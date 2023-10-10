@@ -52,14 +52,15 @@ endif()
 
 
 add_library(mops
-    "src/example/example.cpp"
-    "src/example/capi.cpp"
+    "src/capi.cpp"
+    "src/opsa/opsa.cpp"
+    "src/opsa/capi.cpp"
 )
 
 if(CMAKE_CUDA_COMPILER)
     target_compile_definitions(mops PUBLIC MOPS_CUDA_ENABLED)
     target_sources(mops
-        "src/example/example.cu"
+        "src/opsa/opsa.cu"
     )
 endif()
 

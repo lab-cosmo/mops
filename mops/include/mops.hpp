@@ -2,6 +2,9 @@
 #define MOPS_HPP
 
 #include "mops/exports.h"
-#include "mops/example.hpp"
+
+#include "mops/capi.hpp"
+#include "mops/opsa.hpp"
+
 
 #endif
