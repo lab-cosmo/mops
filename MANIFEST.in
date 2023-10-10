@@ -1,0 +1,4 @@
+include pyproject.toml
+include LICENSE
+
+recursive-include mops *
