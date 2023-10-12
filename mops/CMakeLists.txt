@@ -55,6 +55,12 @@ add_library(mops
     "src/capi.cpp"
     "src/opsa/opsa.cpp"
     "src/opsa/capi.cpp"
+
+    "include/mops.hpp"
+    "include/mops.h"
+    "include/mops/capi.hpp"
+    "include/mops/opsa.hpp"
+    "include/mops/opsa.h"
 )
 
 if(CMAKE_CUDA_COMPILER)

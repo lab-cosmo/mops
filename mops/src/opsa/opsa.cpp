@@ -2,31 +2,17 @@
 
 // explicit instanciations of templates
 template void mops::outer_product_scatter_add<float>(
-    float *output,
-    size_t output_shape_1,
-    size_t output_shape_2,
-    const float *tensor_a,
-    size_t tensor_a_shape_1,
-    size_t tensor_a_shape_2,
-    const float *tensor_b,
-    size_t tensor_b_shape_1,
-    size_t tensor_b_shape_2,
-    const int32_t *indexes,
-    size_t indexes_shape_1
+    Tensor<float, 2> output,
+    Tensor<float, 2> tensor_a,
+    Tensor<float, 2> tensor_b,
+    Tensor<int32_t, 1> indexes
 );
 
 template void mops::outer_product_scatter_add<double>(
-    double *output,
-    size_t output_shape_1,
-    size_t output_shape_2,
-    const double *tensor_a,
-    size_t tensor_a_shape_1,
-    size_t tensor_a_shape_2,
-    const double *tensor_b,
-    size_t tensor_b_shape_1,
-    size_t tensor_b_shape_2,
-    const int32_t *indexes,
-    size_t indexes_shape_1
+    Tensor<double, 2> output,
+    Tensor<double, 2> tensor_a,
+    Tensor<double, 2> tensor_b,
+    Tensor<int32_t, 1> indexes
 );
 
 
@@ -35,17 +21,10 @@ template void mops::outer_product_scatter_add<double>(
 #else
 template<typename scalar_t>
 void mops::cuda::outer_product_scatter_add(
-    scalar_t* output,
-    size_t output_shape_1,
-    size_t output_shape_2,
-    const scalar_t* tensor_a,
-    size_t tensor_a_shape_1,
-    size_t tensor_a_shape_2,
-    const scalar_t* tensor_b,
-    size_t tensor_b_shape_1,
-    size_t tensor_b_shape_2,
-    const int32_t* indexes,
-    size_t indexes_shape_1
+    Tensor<scalar_t, 2> output,
+    Tensor<scalar_t, 2> tensor_a,
+    Tensor<scalar_t, 2> tensor_b,
+    Tensor<int32_t, 1> indexes
 ) {
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
@@ -54,29 +33,15 @@ void mops::cuda::outer_product_scatter_add(
 
 // explicit instanciations of CUDA templates
 template void mops::cuda::outer_product_scatter_add<float>(
-    float *output,
-    size_t output_shape_1,
-    size_t output_shape_2,
-    const float *tensor_a,
-    size_t tensor_a_shape_1,
-    size_t tensor_a_shape_2,
-    const float *tensor_b,
-    size_t tensor_b_shape_1,
-    size_t tensor_b_shape_2,
-    const int32_t *indexes,
-    size_t indexes_shape_1
+    Tensor<float, 2> output,
+    Tensor<float, 2> tensor_a,
+    Tensor<float, 2> tensor_b,
+    Tensor<int32_t, 1> indexes
 );
 
 template void mops::cuda::outer_product_scatter_add<double>(
-    double *output,
-    size_t output_shape_1,
-    size_t output_shape_2,
-    const double *tensor_a,
-    size_t tensor_a_shape_1,
-    size_t tensor_a_shape_2,
-    const double *tensor_b,
-    size_t tensor_b_shape_1,
-    size_t tensor_b_shape_2,
-    const int32_t *indexes,
-    size_t indexes_shape_1
+    Tensor<double, 2> output,
+    Tensor<double, 2> tensor_a,
+    Tensor<double, 2> tensor_b,
+    Tensor<int32_t, 1> indexes
 );

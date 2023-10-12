@@ -1,8 +1,8 @@
 #ifndef MOPS_H
 #define MOPS_H
 
-#include "mops/exports.h"
-#include "mops/opsa.h"
+#include "mops/exports.h"     // IWYU pragma: export
+#include "mops/opsa.h"        // IWYU pragma: export
 
 #ifdef __cplusplus
 extern "C" {

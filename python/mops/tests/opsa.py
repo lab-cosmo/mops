@@ -26,3 +26,6 @@ def test_opsa_numpy():
     reference = reference_implementation(A, B, indices)
     actual = mops.outer_product_scatter_add(A, B, indices)
     assert np.allclose(reference, actual)
+
+
+test_opsa_numpy()

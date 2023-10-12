@@ -1,8 +1,7 @@
-import ctypes
-
 import numpy as np
 
 from ._c_lib import _get_library
+from .utils import numpy_to_mops_tensor
 
 
 def outer_product_scatter_add(A, B, indices):
@@ -34,31 +33,22 @@ def _outer_product_scatter_add_numpy(A, B, indices):
             "first dimension"
         )
 
-    output = np.zeros((np.max(indices) + 1, A.shape[1], B.shape[1]), dtype=A.dtype)
+    output = np.zeros((np.max(indices) + 1, A.shape[1] * B.shape[1]), dtype=A.dtype)
 
     lib = _get_library()
 
     if A.dtype == np.float32:
         function = lib.mops_outer_product_scatter_add_f32
-        pointer_type = ctypes.POINTER(ctypes.c_float)
     elif A.dtype == np.float64:
         function = lib.mops_outer_product_scatter_add_f64
-        pointer_type = ctypes.POINTER(ctypes.c_double)
     else:
         raise TypeError("only float32 and float64 are supported")
 
     function(
-        output.ctypes.data_as(pointer_type),
-        output.shape[0],
-        output.shape[1] * output.shape[2],
-        A.ctypes.data_as(pointer_type),
-        A.shape[0],
-        A.shape[1],
-        B.ctypes.data_as(pointer_type),
-        B.shape[0],
-        B.shape[1],
-        indices.ctypes.data_as(ctypes.POINTER(ctypes.c_int32)),
-        indices.shape[0],
+        numpy_to_mops_tensor(output),
+        numpy_to_mops_tensor(A),
+        numpy_to_mops_tensor(B),
+        numpy_to_mops_tensor(indices),
     )
 
-    return output
+    return output.reshape(-1, A.shape[1], B.shape[1])
