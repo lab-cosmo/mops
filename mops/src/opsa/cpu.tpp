@@ -1,4 +1,5 @@
 #include <cassert>
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 
@@ -39,6 +40,10 @@ void mops::outer_product_scatter_add(
             "output tensor must have space for " + std::to_string(tensor_a_shape_2 * tensor_b_shape_2) +
             " along the second dimension, got " + std::to_string(output_shape_2)
         );
+    }
+
+    if (!std::is_sorted(indexes, indexes + indexes_shape_1)) {
+        throw std::runtime_error("`indexes` values should be sorted");
     }
 
     for (size_t i=0; i<tensor_a_shape_1; i++) {
