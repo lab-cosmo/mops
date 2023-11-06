@@ -20,11 +20,11 @@ pip install .
 
 Some common motifs of vector, matrix and tensor operations that appear in
 science and engineering are implemented here for CPUs and GPUs. These
-include, in alphabetical order:
+include:
 
 ### 1. Homogeneous Polynomial Evaluation
 
-$$ O_i = \sum_{j=1}^J C_j \sum_{k=1}^K A_{j, P_{jk}} \,\,\,\, \mathrm{for} \,\, i=1, \dots, I$$
+$$ O_i = \sum_{j=1}^J C_j \sum_{k=1}^K A_{jP_{jk}} \,\,\,\, \mathrm{for} \,\, i=1, \dots, I$$
 
 #### Inputs
 
@@ -56,17 +56,26 @@ $$ W[i] * ( A_1[:, :, M_1[i]] \odot A_2[:, :, M_2[i]] \odot \dots ) $$
 Here, $\odot$ implies element-wise matrix multiplication between two matrices of
 identical shape, in this case the slices of $A_1$, $A_2$, etc.
 
-### 2. Sparse accumulation
+### 2. Sparse accumulation of Products
 
-$$ O_{i, P_k^O} = \sum_{k=1}^K C_k A_{i, P_k^A} B_{i, P_k^B} \,\,\,\, \mathrm{for} \,\, i=1, \dots, I$$
+$$ O_{iP_k^O} = \sum_{k \in \{k'|P^O_{k'}=P^O_k\}} C_k A_{iP_k^A} B_{iP_k^B} $$
 
-### 3. Sparse Accumulation Scatter-Add 
+### 3. Outer Product Scatter-Add
 
-$$ O_{i, P_k^O, l} = \sum_{k=1}^K C_k \sum_{j \in \mathcal{N}(i)} A_{j, P_k^A, l} B_{j, P_k^B, l} \,\,\,\, \mathrm{for} \,\, l=1, \dots, L$$
+$$ O_{ikl} = \sum_{j=1}^J A_{jk} B_{jl} \delta_{iP_j} $$
 
-### 4. Outer Product Scatter-Add
+or, equivalently,
 
-$$ O_{ikl} = \sum_{j \in \mathcal{N}(i)} A_{jk} B_{jl} \,\,\,\, \mathrm{for} \,\, k=1, \dots, K \,\,\,\, \mathrm{for} \,\, l=1, \dots, L$$
+$$ O_{ikl} = \sum_{j \in \{j'|P_{j'}=i\}} A_{jk} B_{jl} $$
+
+### 4. Outer product Scatter-Add with Weights
+
+$$ O_{imk} = \sum_{e \in \{e'|I_{e'}=i\}} A_{em} R_{ek} X_{{J_e}k} $$
+
+### 5. Sparse Accumulation Scatter-Add with Weights
+
+$$ O_{i{m_3}k} = \sum_{e \in \{e'|I_{e'}=i\}} R_{ek} \sum_{n \in \{n'|M^3_{n'}=m_3\}} C_n A_{e{M_n^1}} X_{{J_e}{M_n^2}k} $$
+
 
 #### Inputs
 
