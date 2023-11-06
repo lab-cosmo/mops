@@ -63,7 +63,7 @@ for j in range(J):
     O[:] += C[j] * A[:, P_1[j, 1]] * A[:, P_2[j, 2]] * ...
 ```
 
-### 2. Sparse accumulation of Products
+### 2. Sparse Accumulation of Products
 
 #### Mathematical notation
 
