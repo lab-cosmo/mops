@@ -26,37 +26,23 @@ include:
 
 #### Mathematical notation
 
-$$ O_i = \sum_{j=1}^J C_j \prod_{k=1}^K A_{jP_{jk}} $$
+$$ O_i = \sum_{j=1}^J C_j \prod_{k=1}^K A_{iP_{jk}} $$
 
 #### Inputs
 
-- $A_i$ is a dense 3D tensor of floats, expected to be very large in one
-  dimension ($N$), much smaller in the other two ($F \times L_i$)
+- $A$ is a 2D tensor of floats, of size $I \times N_{A,2}$. It contains the factors in the monomials that make up the polynomial. 
 
-- $W$ is a vector of float multipliers of size $Q$.
+- $C$ is a vector of float multipliers of size $J$. They represent the coefficients of each monomial in the polynomial, so that $J$ is the number of monomials in the polynomial.
 
-- $M_1, M_2, ...$ are vectors of integers of size $Q$ containing indices that point to slices in $A$
-
-- $M_O$ is a vector of integers of size $Q$ containing indices that point to slices in $E$
+- $P$ is a 2D tensor of integers which represents the positions of the individual factors for each monomial in the second dimension of the $A$ tensor. In particular, the $k$-th factor of monomial $j$ will be found in the $P_{jk}$-th position of the second dimension of $A$.
 
 #### Output
 
-$E$ is a dense 3D tensor of floats, expected to be very large in one dimension
-($N$), much smaller in the other two ($F \times L_O$). It contains the
-accumulated tensor product.
+$O$ is a dense 1D tensor of floats, which only contains a batch dimension of size $I$.
 
 #### Calculation
 
-Each entry in $M_O$, $M_1$, $M_2$, etc point to slices in $E$, $A_1$, $A_2$, etc
-respectively.
-
-For a given set of entries from the same index $i$ in the $M$ arrays and $W$
-array, we add the following to each slice $E[:,:, M_O[i]]$:
-
-$$ W[i] * ( A_1[:, :, M_1[i]] \odot A_2[:, :, M_2[i]] \odot \dots ) $$
-
-Here, $\odot$ implies element-wise matrix multiplication between two matrices of
-identical shape, in this case the slices of $A_1$, $A_2$, etc.
+The calculation consists in a batched evaluation of homogeneous polynomials of degree $K$, where the monomials are given by $C[j] * A[:, P_1[j, 1]] * A[:, P_2[j, 2]] * \dots$, as follows:
 
 ```python
 for j in range(J):
@@ -82,34 +68,23 @@ for k in range(K):
 
 $$ O_{ikl} = \sum_{j=1}^J A_{jk} B_{jl} \delta_{iP_j} \hspace{1cm} \mathrm{or} \hspace{1cm} O_{ikl} = \sum_{j \in \{j'|P_{j'}=i\}} A_{jk} B_{jl} $$
 
-#### Calculation
-
 #### Inputs
 
-- $A$ is a dense matrix of floats, expected to be very large in one dimension
-  ($N$), but finite/fixed in the the other ($F$).
+- $A$ is a dense matrix of floats, expected to be large in one dimension
+  (size $J$), and smaller in the the other (size $K$).
 
-- $B$ is a dense matrix of floats, expected to be very large in one dimension
-  ($N$), much smaller in the other ($L$).
+- $B$ is a dense matrix of floats, expected to be large in one dimension
+  (size $J$), and smaller in the the other (size $L$).
 
-- $J$ is a very large vector of integers (of size $N$) where each element is
-  linked to the corresponding row in the matrices $K$ and $S$ and the value is
-  linked to first dimension of the output tensor $A$.
+- $P$ is a large vector of integers (of size $J$) which maps the dimension $j$ of $A$ and $B$ into the dimension $i$ of $O$. In other words, it contains the position within $O$ where each $AB$ product needs to be summed.
 
 #### Output
 
-$C$ is a dense 3D tensor of floats, expected to be very large in one dimension
-($M$), much smaller in the other two ($F \times L$)
+$O$ is a 3D tensor of floats of dimensions $I \times K \times L$, which contains the accumulated products of the elements of $A$ and $B$.
 
 #### Calculation
 
-Each row of the input matrices $A$ and $B$ can be treated like vectors. For each
-pair of vectors of size $F$ and $L$ respectively, we calculate the outer product
-which results in a (small) matrix of size $F \times L$.
-
-The output tensor $C$ can be treated like a stack of $M$ small matrices. Each
-matrix computed from the outer product of each row is added to the matrix at the
-index mentioned in corresponding element of the vector $J$.
+For each $j$, an outer product of $A[j, :]$ and $B[j, :]$ is calculated, and it is summed to $O[P[j], :, :]$:
 
 ```python
 for j in range(J):
