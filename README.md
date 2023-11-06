@@ -1,6 +1,6 @@
-# mops
+# Mops
 
-Mathematical OPerationS to extract all the performance juice from your hardware!
+<u>M</u>athematical <u>op</u>eration<u>s</u> to extract all the performance juice from your hardware!
 
 ## Getting the code
 
@@ -22,7 +22,9 @@ Some common motifs of vector, matrix and tensor operations that appear in
 science and engineering are implemented here for CPUs and GPUs. These
 include, in alphabetical order:
 
-### 1. Homogeneous polynomial evaluation
+### 1. Homogeneous Polynomial Evaluation
+
+$$ O_i = \sum_{j=1}^J C_j \sum_{k=1}^K A_{j, P_{jk}} \,\,\,\, \mathrm{for} \,\, i=1, \dots, I$$
 
 #### Inputs
 
@@ -56,9 +58,15 @@ identical shape, in this case the slices of $A_1$, $A_2$, etc.
 
 ### 2. Sparse accumulation
 
+$$ O_{i, P_k^O} = \sum_{k=1}^K C_k A_{i, P_k^A} B_{i, P_k^B} \,\,\,\, \mathrm{for} \,\, i=1, \dots, I$$
+
 ### 3. Sparse Accumulation Scatter-Add 
 
+$$ O_{i, P_k^O, l} = \sum_{k=1}^K C_k \sum_{j \in \mathcal{N}(i)} A_{j, P_k^A, l} B_{j, P_k^B, l} \,\,\,\, \mathrm{for} \,\, l=1, \dots, L$$
+
 ### 4. Outer Product Scatter-Add
+
+$$ O_{ikl} = \sum_{j \in \mathcal{N}(i)} A_{jk} B_{jl} \,\,\,\, \mathrm{for} \,\, k=1, \dots, K \,\,\,\, \mathrm{for} \,\, l=1, \dots, L$$
 
 #### Inputs
 
