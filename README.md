@@ -78,7 +78,7 @@ $$ O_{ikl} = \sum_{j=1}^J A_{jk} B_{jl} \delta_{iP_j} \hspace{1cm} \mathrm{or} \
 
 - $P$ is a large vector of integers (of size $J$) which maps the dimension $j$ of $A$ and $B$ into the dimension $i$ of $O$. In other words, it contains the position within $O$ where each $AB$ product needs to be summed.
 
-- $n_O$ is the size of the output array along its first dimension.
+- $n_O$ is the size of the output array along its first dimension. It must be grater or equal than the larger element in $P$ plus one. 
 
 #### Output
 

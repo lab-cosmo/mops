@@ -89,7 +89,7 @@ def check_opsax(A, R, X, I, J, n_O):
     check_scalar_dtype(n_O, np.integer, "opsax", "n_O")
 
 
-def check_sasax(C, A, R, X, I, J, M_A, M_X, M_O, n_O1, n_O2):
+def check_sasax(C, A, R, X, I, J, M_1, M_2, M_3, n_O1, n_O2):
 
     # Check dimensions
     check_number_of_dimensions(C, 1, "sasax", "C")
@@ -98,9 +98,9 @@ def check_sasax(C, A, R, X, I, J, M_A, M_X, M_O, n_O1, n_O2):
     check_number_of_dimensions(X, 3, "sasax", "X")
     check_number_of_dimensions(I, 1, "sasax", "I")
     check_number_of_dimensions(J, 1, "sasax", "J")
-    check_number_of_dimensions(M_A, 1, "sasax", "M_A")
-    check_number_of_dimensions(M_X, 1, "sasax", "M_X")
-    check_number_of_dimensions(M_O, 1, "sasax", "M_O")
+    check_number_of_dimensions(M_1, 1, "sasax", "M_1")
+    check_number_of_dimensions(M_2, 1, "sasax", "M_2")
+    check_number_of_dimensions(M_3, 1, "sasax", "M_3")
     check_scalar(n_O1, "sasax", n_O1)
     check_scalar(n_O2, "sasax", n_O2)
     
@@ -110,8 +110,8 @@ def check_sasax(C, A, R, X, I, J, M_A, M_X, M_O, n_O1, n_O2):
     check_array_dtype(X, np.floating, "sasax", "X")
     check_array_dtype(I, np.integer, "sasax", "I")
     check_array_dtype(J, np.integer, "sasax", "J")
-    check_array_dtype(M_A, np.integer, "sasax", "M_A")
-    check_array_dtype(M_X, np.integer, "sasax", "M_X")
-    check_array_dtype(M_O, np.integer, "sasax", "M_O")
+    check_array_dtype(M_1, np.integer, "sasax", "M_1")
+    check_array_dtype(M_2, np.integer, "sasax", "M_2")
+    check_array_dtype(M_3, np.integer, "sasax", "M_3")
     check_scalar_dtype(n_O1, np.integer, "sasax", "n_O1")
     check_scalar_dtype(n_O2, np.integer, "sasax", "n_O2")
