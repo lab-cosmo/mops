@@ -27,6 +27,7 @@ def check_hpe(C, A, P):
     check_number_of_dimensions(C, 1, "hpe", "C")
     check_number_of_dimensions(A, 2, "hpe", "A")
     check_number_of_dimensions(P, 2, "hpe", "P")
+    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
     
     # Check types
     check_array_dtype(C, np.floating, "hpe", "C")
@@ -44,6 +45,7 @@ def check_sap(C, A, B, P_A, P_B, P_O, n_O):
     check_number_of_dimensions(P_B, 2, "sap", "P_B")
     check_number_of_dimensions(P_O, 2, "sap", "P_O")
     check_scalar(n_O, "sap", "n_O")
+    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
     
     # Check types
     check_array_dtype(C, np.floating, "sap", "C")
@@ -62,6 +64,7 @@ def check_opsa(A, B, P, n_O):
     check_number_of_dimensions(B, 2, "opsa", "B")
     check_number_of_dimensions(P, 1, "opsa", "P")
     check_scalar(n_O, "opsa", "n_O")
+    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
     
     # Check types
     check_array_dtype(A, np.floating, "opsa", "A")
@@ -79,6 +82,7 @@ def check_opsax(A, R, X, I, J, n_O):
     check_number_of_dimensions(I, 1, "opsax", "I")
     check_number_of_dimensions(J, 1, "opsax", "J")
     check_scalar(n_O, "opsax", "n_O")
+    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
     
     # Check types
     check_array_dtype(A, np.floating, "opsax", "A")
@@ -103,6 +107,7 @@ def check_sasax(C, A, R, X, I, J, M_1, M_2, M_3, n_O1, n_O2):
     check_number_of_dimensions(M_3, 1, "sasax", "M_3")
     check_scalar(n_O1, "sasax", n_O1)
     check_scalar(n_O2, "sasax", n_O2)
+    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
     
     # Check types
     check_array_dtype(A, np.floating, "sasax", "A")
