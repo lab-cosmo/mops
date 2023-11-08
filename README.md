@@ -78,6 +78,8 @@ $$ O_{ikl} = \sum_{j=1}^J A_{jk} B_{jl} \delta_{iP_j} \hspace{1cm} \mathrm{or} \
 
 - $P$ is a large vector of integers (of size $J$) which maps the dimension $j$ of $A$ and $B$ into the dimension $i$ of $O$. In other words, it contains the position within $O$ where each $AB$ product needs to be summed.
 
+- $n_O$ is the size of the output array along its first dimension.
+
 #### Output
 
 $O$ is a 3D tensor of floats of dimensions $I \times K \times L$, which contains the accumulated products of the elements of $A$ and $B$.
