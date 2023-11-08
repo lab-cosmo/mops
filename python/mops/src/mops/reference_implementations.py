@@ -1,5 +1,5 @@
 import numpy as np
-from checks import check_hpe, check_sap, check_opsa, check_opsax, check_sasax
+from .checks import check_hpe, check_sap, check_opsa, check_opsax, check_sasax
 
 
 def hpe(C, A, P):

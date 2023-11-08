@@ -66,7 +66,8 @@ add_library(mops
 if(CMAKE_CUDA_COMPILER)
     target_compile_definitions(mops PUBLIC MOPS_CUDA_ENABLED)
     target_sources(mops
-        "src/opsa/opsa.cu"
+        PRIVATE
+            src/opsa/opsa.cu
     )
 endif()
 
