@@ -59,7 +59,7 @@ $$ O_{iP_k^O} = \sum_{k \in \{k'|P^O_{k'}=P^O_k\}} C_k A_{iP_k^A} B_{iP_k^B} $$
 
 ```python
 for k in range(K):
-    O[:, P_O[k]] += C[k] * A[:, P_A[k]] * A[:, P_B[k]]
+    O[:, P_O[k]] += C[k] * A[:, P_A[k]] * B[:, P_B[k]]
 ```
 
 ### 3. Outer Product Scatter-Add
