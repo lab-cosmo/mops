@@ -21,17 +21,17 @@ def check_scalar_dtype(scalar, expected_dtype, operation, input):
         raise TypeError(f"Wrong dtype for {input} in {operation}: got {type(scalar)}")
 
 
-def check_hpe(C, A, P):
+def check_hpe(A, C, P):
 
     # Check dimensions
-    check_number_of_dimensions(C, 1, "hpe", "C")
     check_number_of_dimensions(A, 2, "hpe", "A")
+    check_number_of_dimensions(C, 1, "hpe", "C")
     check_number_of_dimensions(P, 2, "hpe", "P")
     # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
     
     # Check types
-    check_array_dtype(C, np.floating, "hpe", "C")
     check_array_dtype(A, np.floating, "hpe", "A")
+    check_array_dtype(C, np.floating, "hpe", "C")
     check_array_dtype(P, np.integer, "hpe", "P")
 
 

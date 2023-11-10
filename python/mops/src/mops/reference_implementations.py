@@ -2,8 +2,8 @@ import numpy as np
 from .checks import check_hpe, check_sap, check_opsa, check_opsax, check_sasax
 
 
-def homogeneous_polynomial_evaluation(C, A, P):
-    check_hpe(C, A, P)
+def homogeneous_polynomial_evaluation(A, C, P):
+    check_hpe(A, C, P)
 
     O = np.zeros((A.shape[0],), dtype=A.dtype)
     J = P.shape[0]

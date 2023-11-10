@@ -36,44 +36,47 @@ class mops_tensor_1d_i32_t(ctypes.Structure):
     ]
 
 
+class mops_tensor_2d_i32_t(ctypes.Structure):
+    _fields_ = [
+        ("data", ctypes.POINTER(ctypes.c_int32)),
+        ("shape", ctypes.ARRAY(ctypes.c_int64, 2)),
+    ]
+
+
 def setup_functions(lib):
     from .status import _check_status
 
     lib.mops_get_last_error_message.argtypes = []
     lib.mops_get_last_error_message.restype = ctypes.c_char_p
 
-    # outer_product_scatter_add
-    lib.mops_outer_product_scatter_add_f32.argtypes = [
+    # homogeneous_polynomial_evaluation
+    lib.mops_homogeneous_polynomial_evaluation_f32.argtypes = [
         mops_tensor_2d_f32_t,
-        mops_tensor_2d_f32_t,
-        mops_tensor_2d_f32_t,
-        mops_tensor_1d_i32_t,
+        mops_tensor_1d_f32_t,
+        mops_tensor_2d_i32_t,
     ]
-    lib.mops_outer_product_scatter_add_f32.restype = _check_status
+    lib.mops_homogeneous_polynomial_evaluation_f32.restype = _check_status
 
-    lib.mops_outer_product_scatter_add_f64.argtypes = [
+    lib.mops_homogeneous_polynomial_evaluation_f64.argtypes = [
         mops_tensor_2d_f64_t,
-        mops_tensor_2d_f64_t,
-        mops_tensor_2d_f64_t,
-        mops_tensor_1d_i32_t,
+        mops_tensor_1d_f64_t,
+        mops_tensor_2d_i64_t,
     ]
-    lib.mops_outer_product_scatter_add_f64.restype = _check_status
+    lib.mops_homogeneous_polynomial_evaluation_f64.restype = _check_status
 
-    lib.mops_cuda_outer_product_scatter_add_f32.argtypes = [
+    lib.mops_cuda_homogeneous_polynomial_evaluation_f32.argtypes = [
         mops_tensor_2d_f32_t,
-        mops_tensor_2d_f32_t,
-        mops_tensor_2d_f32_t,
-        mops_tensor_1d_i32_t,
+        mops_tensor_1d_f32_t,
+        mops_tensor_2d_i32_t,
     ]
-    lib.mops_cuda_outer_product_scatter_add_f32.restype = _check_status
+    lib.mops_cuda_homogeneous_polynomial_evaluation_f32.restype = _check_status
 
-    lib.mops_cuda_outer_product_scatter_add_f64.argtypes = [
+    lib.mops_cuda_homogeneous_polynomial_evaluation_f64.argtypes = [
         mops_tensor_2d_f64_t,
-        mops_tensor_2d_f64_t,
-        mops_tensor_2d_f64_t,
-        mops_tensor_1d_i32_t,
+        mops_tensor_1d_f64_t,
+        mops_tensor_2d_i64_t,
     ]
-    lib.mops_cuda_outer_product_scatter_add_f64.restype = _check_status
+    lib.mops_cuda_homogeneous_polynomial_evaluation_f64.restype = _check_status
 
     # sparse_accumulation_of_products
     lib.mops_sparse_accumulation_of_products_f32.argtypes = [
@@ -119,3 +122,36 @@ def setup_functions(lib):
         mops_tensor_1d_i32_t,
     ]
     lib.mops_cuda_sparse_accumulation_of_products_f64.restype = _check_status
+
+    # outer_product_scatter_add
+    lib.mops_outer_product_scatter_add_f32.argtypes = [
+        mops_tensor_2d_f32_t,
+        mops_tensor_2d_f32_t,
+        mops_tensor_2d_f32_t,
+        mops_tensor_1d_i32_t,
+    ]
+    lib.mops_outer_product_scatter_add_f32.restype = _check_status
+
+    lib.mops_outer_product_scatter_add_f64.argtypes = [
+        mops_tensor_2d_f64_t,
+        mops_tensor_2d_f64_t,
+        mops_tensor_2d_f64_t,
+        mops_tensor_1d_i32_t,
+    ]
+    lib.mops_outer_product_scatter_add_f64.restype = _check_status
+
+    lib.mops_cuda_outer_product_scatter_add_f32.argtypes = [
+        mops_tensor_2d_f32_t,
+        mops_tensor_2d_f32_t,
+        mops_tensor_2d_f32_t,
+        mops_tensor_1d_i32_t,
+    ]
+    lib.mops_cuda_outer_product_scatter_add_f32.restype = _check_status
+
+    lib.mops_cuda_outer_product_scatter_add_f64.argtypes = [
+        mops_tensor_2d_f64_t,
+        mops_tensor_2d_f64_t,
+        mops_tensor_2d_f64_t,
+        mops_tensor_1d_i32_t,
+    ]
+    lib.mops_cuda_outer_product_scatter_add_f64.restype = _check_status

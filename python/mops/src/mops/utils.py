@@ -3,11 +3,12 @@ import ctypes
 import numpy as np
 
 from ._c_api import (
-    mops_tensor_1d_i32_t,
     mops_tensor_1d_f32_t, 
     mops_tensor_1d_f64_t,
     mops_tensor_2d_f32_t,
-    mops_tensor_2d_f64_t
+    mops_tensor_2d_f64_t,
+    mops_tensor_1d_i32_t,
+    mops_tensor_2d_i32_t,
 )
 
 
@@ -48,7 +49,13 @@ def numpy_to_mops_tensor(array):
             tensor.data = array.ctypes.data_as(ctypes.POINTER(ctypes.c_int32))
             tensor.shape[0] = array.shape[0]
             return tensor
+        elif len(array.shape) == 2:
+            tensor = mops_tensor_2d_i32_t()
+            tensor.data = array.ctypes.data_as(ctypes.POINTER(ctypes.c_int32))
+            tensor.shape[0] = array.shape[0]
+            tensor.shape[1] = array.shape[1]
+            return tensor
         else:
-            raise TypeError("we can only convert 1D arrays of int32")
+            raise TypeError("we can only convert 1D and 2D arrays of int32")
     else:
         raise TypeError("we can only arrays of int32, float32 or float64")

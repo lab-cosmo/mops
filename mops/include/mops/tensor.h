@@ -33,6 +33,11 @@ struct mops_tensor_1d_i32_t {
     int64_t shape[1];
 };
 
+struct mops_tensor_2d_i32_t {
+    int32_t* __restrict__ data;
+    int64_t shape[2];
+};
+
 #ifdef __cplusplus
 }
 #endif
