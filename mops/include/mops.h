@@ -2,6 +2,7 @@
 #define MOPS_H
 
 #include "mops/exports.h" // IWYU pragma: export
+
 #include "mops/hpe.h"     // IWYU pragma: export
 #include "mops/opsa.h"    // IWYU pragma: export
 #include "mops/opsax.h"   // IWYU pragma: export
