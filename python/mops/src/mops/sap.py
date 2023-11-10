@@ -5,8 +5,8 @@ from .utils import numpy_to_mops_tensor
 from .checks import check_sap
 
 
-def sparse_accumulation_of_products(C, A, B, P_A, P_B, P_O, n_O):
-    check_sap(C, A, B, P_A, P_B, P_O, n_O)
+def sparse_accumulation_of_products(A, B, C, P_A, P_B, P_O, n_O):
+    check_sap(A, B, C, P_A, P_B, P_O, n_O)
 
     A = np.ascontiguousarray(A)
     B = np.ascontiguousarray(B)

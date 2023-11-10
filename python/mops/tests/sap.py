@@ -10,18 +10,16 @@ from mops import sparse_accumulation_of_products as sap
 def test_sap():
 
     A = np.random.rand(100, 20)
-    B = np.random.rand(100, 5)
-    C = np.random.rand(25)
+    B = np.random.rand(100, 6)
+    C = np.random.rand(30)
 
-    P_A = np.random.randint(20, size=(25,))
-    P_B = np.random.randint(5, size=(25,))
-    n_O = 30
-    P_O = np.random.randint(n_O, size=(25,))
+    P_A = np.random.randint(20, size=(30,))
+    P_B = np.random.randint(6, size=(30,))
+    n_O = 35
+    P_O = np.random.randint(n_O, size=(30,))
 
-    reference = ref_sap(C, A, B, P_A, P_B, P_O, n_O)
-    actual = sap(C, A, B, P_A, P_B, P_O, n_O)
-    print(reference)
-    print(actual)
+    reference = ref_sap(A, B, C, P_A, P_B, P_O, n_O)
+    actual = sap(A, B, C, P_A, P_B, P_O, n_O)
     assert np.allclose(reference, actual)
 
 

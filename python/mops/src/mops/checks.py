@@ -35,12 +35,12 @@ def check_hpe(C, A, P):
     check_array_dtype(P, np.integer, "hpe", "P")
 
 
-def check_sap(C, A, B, P_A, P_B, P_O, n_O):
+def check_sap(A, B, C, P_A, P_B, P_O, n_O):
 
     # Check dimensions
-    check_number_of_dimensions(C, 1, "sap", "C")
     check_number_of_dimensions(A, 2, "sap", "A")
     check_number_of_dimensions(B, 2, "sap", "B")
+    check_number_of_dimensions(C, 1, "sap", "C")
     check_number_of_dimensions(P_A, 1, "sap", "P_A")
     check_number_of_dimensions(P_B, 1, "sap", "P_B")
     check_number_of_dimensions(P_O, 1, "sap", "P_O")
@@ -48,9 +48,9 @@ def check_sap(C, A, B, P_A, P_B, P_O, n_O):
     # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
     
     # Check types
-    check_array_dtype(C, np.floating, "sap", "C")
     check_array_dtype(A, np.floating, "sap", "A")
     check_array_dtype(B, np.floating, "sap", "B")
+    check_array_dtype(C, np.floating, "sap", "C")
     check_array_dtype(P_A, np.integer, "sap", "P_A")
     check_array_dtype(P_B, np.integer, "sap", "P_B")
     check_array_dtype(P_O, np.integer, "sap", "P_O")
