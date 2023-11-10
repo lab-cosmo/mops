@@ -68,7 +68,7 @@ for k in range(K):
 
 $$ O_{ikl} = \sum_{j=1}^J A_{jk} B_{jl} \delta_{iP_j} \hspace{1cm} \mathrm{or} \hspace{1cm} O_{ikl} = \sum_{j \in \{j'|P_{j'}=i\}} A_{jk} B_{jl} $$
 
-$$ O_{iP_k^O} = \sum_{k \in \{k'|P^O_{k'}=P^O_k\}} C_k A_{iP_k^A} B_{iP_k^B} $$
+#### Inputs
 
 - $A$ is a dense matrix of floats, expected to be large in one dimension
   (size $J$), and smaller in the the other (size $K$).
