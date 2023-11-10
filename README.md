@@ -16,11 +16,11 @@ pip install .
 ```
 
 
-## Implemented operations
+## Planned operations
 
 Some common motifs of vector, matrix and tensor operations that appear in
-science and engineering are implemented here for CPUs and GPUs. These
-include:
+science and engineering are planned to be implemented here for CPUs and GPUs.
+These include:
 
 ### 1. Homogeneous Polynomial Evaluation
 

@@ -7,8 +7,8 @@
 #include "mops/exports.h"
 
 namespace mops {
-    void MOPS_EXPORT store_error_message(std::string message);
-    const std::string& MOPS_EXPORT get_last_error_message();
+    void store_error_message(std::string message);
+    MOPS_EXPORT const std::string& get_last_error_message();
 }
 
 #define MOPS_CATCH_EXCEPTIONS(__code__)                                                     \
