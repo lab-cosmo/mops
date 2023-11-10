@@ -3,9 +3,8 @@ np.random.seed(0xDEADBEEF)
 
 import pytest
 
-import mops
-from mops.reference_implementations import opsa as ref_opsa
-from mops import opsa
+from mops.reference_implementations import outer_product_scatter_add as ref_opsa
+from mops import outer_product_scatter_add as opsa
 
 
 def test_opsa_numpy():

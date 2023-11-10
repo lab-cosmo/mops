@@ -5,7 +5,7 @@ from .utils import numpy_to_mops_tensor
 from .checks import check_opsa
 
 
-def opsa(A, B, P, n_O):
+def outer_product_scatter_add(A, B, P, n_O):
     check_opsa(A, B, P, n_O)
 
     A = np.ascontiguousarray(A)
