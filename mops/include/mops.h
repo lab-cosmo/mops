@@ -9,7 +9,7 @@ extern "C" {
 #endif
 
 /// TODO
-const char* MOPS_EXPORT mops_get_last_error_message();
+MOPS_EXPORT const char* mops_get_last_error_message();
 
 #ifdef __cplusplus
 }
