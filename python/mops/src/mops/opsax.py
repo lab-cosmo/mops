@@ -5,7 +5,7 @@ from .utils import numpy_to_mops_tensor
 from .checks import check_opsax
 
 
-def outer_product_scatted_add_with_weights(A, R, X, I, J, n_O):
+def outer_product_scatter_add_with_weights(A, R, X, I, J, n_O):
     check_opsax(A, R, X, I, J, n_O)
 
     A = np.ascontiguousarray(A)
@@ -21,9 +21,9 @@ def outer_product_scatted_add_with_weights(A, R, X, I, J, n_O):
     lib = _get_library()
 
     if A.dtype == np.float32:
-        function = lib.mops_outer_product_scatted_add_with_weights_f32
+        function = lib.mops_outer_product_scatter_add_with_weights_f32
     elif A.dtype == np.float64:
-        function = lib.mops_outer_product_scatted_add_with_weights_f64
+        function = lib.mops_outer_product_scatter_add_with_weights_f64
     else:
         raise TypeError("Unsupported dtype detected. Only float32 and float64 are supported")
 
