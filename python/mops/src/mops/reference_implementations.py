@@ -14,6 +14,8 @@ def homogeneous_polynomial_evaluation(C, A, P):
             temp *= A[:, P[j, k]]
         O[:] += temp
 
+    return O
+
 
 def sparse_accumulation_of_products(C, A, B, P_A, P_B, P_O, n_O):
     check_sap(C, A, B, P_A, P_B, P_O, n_O)
@@ -22,6 +24,8 @@ def sparse_accumulation_of_products(C, A, B, P_A, P_B, P_O, n_O):
     K = C.shape[0]
     for k in range(K):
         O[:, P_O[k]] += C[k] * A[:, P_A[k]] * A[:, P_B[k]]
+
+    return O
 
 
 def outer_product_scatter_add(A, B, P, n_O):
@@ -32,6 +36,8 @@ def outer_product_scatter_add(A, B, P, n_O):
     for j in range(J):
         O[P[j], :, :] += A[j, :, None] * B[j, None, :]
 
+    return O
+
 
 def outer_product_scatter_add_with_weights(A, R, X, I, J, n_O):
     check_opsax(A, R, X, I, J, n_O)
@@ -40,6 +46,8 @@ def outer_product_scatter_add_with_weights(A, R, X, I, J, n_O):
     E = I.shape[0]
     for e in range(E):
         O[I[e], :, :] += A[e, :, None] * R[e, None, :] * X[J[e], None, :]
+
+    return O
 
 
 def sparse_accumulation_scatter_add_with_weights(C, A, R, X, I, J, M_1, M_2, M_3, n_O1, n_O2):
@@ -51,3 +59,5 @@ def sparse_accumulation_scatter_add_with_weights(C, A, R, X, I, J, M_1, M_2, M_3
     for e in range(E):
         for n in range(N):
             O[I[e], M_3[n], :] += R[e, :] * C[n] * A[e, M_1[n]] * X[J[e], M_2[n], :]
+
+    return O

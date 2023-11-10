@@ -25,8 +25,8 @@ class mops_tensor_1d_i32_t(ctypes.Structure):
 def setup_functions(lib):
     from .status import _check_status
 
-    lib.mops_get_last_error_message.argtypes = []
-    lib.mops_get_last_error_message.restype = ctypes.c_char_p
+    # lib.mops_get_last_error_message.argtypes = []
+    # lib.mops_get_last_error_message.restype = ctypes.c_char_p
 
     # outer_product_scatter_add
     lib.mops_outer_product_scatter_add_f32.argtypes = [
