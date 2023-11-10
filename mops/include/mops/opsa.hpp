@@ -1,5 +1,5 @@
-#ifndef MOPS_OUTER_PRODUCT_SCATTER_ADD_HPP
-#define MOPS_OUTER_PRODUCT_SCATTER_ADD_HPP
+#ifndef MOPS_OPSA_HPP
+#define MOPS_OPSA_HPP
 
 #include <cstddef>
 #include <cstdint>
