@@ -13,13 +13,15 @@ def test_sap():
     B = np.random.rand(100, 5)
     C = np.random.rand(25)
 
-    P_A = np.random.randint(20, size=(100,))
-    P_B = np.random.randint(10, size=(100,))
+    P_A = np.random.randint(20, size=(25,))
+    P_B = np.random.randint(5, size=(25,))
     n_O = 30
-    P_O = np.random.randint(n_O, size=(100,))
+    P_O = np.random.randint(n_O, size=(25,))
 
     reference = ref_sap(C, A, B, P_A, P_B, P_O, n_O)
     actual = sap(C, A, B, P_A, P_B, P_O, n_O)
+    print(reference)
+    print(actual)
     assert np.allclose(reference, actual)
 
 
