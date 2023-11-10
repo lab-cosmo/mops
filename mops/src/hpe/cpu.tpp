@@ -13,37 +13,21 @@ void mops::homogeneous_polynomial_evaluation(
     Tensor<int32_t, 2> p
 ) {
 
-    // if (tensor_a.shape[0] != tensor_b.shape[0]) {
-    //     throw std::runtime_error(
-    //         "A and B tensors must have the same number of elements along the "
-    //         "first dimension, got " + std::to_string(tensor_a.shape[0]) + " and " +
-    //         std::to_string(tensor_b.shape[0])
-    //     );
-    // }
+    if (tensor_a.shape[0] != output.shape[0]) {
+        throw std::runtime_error(
+            "A and O tensors must have the same number of elements along the "
+            "first dimension, got " + std::to_string(tensor_a.shape[0]) + " and " +
+            std::to_string(output.shape[0])
+        );
+    }
 
-    // if (tensor_a.shape[0] != output.shape[0]) {
-    //     throw std::runtime_error(
-    //         "O must contain the same number of elements as the first "
-    //         "dimension of A and B , got " + std::to_string(output.shape[0]) +
-    //         " and " + std::to_string(tensor_a.shape[0])
-    //     );
-    // }
-
-    // if (tensor_c.shape[0] != p_b.shape[0]) {
-    //     throw std::runtime_error(
-    //         "the dimension of C must match that of P_B, got "
-    //         + std::to_string(tensor_c.shape[0]) +
-    //         " for C and " + std::to_string(p_b.shape[0]) + " for P_B"
-    //     );
-    // }
-
-    // if (tensor_c.shape[0] != p_o.shape[0]) {
-    //     throw std::runtime_error(
-    //         "the dimension of C must match that of P_O, got "
-    //         + std::to_string(tensor_c.shape[0]) +
-    //         " for C and " + std::to_string(p_o.shape[0]) + " for P_O"
-    //     );
-    // }
+    if (tensor_c.shape[0] != p.shape[0]) {
+        throw std::runtime_error(
+            "C and P tensors must have the same number of elements along the "
+            "first dimension, got " + std::to_string(tensor_c.shape[0]) + " and " +
+            std::to_string(p.shape[0])
+        );
+    }
 
     scalar_t* o_ptr = output.data;
     scalar_t* a_ptr = tensor_a.data;
