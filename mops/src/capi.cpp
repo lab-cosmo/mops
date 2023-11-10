@@ -11,7 +11,6 @@ const std::string& mops::get_last_error_message() {
     return LAST_ERROR_MESSAGE;
 }
 
-
-extern "C" const char* MOPS_EXPORT mops_get_last_error_message() {
+extern "C" const char* mops_get_last_error_message() {
     return mops::get_last_error_message().c_str();
 }
