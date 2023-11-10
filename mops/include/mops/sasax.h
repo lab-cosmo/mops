@@ -1,5 +1,5 @@
-#ifndef MOPS_OUTER_PRODUCT_SCATTER_ADD_H
-#define MOPS_OUTER_PRODUCT_SCATTER_ADD_H
+#ifndef MOPS_SASAX_H
+#define MOPS_SASAX_H
 
 #include "mops/exports.h"
 #include "mops/tensor.h"
