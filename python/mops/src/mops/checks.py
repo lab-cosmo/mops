@@ -77,9 +77,9 @@ def check_opsa(A, B, P, n_O):
 
 def check_opsax(A, R, X, I, J, n_O):
     # Check dimensions
-    check_number_of_dimensions(A, 3, "opsax", "A")
-    check_number_of_dimensions(R, 3, "opsax", "R")
-    check_number_of_dimensions(X, 3, "opsax", "X")
+    check_number_of_dimensions(A, 2, "opsax", "A")
+    check_number_of_dimensions(R, 2, "opsax", "R")
+    check_number_of_dimensions(X, 2, "opsax", "X")
     check_number_of_dimensions(I, 1, "opsax", "I")
     check_number_of_dimensions(J, 1, "opsax", "J")
     check_scalar(n_O, "opsax", "n_O")
@@ -96,8 +96,8 @@ def check_opsax(A, R, X, I, J, n_O):
 
 def check_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2):
     # Check dimensions
-    check_number_of_dimensions(A, 3, "sasax", "A")
-    check_number_of_dimensions(R, 3, "sasax", "R")
+    check_number_of_dimensions(A, 2, "sasax", "A")
+    check_number_of_dimensions(R, 2, "sasax", "R")
     check_number_of_dimensions(X, 3, "sasax", "X")
     check_number_of_dimensions(C, 1, "sasax", "C")
     check_number_of_dimensions(I, 1, "sasax", "I")

@@ -25,7 +25,7 @@ def sparse_accumulation_scatter_add_with_weights(
     M_2 = M_2.astype(np.int32)
     M_3 = M_3.astype(np.int32)
 
-    O = np.zeros((n_O1, n_O2, A.shape[1]), dtype=A.dtype)
+    O = np.zeros((n_O1, n_O2, X.shape[2]), dtype=X.dtype)
 
     lib = _get_library()
 

@@ -52,11 +52,11 @@ def outer_product_scatter_add_with_weights(A, R, X, I, J, n_O):
 
 
 def sparse_accumulation_scatter_add_with_weights(
-    C, A, R, X, I, J, M_1, M_2, M_3, n_O1, n_O2
+    A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2
 ):
-    check_sasax(C, A, R, X, I, J, M_1, M_2, M_3, n_O1, n_O2)
+    check_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2)
 
-    O = np.zeros((n_O1, n_O2, A.shape[1]), dtype=A.dtype)
+    O = np.zeros((n_O1, n_O2, X.shape[2]), dtype=X.dtype)
     E = E = I.shape[0]
     N = C.shape[0]
     for e in range(E):
