@@ -93,13 +93,13 @@ def check_opsax(A, R, X, I, J, n_O):
     check_scalar_dtype(n_O, np.integer, "opsax", "n_O")
 
 
-def check_sasax(C, A, R, X, I, J, M_1, M_2, M_3, n_O1, n_O2):
+def check_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2):
 
     # Check dimensions
-    check_number_of_dimensions(C, 1, "sasax", "C")
     check_number_of_dimensions(A, 3, "sasax", "A")
     check_number_of_dimensions(R, 3, "sasax", "R")
     check_number_of_dimensions(X, 3, "sasax", "X")
+    check_number_of_dimensions(C, 1, "sasax", "C")
     check_number_of_dimensions(I, 1, "sasax", "I")
     check_number_of_dimensions(J, 1, "sasax", "J")
     check_number_of_dimensions(M_1, 1, "sasax", "M_1")
