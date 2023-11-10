@@ -2,16 +2,10 @@ import ctypes
 
 import numpy as np
 
-from ._c_api import (
-    mops_tensor_1d_f32_t, 
-    mops_tensor_1d_f64_t,
-    mops_tensor_2d_f32_t,
-    mops_tensor_2d_f64_t,
-    mops_tensor_3d_f32_t,
-    mops_tensor_3d_f64_t,
-    mops_tensor_1d_i32_t,
-    mops_tensor_2d_i32_t,
-)
+from ._c_api import (mops_tensor_1d_f32_t, mops_tensor_1d_f64_t,
+                     mops_tensor_1d_i32_t, mops_tensor_2d_f32_t,
+                     mops_tensor_2d_f64_t, mops_tensor_2d_i32_t,
+                     mops_tensor_3d_f32_t, mops_tensor_3d_f64_t)
 
 
 def numpy_to_mops_tensor(array):

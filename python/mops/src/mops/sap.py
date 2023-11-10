@@ -1,8 +1,8 @@
 import numpy as np
 
 from ._c_lib import _get_library
-from .utils import numpy_to_mops_tensor
 from .checks import check_sap
+from .utils import numpy_to_mops_tensor
 
 
 def sparse_accumulation_of_products(A, B, C, P_A, P_B, P_O, n_O):
@@ -27,7 +27,9 @@ def sparse_accumulation_of_products(A, B, C, P_A, P_B, P_O, n_O):
     elif A.dtype == np.float64:
         function = lib.mops_sparse_accumulation_of_products_f64
     else:
-        raise TypeError("Unsupported dtype detected. Only float32 and float64 are supported")
+        raise TypeError(
+            "Unsupported dtype detected. Only float32 and float64 are supported"
+        )
 
     function(
         numpy_to_mops_tensor(O),

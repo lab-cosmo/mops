@@ -2,30 +2,21 @@
 
 // explicit instanciations of templates
 template void mops::outer_product_scatter_add<float>(
-    Tensor<float, 2> output,
-    Tensor<float, 2> tensor_a,
-    Tensor<float, 2> tensor_b,
-    Tensor<int32_t, 1> indexes
-);
+    Tensor<float, 2> output, Tensor<float, 2> tensor_a,
+    Tensor<float, 2> tensor_b, Tensor<int32_t, 1> indexes);
 
 template void mops::outer_product_scatter_add<double>(
-    Tensor<double, 2> output,
-    Tensor<double, 2> tensor_a,
-    Tensor<double, 2> tensor_b,
-    Tensor<int32_t, 1> indexes
-);
-
+    Tensor<double, 2> output, Tensor<double, 2> tensor_a,
+    Tensor<double, 2> tensor_b, Tensor<int32_t, 1> indexes);
 
 #ifdef MOPS_CUDA_ENABLED
-    #include "cuda.tpp"
+#include "cuda.tpp"
 #else
-template<typename scalar_t>
-void mops::cuda::outer_product_scatter_add(
-    Tensor<scalar_t, 2> output,
-    Tensor<scalar_t, 2> tensor_a,
-    Tensor<scalar_t, 2> tensor_b,
-    Tensor<int32_t, 1> indexes
-) {
+template <typename scalar_t>
+void mops::cuda::outer_product_scatter_add(Tensor<scalar_t, 2> output,
+                                           Tensor<scalar_t, 2> tensor_a,
+                                           Tensor<scalar_t, 2> tensor_b,
+                                           Tensor<int32_t, 1> indexes) {
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
 
@@ -33,15 +24,9 @@ void mops::cuda::outer_product_scatter_add(
 
 // explicit instanciations of CUDA templates
 template void mops::cuda::outer_product_scatter_add<float>(
-    Tensor<float, 2> output,
-    Tensor<float, 2> tensor_a,
-    Tensor<float, 2> tensor_b,
-    Tensor<int32_t, 1> indexes
-);
+    Tensor<float, 2> output, Tensor<float, 2> tensor_a,
+    Tensor<float, 2> tensor_b, Tensor<int32_t, 1> indexes);
 
 template void mops::cuda::outer_product_scatter_add<double>(
-    Tensor<double, 2> output,
-    Tensor<double, 2> tensor_a,
-    Tensor<double, 2> tensor_b,
-    Tensor<int32_t, 1> indexes
-);
+    Tensor<double, 2> output, Tensor<double, 2> tensor_a,
+    Tensor<double, 2> tensor_b, Tensor<int32_t, 1> indexes);

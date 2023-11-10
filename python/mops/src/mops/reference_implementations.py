@@ -1,5 +1,6 @@
 import numpy as np
-from .checks import check_hpe, check_sap, check_opsa, check_opsax, check_sasax
+
+from .checks import check_hpe, check_opsa, check_opsax, check_sap, check_sasax
 
 
 def homogeneous_polynomial_evaluation(A, C, P):
@@ -50,7 +51,9 @@ def outer_product_scatter_add_with_weights(A, R, X, I, J, n_O):
     return O
 
 
-def sparse_accumulation_scatter_add_with_weights(C, A, R, X, I, J, M_1, M_2, M_3, n_O1, n_O2):
+def sparse_accumulation_scatter_add_with_weights(
+    C, A, R, X, I, J, M_1, M_2, M_3, n_O1, n_O2
+):
     check_sasax(C, A, R, X, I, J, M_1, M_2, M_3, n_O1, n_O2)
 
     O = np.zeros((n_O1, n_O2, A.shape[1]), dtype=A.dtype)

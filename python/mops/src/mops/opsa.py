@@ -1,8 +1,8 @@
 import numpy as np
 
 from ._c_lib import _get_library
-from .utils import numpy_to_mops_tensor
 from .checks import check_opsa
+from .utils import numpy_to_mops_tensor
 
 
 def outer_product_scatter_add(A, B, P, n_O):
@@ -23,8 +23,7 @@ def outer_product_scatter_add(A, B, P, n_O):
         raise TypeError("P must be 1-dimensional arrays")
     if A.shape[0] != B.shape[0] or A.shape[0] != P.shape[0]:
         raise TypeError(
-            "A, B and P must have the same number of elements on the "
-            "first dimension"
+            "A, B and P must have the same number of elements on the " "first dimension"
         )
 
     P = P.astype(np.int32)
@@ -38,7 +37,9 @@ def outer_product_scatter_add(A, B, P, n_O):
     elif A.dtype == np.float64:
         function = lib.mops_outer_product_scatter_add_f64
     else:
-        raise TypeError("Unsupported dtype detected. Only float32 and float64 are supported")
+        raise TypeError(
+            "Unsupported dtype detected. Only float32 and float64 are supported"
+        )
 
     function(
         numpy_to_mops_tensor(output),

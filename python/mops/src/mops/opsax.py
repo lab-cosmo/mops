@@ -1,8 +1,8 @@
 import numpy as np
 
 from ._c_lib import _get_library
-from .utils import numpy_to_mops_tensor
 from .checks import check_opsax
+from .utils import numpy_to_mops_tensor
 
 
 def outer_product_scatter_add_with_weights(A, R, X, I, J, n_O):
@@ -25,7 +25,9 @@ def outer_product_scatter_add_with_weights(A, R, X, I, J, n_O):
     elif A.dtype == np.float64:
         function = lib.mops_outer_product_scatter_add_with_weights_f64
     else:
-        raise TypeError("Unsupported dtype detected. Only float32 and float64 are supported")
+        raise TypeError(
+            "Unsupported dtype detected. Only float32 and float64 are supported"
+        )
 
     function(
         numpy_to_mops_tensor(O),

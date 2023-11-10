@@ -1,11 +1,13 @@
 import numpy as np
 
 from ._c_lib import _get_library
-from .utils import numpy_to_mops_tensor
 from .checks import check_sasax
+from .utils import numpy_to_mops_tensor
 
 
-def sparse_accumulation_scatter_add_with_weights(A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2):
+def sparse_accumulation_scatter_add_with_weights(
+    A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2
+):
     check_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2)
 
     A = np.ascontiguousarray(A)
@@ -32,7 +34,9 @@ def sparse_accumulation_scatter_add_with_weights(A, R, X, C, I, J, M_1, M_2, M_3
     elif A.dtype == np.float64:
         function = lib.mops_sparse_accumulation_scatter_add_with_weights_f64
     else:
-        raise TypeError("Unsupported dtype detected. Only float32 and float64 are supported")
+        raise TypeError(
+            "Unsupported dtype detected. Only float32 and float64 are supported"
+        )
 
     function(
         numpy_to_mops_tensor(O),

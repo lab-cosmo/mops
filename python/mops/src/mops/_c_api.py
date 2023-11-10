@@ -256,7 +256,9 @@ def setup_functions(lib):
         mops_tensor_1d_i32_t,
         mops_tensor_1d_i32_t,
     ]
-    lib.mops_cuda_sparse_accumulation_scatter_add_with_weights_f32.restype = _check_status
+    lib.mops_cuda_sparse_accumulation_scatter_add_with_weights_f32.restype = (
+        _check_status
+    )
 
     lib.mops_cuda_sparse_accumulation_scatter_add_with_weights_f64.argtypes = [
         mops_tensor_3d_f64_t,
@@ -270,4 +272,6 @@ def setup_functions(lib):
         mops_tensor_1d_i32_t,
         mops_tensor_1d_i32_t,
     ]
-    lib.mops_cuda_sparse_accumulation_scatter_add_with_weights_f64.restype = _check_status
+    lib.mops_cuda_sparse_accumulation_scatter_add_with_weights_f64.restype = (
+        _check_status
+    )
