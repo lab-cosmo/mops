@@ -9,8 +9,8 @@
 extern "C" {
 #endif
 
-/// CPU version of mops::outer_product_scatter_add for 32-bit floats
-int MOPS_EXPORT mops_outer_product_scatter_add_f32(
+/// CPU version of mops::sparse_accumulation_of_products for 32-bit floats
+int MOPS_EXPORT mops_sparse_accumulation_of_products_f32(
     mops_tensor_2d_f32_t output,
     mops_tensor_2d_f32_t tensor_a,
     mops_tensor_2d_f32_t tensor_b,
@@ -18,8 +18,8 @@ int MOPS_EXPORT mops_outer_product_scatter_add_f32(
 );
 
 
-/// CPU version of mops::outer_product_scatter_add for 64-bit floats
-int MOPS_EXPORT mops_outer_product_scatter_add_f64(
+/// CPU version of mops::sparse_accumulation_of_products for 64-bit floats
+int MOPS_EXPORT mops_sparse_accumulation_of_products_f64(
     mops_tensor_2d_f64_t output,
     mops_tensor_2d_f64_t tensor_a,
     mops_tensor_2d_f64_t tensor_b,
@@ -27,8 +27,8 @@ int MOPS_EXPORT mops_outer_product_scatter_add_f64(
 );
 
 
-/// CUDA version of mops::outer_product_scatter_add for 32-bit floats
-int MOPS_EXPORT mops_cuda_outer_product_scatter_add_f32(
+/// CUDA version of mops::sparse_accumulation_of_products for 32-bit floats
+int MOPS_EXPORT mops_cuda_sparse_accumulation_of_products_f32(
     mops_tensor_2d_f32_t output,
     mops_tensor_2d_f32_t tensor_a,
     mops_tensor_2d_f32_t tensor_b,
@@ -36,8 +36,8 @@ int MOPS_EXPORT mops_cuda_outer_product_scatter_add_f32(
 );
 
 
-/// CUDA version of mops::outer_product_scatter_add for 64-bit floats
-int MOPS_EXPORT mops_cuda_outer_product_scatter_add_f64(
+/// CUDA version of mops::sparse_accumulation_of_products for 64-bit floats
+int MOPS_EXPORT mops_cuda_sparse_accumulation_of_products_f64(
     mops_tensor_2d_f64_t output,
     mops_tensor_2d_f64_t tensor_a,
     mops_tensor_2d_f64_t tensor_b,

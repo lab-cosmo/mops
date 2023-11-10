@@ -1,7 +1,7 @@
 #include "mops/capi.hpp"
 
-#include "mops/opsa.hpp"
-#include "mops/opsa.h"
+#include "mops/sap.hpp"
+#include "mops/sap.h"
 
 static size_t checked_cast(int64_t value) {
     if (value < 0 || static_cast<uint64_t>(value) > static_cast<uint64_t>(SIZE_MAX)) {

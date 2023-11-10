@@ -15,6 +15,20 @@ class mops_tensor_2d_f64_t(ctypes.Structure):
     ]
 
 
+class mops_tensor_1d_f32_t(ctypes.Structure):
+    _fields_ = [
+        ("data", ctypes.POINTER(ctypes.c_double)),
+        ("shape", ctypes.ARRAY(ctypes.c_int64, 1)),
+    ]
+
+
+class mops_tensor_1d_f64_t(ctypes.Structure):
+    _fields_ = [
+        ("data", ctypes.POINTER(ctypes.c_double)),
+        ("shape", ctypes.ARRAY(ctypes.c_int64, 1)),
+    ]
+
+
 class mops_tensor_1d_i32_t(ctypes.Structure):
     _fields_ = [
         ("data", ctypes.POINTER(ctypes.c_int32)),
@@ -60,3 +74,48 @@ def setup_functions(lib):
         mops_tensor_1d_i32_t,
     ]
     lib.mops_cuda_outer_product_scatter_add_f64.restype = _check_status
+
+    # sparse_accumulation_of_products
+    lib.mops_sparse_accumulation_of_products_f32.argtypes = [
+        mops_tensor_2d_f32_t,
+        mops_tensor_2d_f32_t,
+        mops_tensor_2d_f32_t,
+        mops_tensor_1d_f32_t,
+        mops_tensor_1d_i32_t,
+        mops_tensor_1d_i32_t,
+        mops_tensor_1d_i32_t,
+    ]
+    lib.mops_sparse_accumulation_of_products_f32.restype = _check_status
+
+    lib.mops_sparse_accumulation_of_products_f64.argtypes = [
+        mops_tensor_2d_f64_t,
+        mops_tensor_2d_f64_t,
+        mops_tensor_2d_f64_t,
+        mops_tensor_1d_f64_t,
+        mops_tensor_1d_i32_t,
+        mops_tensor_1d_i32_t,
+        mops_tensor_1d_i32_t,
+    ]
+    lib.mops_sparse_accumulation_of_products_f64.restype = _check_status
+
+    lib.mops_cuda_sparse_accumulation_of_products_f32.argtypes = [
+        mops_tensor_2d_f32_t,
+        mops_tensor_2d_f32_t,
+        mops_tensor_2d_f32_t,
+        mops_tensor_1d_f32_t,
+        mops_tensor_1d_i32_t,
+        mops_tensor_1d_i32_t,
+        mops_tensor_1d_i32_t,
+    ]
+    lib.mops_cuda_sparse_accumulation_of_products_f32.restype = _check_status
+
+    lib.mops_cuda_sparse_accumulation_of_products_f64.argtypes = [
+        mops_tensor_2d_f64_t,
+        mops_tensor_2d_f64_t,
+        mops_tensor_2d_f64_t,
+        mops_tensor_1d_f64_t,
+        mops_tensor_1d_i32_t,
+        mops_tensor_1d_i32_t,
+        mops_tensor_1d_i32_t,
+    ]
+    lib.mops_cuda_sparse_accumulation_of_products_f64.restype = _check_status
