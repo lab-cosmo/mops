@@ -4,7 +4,8 @@ import numpy as np
 def check_number_of_dimensions(array, expected_number_of_dimensions, operation, input):
     if len(array.shape) != expected_number_of_dimensions:
         raise ValueError(
-            f"{input} must be a {expected_number_of_dimensions}D array in {operation}, got a {len(array.shape)}D array"
+            f"{input} must be a {expected_number_of_dimensions}D "
+            f"array in {operation}, got a {len(array.shape)}D array"
         )
 
 

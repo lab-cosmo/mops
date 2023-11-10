@@ -1,12 +1,10 @@
 import numpy as np
-
-np.random.seed(0xDEADBEEF)
-
 import pytest
-from mops.reference_implementations import \
-    sparse_accumulation_of_products as ref_sap
+from mops.reference_implementations import sparse_accumulation_of_products as ref_sap
 
 from mops import sparse_accumulation_of_products as sap
+
+np.random.seed(0xDEADBEEF)
 
 
 def test_sap():

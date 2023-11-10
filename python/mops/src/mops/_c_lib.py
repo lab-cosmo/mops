@@ -76,7 +76,8 @@ def _check_dll(path):
     else:
         raise ImportError(
             f"MOPS doesn't provide a version for {python_machine} CPU. "
-            "If you are compiling from source on a new architecture, edit this file"
+            "If you are compiling from source on a new architecture, "
+            "edit this file"
         )
 
 
