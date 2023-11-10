@@ -14,7 +14,10 @@ int MOPS_EXPORT mops_sparse_accumulation_of_products_f32(
     mops_tensor_2d_f32_t output,
     mops_tensor_2d_f32_t tensor_a,
     mops_tensor_2d_f32_t tensor_b,
-    mops_tensor_1d_i32_t indexes
+    mops_tensor_1d_f32_t tensor_c,
+    mops_tensor_1d_i32_t p_a,
+    mops_tensor_1d_i32_t p_b,
+    mops_tensor_1d_i32_t p_o
 );
 
 
@@ -23,7 +26,10 @@ int MOPS_EXPORT mops_sparse_accumulation_of_products_f64(
     mops_tensor_2d_f64_t output,
     mops_tensor_2d_f64_t tensor_a,
     mops_tensor_2d_f64_t tensor_b,
-    mops_tensor_1d_i32_t indexes
+    mops_tensor_1d_f64_t tensor_c,
+    mops_tensor_1d_i32_t p_a,
+    mops_tensor_1d_i32_t p_b,
+    mops_tensor_1d_i32_t p_o
 );
 
 
@@ -32,7 +38,10 @@ int MOPS_EXPORT mops_cuda_sparse_accumulation_of_products_f32(
     mops_tensor_2d_f32_t output,
     mops_tensor_2d_f32_t tensor_a,
     mops_tensor_2d_f32_t tensor_b,
-    mops_tensor_1d_i32_t indexes
+    mops_tensor_1d_f32_t tensor_c,
+    mops_tensor_1d_i32_t p_a,
+    mops_tensor_1d_i32_t p_b,
+    mops_tensor_1d_i32_t p_o
 );
 
 
@@ -41,7 +50,10 @@ int MOPS_EXPORT mops_cuda_sparse_accumulation_of_products_f64(
     mops_tensor_2d_f64_t output,
     mops_tensor_2d_f64_t tensor_a,
     mops_tensor_2d_f64_t tensor_b,
-    mops_tensor_1d_i32_t indexes
+    mops_tensor_1d_f64_t tensor_c,
+    mops_tensor_1d_i32_t p_a,
+    mops_tensor_1d_i32_t p_b,
+    mops_tensor_1d_i32_t p_o
 );
 
 

@@ -42,8 +42,8 @@ def check_sap(C, A, B, P_A, P_B, P_O, n_O):
     check_number_of_dimensions(A, 2, "sap", "A")
     check_number_of_dimensions(B, 2, "sap", "B")
     check_number_of_dimensions(P_A, 1, "sap", "P_A")
-    check_number_of_dimensions(P_B, 2, "sap", "P_B")
-    check_number_of_dimensions(P_O, 2, "sap", "P_O")
+    check_number_of_dimensions(P_B, 1, "sap", "P_B")
+    check_number_of_dimensions(P_O, 1, "sap", "P_O")
     check_scalar(n_O, "sap", "n_O")
     # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
     

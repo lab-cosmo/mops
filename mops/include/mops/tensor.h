@@ -18,6 +18,16 @@ struct mops_tensor_2d_f64_t {
     int64_t shape[2];
 };
 
+struct mops_tensor_1d_f32_t {
+    float* __restrict__ data;
+    int64_t shape[1];
+};
+
+struct mops_tensor_1d_f64_t {
+    double* __restrict__ data;
+    int64_t shape[1];
+};
+
 struct mops_tensor_1d_i32_t {
     int32_t* __restrict__ data;
     int64_t shape[1];
