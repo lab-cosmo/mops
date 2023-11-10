@@ -10,7 +10,7 @@ extern "C" {
 #endif
 
 /// CPU version of mops::outer_product_scatter_add_with for 32-bit floats
-int MOPS_EXPORT mops_outer_product_scatter_add_with_f32(
+int MOPS_EXPORT mops_outer_product_scatter_add_with_weights_f32(
     mops_tensor_3d_f32_t output,
     mops_tensor_2d_f32_t tensor_a,
     mops_tensor_2d_f32_t tensor_r,
@@ -21,7 +21,7 @@ int MOPS_EXPORT mops_outer_product_scatter_add_with_f32(
 
 
 /// CPU version of mops::outer_product_scatter_add_with for 64-bit floats
-int MOPS_EXPORT mops_outer_product_scatter_add_with_f64(
+int MOPS_EXPORT mops_outer_product_scatter_add_with_weights_f64(
     mops_tensor_3d_f64_t output,
     mops_tensor_2d_f64_t tensor_a,
     mops_tensor_2d_f64_t tensor_r,
@@ -32,7 +32,7 @@ int MOPS_EXPORT mops_outer_product_scatter_add_with_f64(
 
 
 /// CUDA version of mops::outer_product_scatter_add_with for 32-bit floats
-int MOPS_EXPORT mops_cuda_outer_product_scatter_add_with_f32(
+int MOPS_EXPORT mops_cuda_outer_product_scatter_add_with_weights_f32(
     mops_tensor_3d_f32_t output,
     mops_tensor_2d_f32_t tensor_a,
     mops_tensor_2d_f32_t tensor_r,
@@ -43,7 +43,7 @@ int MOPS_EXPORT mops_cuda_outer_product_scatter_add_with_f32(
 
 
 /// CUDA version of mops::outer_product_scatter_add_with for 64-bit floats
-int MOPS_EXPORT mops_cuda_outer_product_scatter_add_with_f64(
+int MOPS_EXPORT mops_cuda_outer_product_scatter_add_with_weights_f64(
     mops_tensor_3d_f64_t output,
     mops_tensor_2d_f64_t tensor_a,
     mops_tensor_2d_f64_t tensor_r,
