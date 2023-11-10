@@ -11,6 +11,7 @@ def homogeneous_polynomial_evaluation(A, C, P):
     A = np.ascontiguousarray(A)
     C = np.ascontiguousarray(C)
     P = np.ascontiguousarray(P)
+    P = P.astype(np.int32)
 
     O = np.zeros((A.shape[0],), dtype=A.dtype)
 

@@ -23,7 +23,7 @@ int MOPS_EXPORT mops_homogeneous_polynomial_evaluation_f64(
     mops_tensor_1d_f64_t output,
     mops_tensor_2d_f64_t tensor_a,
     mops_tensor_1d_f64_t tensor_c,
-    mops_tensor_2d_i64_t p
+    mops_tensor_2d_i32_t p
 );
 
 
@@ -41,7 +41,7 @@ int MOPS_EXPORT mops_cuda_homogeneous_polynomial_evaluation_f64(
     mops_tensor_1d_f64_t output,
     mops_tensor_2d_f64_t tensor_a,
     mops_tensor_1d_f64_t tensor_c,
-    mops_tensor_2d_i64_t p
+    mops_tensor_2d_i32_t p
 );
 
 

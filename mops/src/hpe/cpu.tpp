@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "mops/opsa.hpp"
+#include "mops/hpe.hpp"
 
 template<typename scalar_t>
 void mops::homogeneous_polynomial_evaluation(
@@ -12,6 +12,7 @@ void mops::homogeneous_polynomial_evaluation(
     Tensor<scalar_t, 1> tensor_c,
     Tensor<int32_t, 2> p
 ) {
+
     // if (tensor_a.shape[0] != tensor_b.shape[0]) {
     //     throw std::runtime_error(
     //         "A and B tensors must have the same number of elements along the "
@@ -20,34 +21,53 @@ void mops::homogeneous_polynomial_evaluation(
     //     );
     // }
 
-    // if (tensor_a.shape[0] != indexes.shape[0]) {
+    // if (tensor_a.shape[0] != output.shape[0]) {
     //     throw std::runtime_error(
-    //         "indexes must contain the same number of elements as the first "
-    //         "dimension of A and B , got " + std::to_string(indexes.shape[0]) +
+    //         "O must contain the same number of elements as the first "
+    //         "dimension of A and B , got " + std::to_string(output.shape[0]) +
     //         " and " + std::to_string(tensor_a.shape[0])
     //     );
     // }
 
-    // if (tensor_a.shape[1] * tensor_b.shape[1] != output.shape[1]) {
+    // if (tensor_c.shape[0] != p_b.shape[0]) {
     //     throw std::runtime_error(
-    //         "output tensor must have space for " + std::to_string(tensor_a.shape[1] * tensor_b.shape[1]) +
-    //         " along the second dimension, got " + std::to_string(output.shape[1])
+    //         "the dimension of C must match that of P_B, got "
+    //         + std::to_string(tensor_c.shape[0]) +
+    //         " for C and " + std::to_string(p_b.shape[0]) + " for P_B"
     //     );
     // }
 
-    // if (!std::is_sorted(indexes.data, indexes.data + indexes.shape[0])) {
-    //     throw std::runtime_error("`indexes` values should be sorted");
+    // if (tensor_c.shape[0] != p_o.shape[0]) {
+    //     throw std::runtime_error(
+    //         "the dimension of C must match that of P_O, got "
+    //         + std::to_string(tensor_c.shape[0]) +
+    //         " for C and " + std::to_string(p_o.shape[0]) + " for P_O"
+    //     );
     // }
 
-    // for (size_t i=0; i<tensor_a.shape[0]; i++) {
-    //     auto i_output = indexes.data[i];
-    //     assert(i_output < output.shape[0]);
-    //     for (size_t a_j=0; a_j<tensor_a.shape[1]; a_j++) {
-    //         for (size_t b_j=0; b_j<tensor_b.shape[1]; b_j++) {
-    //             auto output_index = tensor_b.shape[1] * (tensor_a.shape[1] * i_output + a_j) + b_j;
-    //             output.data[output_index] += tensor_a.data[tensor_a.shape[1] * i + a_j]
-    //                                        * tensor_b.data[tensor_b.shape[1] * i + b_j];
-    //         }
-    //     }
-    // }
+    scalar_t* o_ptr = output.data;
+    scalar_t* a_ptr = tensor_a.data;
+    scalar_t* c_ptr = tensor_c.data;
+    int32_t* p_ptr = p.data;
+
+    long size_batch_dimension = tensor_a.shape[0];
+    long n_monomials = p.shape[0];
+    long polynomial_order = p.shape[1];
+    long n_possible_factors = tensor_a.shape[1];
+
+    for (long i = 0; i < size_batch_dimension; i++) {
+        scalar_t result = 0.0;
+        scalar_t* shifted_a_ptr = a_ptr + i*n_possible_factors;
+        int32_t* p_ptr_temp = p_ptr;
+        for (long j = 0; j < n_monomials; j++) {
+            scalar_t temp = c_ptr[j];
+            for (uint8_t k = 0; k < polynomial_order; k++) {
+                temp *= shifted_a_ptr[p_ptr_temp[k]];
+            }
+            result += temp;
+            p_ptr_temp += polynomial_order;
+        }
+        o_ptr[i] = result;
+    }
+
 }

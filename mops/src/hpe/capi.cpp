@@ -1,7 +1,7 @@
 #include "mops/capi.hpp"
 
-#include "mops/opsa.hpp"
-#include "mops/opsa.h"
+#include "mops/hpe.hpp"
+#include "mops/hpe.h"
 
 static size_t checked_cast(int64_t value) {
     if (value < 0 || static_cast<uint64_t>(value) > static_cast<uint64_t>(SIZE_MAX)) {
@@ -21,10 +21,10 @@ extern "C" int mops_homogeneous_polynomial_evaluation_f32(
 ) {
     MOPS_CATCH_EXCEPTIONS(
         mops::homogeneous_polynomial_evaluation<float>(
-            {output.data, {checked_cast(output.shape[0]), checked_cast(output.shape[1])}},
+            {output.data, {checked_cast(output.shape[0])}},
             {tensor_a.data, {checked_cast(tensor_a.shape[0]), checked_cast(tensor_a.shape[1])}},
-            {tensor_b.data, {checked_cast(tensor_b.shape[0]), checked_cast(tensor_b.shape[1])}},
-            {indexes.data, {checked_cast(indexes.shape[0])}}
+            {tensor_c.data, {checked_cast(tensor_c.shape[0])}},
+            {p.data, {checked_cast(p.shape[0]), checked_cast(p.shape[1])}}
         );
     );
 }
@@ -38,10 +38,10 @@ extern "C" int mops_homogeneous_polynomial_evaluation_f64(
 ) {
     MOPS_CATCH_EXCEPTIONS(
         mops::homogeneous_polynomial_evaluation<double>(
-            {output.data, {checked_cast(output.shape[0]), checked_cast(output.shape[1])}},
+            {output.data, {checked_cast(output.shape[0])}},
             {tensor_a.data, {checked_cast(tensor_a.shape[0]), checked_cast(tensor_a.shape[1])}},
-            {tensor_b.data, {checked_cast(tensor_b.shape[0]), checked_cast(tensor_b.shape[1])}},
-            {indexes.data, {checked_cast(indexes.shape[0])}}
+            {tensor_c.data, {checked_cast(tensor_c.shape[0])}},
+            {p.data, {checked_cast(p.shape[0]), checked_cast(p.shape[1])}}
         );
     );
 }
@@ -55,10 +55,10 @@ extern "C" int mops_cuda_homogeneous_polynomial_evaluation_f32(
 ) {
     MOPS_CATCH_EXCEPTIONS(
         mops::cuda::homogeneous_polynomial_evaluation<float>(
-            {output.data, {checked_cast(output.shape[0]), checked_cast(output.shape[1])}},
+            {output.data, {checked_cast(output.shape[0])}},
             {tensor_a.data, {checked_cast(tensor_a.shape[0]), checked_cast(tensor_a.shape[1])}},
-            {tensor_b.data, {checked_cast(tensor_b.shape[0]), checked_cast(tensor_b.shape[1])}},
-            {indexes.data, {checked_cast(indexes.shape[0])}}
+            {tensor_c.data, {checked_cast(tensor_c.shape[0])}},
+            {p.data, {checked_cast(p.shape[0]), checked_cast(p.shape[1])}}
         );
     );
 }
@@ -72,10 +72,10 @@ extern "C" int mops_cuda_homogeneous_polynomial_evaluation_f64(
 ) {
     MOPS_CATCH_EXCEPTIONS(
         mops::cuda::homogeneous_polynomial_evaluation<double>(
-            {output.data, {checked_cast(output.shape[0]), checked_cast(output.shape[1])}},
+            {output.data, {checked_cast(output.shape[0])}},
             {tensor_a.data, {checked_cast(tensor_a.shape[0]), checked_cast(tensor_a.shape[1])}},
-            {tensor_b.data, {checked_cast(tensor_b.shape[0]), checked_cast(tensor_b.shape[1])}},
-            {indexes.data, {checked_cast(indexes.shape[0])}}
+            {tensor_c.data, {checked_cast(tensor_c.shape[0])}},
+            {p.data, {checked_cast(p.shape[0]), checked_cast(p.shape[1])}}
         );
     );
 }

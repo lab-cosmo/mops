@@ -1,6 +1,6 @@
 #include <stdexcept>
 
-#include "mops/opsa.hpp"
+#include "mops/hpe.hpp"
 
 template<typename scalar_t>
 void mops::cuda::homogeneous_polynomial_evaluation(
