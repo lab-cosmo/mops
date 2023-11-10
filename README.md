@@ -59,7 +59,7 @@ $$ O_{iP_k^O} = \sum_{k \in \{k'|P^O_{k'}=P^O_k\}} C_k A_{iP_k^A} B_{iP_k^B} $$
 
 ```python
 for k in range(K):
-    O[:, P_O[k]] += C[k] * A[:, P_A[k]] * A[:, P_B[k]]
+    O[:, P_O[k]] += C[k] * A[:, P_A[k]] * B[:, P_B[k]]
 ```
 
 ### 3. Outer Product Scatter-Add
@@ -77,6 +77,8 @@ $$ O_{ikl} = \sum_{j=1}^J A_{jk} B_{jl} \delta_{iP_j} \hspace{1cm} \mathrm{or} \
   (size $J$), and smaller in the the other (size $L$).
 
 - $P$ is a large vector of integers (of size $J$) which maps the dimension $j$ of $A$ and $B$ into the dimension $i$ of $O$. In other words, it contains the position within $O$ where each $AB$ product needs to be summed.
+
+- $n_O$ is the size of the output array along its first dimension. It must be grater or equal than the larger element in $P$ plus one. 
 
 #### Output
 
@@ -109,7 +111,6 @@ for e in range(E):
 #### Math notation
 
 $$ O_{i{m_3}k} = \sum_{e \in \{e'|I_{e'}=i\}} R_{ek} \sum_{n \in \{n'|M^3_{n'}=m_3\}} C_n A_{e{M_n^1}} X_{{J_e}{M_n^2}k} $$
-
 #### Calculation
 
 ```python
