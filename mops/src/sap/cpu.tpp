@@ -64,9 +64,9 @@ void mops::sparse_accumulation_of_products(
     size_t c_size = tensor_c.shape[0];
     
     for (size_t i = 0; i < size_first_dimension; i++) {
-        size_tshift_first_dimension_a = i * size_second_dimension_a;
-        size_tshift_first_dimension_b = i * size_second_dimension_b;
-        size_tshift_first_dimension_o = i * size_second_dimension_o;
+        size_t shift_first_dimension_a = i * size_second_dimension_a;
+        size_t shift_first_dimension_b = i * size_second_dimension_b;
+        size_t shift_first_dimension_o = i * size_second_dimension_o;
         for (size_t j = 0; j < c_size; j++) { 
             o_ptr[shift_first_dimension_o + p_o_ptr[j]] +=
             c_ptr[j] * a_ptr[shift_first_dimension_a + p_a_ptr[j]] * b_ptr[shift_first_dimension_b + p_b_ptr[j]];                                             
