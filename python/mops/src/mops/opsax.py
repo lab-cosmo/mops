@@ -5,8 +5,8 @@ from .checks import check_opsax
 from .utils import numpy_to_mops_tensor
 
 
-def outer_product_scatter_add_with_weights(A, R, X, I, J, n_O):
-    check_opsax(A, R, X, I, J, n_O)
+def outer_product_scatter_add_with_weights(A, R, X, I, J):
+    check_opsax(A, R, X, I, J)
 
     A = np.ascontiguousarray(A)
     R = np.ascontiguousarray(R)
@@ -16,7 +16,7 @@ def outer_product_scatter_add_with_weights(A, R, X, I, J, n_O):
     I = I.astype(np.int32)
     J = J.astype(np.int32)
 
-    O = np.zeros((n_O, A.shape[1], R.shape[1]), dtype=A.dtype)
+    O = np.zeros((X.shape[0], A.shape[1], R.shape[1]), dtype=A.dtype)
 
     lib = _get_library()
 

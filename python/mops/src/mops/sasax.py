@@ -5,10 +5,8 @@ from .checks import check_sasax
 from .utils import numpy_to_mops_tensor
 
 
-def sparse_accumulation_scatter_add_with_weights(
-    A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2
-):
-    check_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2)
+def sparse_accumulation_scatter_add_with_weights(A, R, X, C, I, J, M_1, M_2, M_3, n_O):
+    check_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O)
 
     A = np.ascontiguousarray(A)
     R = np.ascontiguousarray(R)
@@ -25,7 +23,7 @@ def sparse_accumulation_scatter_add_with_weights(
     M_2 = M_2.astype(np.int32)
     M_3 = M_3.astype(np.int32)
 
-    O = np.zeros((n_O1, n_O2, X.shape[2]), dtype=X.dtype)
+    O = np.zeros((X.shape[0], n_O, X.shape[2]), dtype=X.dtype)
 
     lib = _get_library()
 

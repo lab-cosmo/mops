@@ -75,14 +75,13 @@ def check_opsa(A, B, P, n_O):
     check_scalar_dtype(n_O, np.integer, "opsa", "n_O")
 
 
-def check_opsax(A, R, X, I, J, n_O):
+def check_opsax(A, R, X, I, J):
     # Check dimensions
     check_number_of_dimensions(A, 2, "opsax", "A")
     check_number_of_dimensions(R, 2, "opsax", "R")
     check_number_of_dimensions(X, 2, "opsax", "X")
     check_number_of_dimensions(I, 1, "opsax", "I")
     check_number_of_dimensions(J, 1, "opsax", "J")
-    check_scalar(n_O, "opsax", "n_O")
     # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
@@ -91,10 +90,9 @@ def check_opsax(A, R, X, I, J, n_O):
     check_array_dtype(X, np.floating, "opsax", "X")
     check_array_dtype(I, np.integer, "opsax", "I")
     check_array_dtype(J, np.integer, "opsax", "J")
-    check_scalar_dtype(n_O, np.integer, "opsax", "n_O")
 
 
-def check_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2):
+def check_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O):
     # Check dimensions
     check_number_of_dimensions(A, 2, "sasax", "A")
     check_number_of_dimensions(R, 2, "sasax", "R")
@@ -105,8 +103,7 @@ def check_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2):
     check_number_of_dimensions(M_1, 1, "sasax", "M_1")
     check_number_of_dimensions(M_2, 1, "sasax", "M_2")
     check_number_of_dimensions(M_3, 1, "sasax", "M_3")
-    check_scalar(n_O1, "sasax", n_O1)
-    check_scalar(n_O2, "sasax", n_O2)
+    check_scalar(n_O, "sasax", n_O)
     # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
@@ -118,5 +115,4 @@ def check_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2):
     check_array_dtype(M_1, np.integer, "sasax", "M_1")
     check_array_dtype(M_2, np.integer, "sasax", "M_2")
     check_array_dtype(M_3, np.integer, "sasax", "M_3")
-    check_scalar_dtype(n_O1, np.integer, "sasax", "n_O1")
-    check_scalar_dtype(n_O2, np.integer, "sasax", "n_O2")
+    check_scalar_dtype(n_O, np.integer, "sasax", "n_O")

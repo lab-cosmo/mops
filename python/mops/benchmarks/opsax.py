@@ -11,14 +11,13 @@ np.random.seed(0xDEADBEEF)
 
 A = np.random.rand(100, 10)
 R = np.random.rand(100, 5)
-n_O = 20
-X = np.random.rand(n_O, 5)
+X = np.random.rand(20, 5)
 
 I = np.random.randint(20, size=(100,))
 J = np.random.randint(20, size=(100,))
 
-ref_mean, ref_std = benchmark(lambda: ref_opsax(A, R, X, I, J, 20))
-mean, std = benchmark(lambda: opsax(A, R, X, I, J, 20))
+ref_mean, ref_std = benchmark(lambda: ref_opsax(A, R, X, I, J))
+mean, std = benchmark(lambda: opsax(A, R, X, I, J))
 
 print("Reference implementation:", format_mean_std(ref_mean, ref_std))
 print("Optimized implementation:", format_mean_std(mean, std))

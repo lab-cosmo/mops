@@ -40,10 +40,10 @@ def outer_product_scatter_add(A, B, P, n_O):
     return O
 
 
-def outer_product_scatter_add_with_weights(A, R, X, I, J, n_O):
-    check_opsax(A, R, X, I, J, n_O)
+def outer_product_scatter_add_with_weights(A, R, X, I, J):
+    check_opsax(A, R, X, I, J)
 
-    O = np.zeros((n_O, A.shape[1], R.shape[1]), dtype=A.dtype)
+    O = np.zeros((X.shape[0], A.shape[1], R.shape[1]), dtype=A.dtype)
     E = I.shape[0]
     for e in range(E):
         O[I[e], :, :] += A[e, :, None] * R[e, None, :] * X[J[e], None, :]
@@ -51,12 +51,10 @@ def outer_product_scatter_add_with_weights(A, R, X, I, J, n_O):
     return O
 
 
-def sparse_accumulation_scatter_add_with_weights(
-    A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2
-):
-    check_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2)
+def sparse_accumulation_scatter_add_with_weights(A, R, X, C, I, J, M_1, M_2, M_3, n_O):
+    check_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O)
 
-    O = np.zeros((n_O1, n_O2, X.shape[2]), dtype=X.dtype)
+    O = np.zeros((X.shape[0], n_O, X.shape[2]), dtype=X.dtype)
     E = E = I.shape[0]
     N = C.shape[0]
     for e in range(E):
