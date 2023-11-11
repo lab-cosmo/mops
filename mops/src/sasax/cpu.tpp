@@ -52,27 +52,27 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     int* m_2_ptr = tensor_m_2.data;
     int* m_3_ptr = tensor_m_3.data;
 
-    long E = tensor_i.shape[0];
-    long N = tensor_c.shape[0];
-    long size_a = tensor_a.shape[1];
-    long size_r = tensor_r.shape[1];
-    long o_shift_first_dim = output.shape[1] * output.shape[2];
-    long x_shift_first_dim = tensor_x.shape[1] * tensor_x.shape[2];
-    long o_shift_second_dim = output.shape[2];
-    long x_shift_second_dim = tensor_x.shape[2];
+    size_t E = tensor_i.shape[0];
+    size_t N = tensor_c.shape[0];
+    size_t size_a = tensor_a.shape[1];
+    size_t size_r = tensor_r.shape[1];
+    size_t o_shift_first_dim = output.shape[1] * output.shape[2];
+    size_t x_shift_first_dim = tensor_x.shape[1] * tensor_x.shape[2];
+    size_t o_shift_second_dim = output.shape[2];
+    size_t x_shift_second_dim = tensor_x.shape[2];
 
-    for (long e = 0; e < E; e++) {
+    for (size_t e = 0; e < E; e++) {
         scalar_t* o_ptr_shifted_first_dim = o_ptr + i_ptr[e] * o_shift_first_dim;
         scalar_t* a_ptr_shifted_first_dim = a_ptr + e * size_a;
         scalar_t* r_ptr_shifted_first_dim = r_ptr + e * size_r;
         scalar_t* x_ptr_shifted_first_dim = x_ptr + j_ptr[e] * x_shift_first_dim;
-        for (long n = 0; n < N; n++) {
+        for (size_t n = 0; n < N; n++) {
             scalar_t current_c = c_ptr[n];
             scalar_t current_a = a_ptr_shifted_first_dim[m_1_ptr[n]];
             scalar_t current_ac = current_c * current_a;
             scalar_t* o_ptr_shifted_second_dim = o_ptr_shifted_first_dim + m_3_ptr[n] * o_shift_second_dim;
             scalar_t* x_ptr_shifted_second_dim = x_ptr_shifted_first_dim + m_2_ptr[n] * x_shift_second_dim;
-            for (long r_idx = 0; r_idx < size_r; r_idx++) {
+            for (size_t r_idx = 0; r_idx < size_r; r_idx++) {
                 o_ptr_shifted_second_dim[r_idx] += current_ac * r_ptr_shifted_first_dim[r_idx] * x_ptr_shifted_second_dim[r_idx];
             }
         }

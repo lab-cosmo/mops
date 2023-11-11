@@ -44,20 +44,20 @@ void mops::outer_product_scatter_add_with_weights(
     int* i_ptr = tensor_i.data;
     int* j_ptr = tensor_j.data;
 
-    long E = tensor_i.shape[0];
-    long size_a = tensor_a.shape[1];
-    long size_r = tensor_r.shape[1];
+    size_t E = tensor_i.shape[0];
+    size_t size_a = tensor_a.shape[1];
+    size_t size_r = tensor_r.shape[1];
 
-    for (long e = 0; e < E; e++) {
+    for (size_t e = 0; e < E; e++) {
         scalar_t* o_ptr_shifted_first_dim = o_ptr + i_ptr[e] * size_a * size_r;
         scalar_t* a_ptr_shifted_first_dim = a_ptr + e * size_a;
         scalar_t* r_ptr_shifted_first_dim = r_ptr + e * size_r;
         scalar_t* x_ptr_shifted_first_dim = x_ptr + j_ptr[e] * size_r;
-        for (long a_idx = 0; a_idx < size_a; a_idx++) {
+        for (size_t a_idx = 0; a_idx < size_a; a_idx++) {
             scalar_t current_a = a_ptr_shifted_first_dim[a_idx];
             scalar_t* o_ptr_shifted_second_dim = o_ptr_shifted_first_dim + a_idx * size_r;
             // Swapping the two inner loops might reduce the number of multiplications
-            for (long r_idx = 0; r_idx < size_r; r_idx++) {
+            for (size_t r_idx = 0; r_idx < size_r; r_idx++) {
                 o_ptr_shifted_second_dim[r_idx] += current_a * r_ptr_shifted_first_dim[r_idx] * x_ptr_shifted_first_dim[r_idx];
             }
         }

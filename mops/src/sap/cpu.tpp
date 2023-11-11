@@ -57,17 +57,17 @@ void mops::sparse_accumulation_of_products(
     int32_t* p_b_ptr = p_b.data;
     int32_t* p_o_ptr = p_o.data;
 
-    long size_first_dimension = tensor_a.shape[0];
-    long size_second_dimension_a = tensor_a.shape[1];
-    long size_second_dimension_b = tensor_b.shape[1];
-    long size_second_dimension_o = output.shape[1];
-    long c_size = tensor_c.shape[0];
+    size_t size_first_dimension = tensor_a.shape[0];
+    size_t size_second_dimension_a = tensor_a.shape[1];
+    size_t size_second_dimension_b = tensor_b.shape[1];
+    size_t size_second_dimension_o = output.shape[1];
+    size_t c_size = tensor_c.shape[0];
     
-    for (int i = 0; i < size_first_dimension; i++) {
-        long shift_first_dimension_a = i * size_second_dimension_a;
-        long shift_first_dimension_b = i * size_second_dimension_b;
-        long shift_first_dimension_o = i * size_second_dimension_o;
-        for (int j = 0; j < c_size; j++) { 
+    for (size_t i = 0; i < size_first_dimension; i++) {
+        size_tshift_first_dimension_a = i * size_second_dimension_a;
+        size_tshift_first_dimension_b = i * size_second_dimension_b;
+        size_tshift_first_dimension_o = i * size_second_dimension_o;
+        for (size_t j = 0; j < c_size; j++) { 
             o_ptr[shift_first_dimension_o + p_o_ptr[j]] +=
             c_ptr[j] * a_ptr[shift_first_dimension_a + p_a_ptr[j]] * b_ptr[shift_first_dimension_b + p_b_ptr[j]];                                             
         }

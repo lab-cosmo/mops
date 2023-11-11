@@ -146,6 +146,23 @@ if (MOPS_ARCH_NATIVE)
 endif()
 
 
+# handle warning flags
+check_cxx_compiler_flag("-Wall" COMPILER_SUPPORTS_WALL)
+if(COMPILER_SUPPORTS_WALL)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+endif()
+
+check_cxx_compiler_flag("-Wextra" COMPILER_SUPPORTS_WEXTRA)
+if(COMPILER_SUPPORTS_WEXTRA)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+endif()
+
+check_cxx_compiler_flag("-Werror" COMPILER_SUPPORTS_WERROR)
+if(COMPILER_SUPPORTS_WERROR)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+endif()
+
+
 if (MOPS_TESTS)
     enable_testing()
     add_subdirectory(tests)
