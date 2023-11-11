@@ -41,7 +41,6 @@ void mops::outer_product_scatter_add(
 
     for (size_t i=0; i<tensor_a.shape[0]; i++) {
         auto i_output = indexes.data[i];
-        assert(i_output < output.shape[0]);
         for (size_t a_j=0; a_j<tensor_a.shape[1]; a_j++) {
             for (size_t b_j=0; b_j<tensor_b.shape[1]; b_j++) {
                 auto output_index = tensor_b.shape[1] * (tensor_a.shape[1] * i_output + a_j) + b_j;
