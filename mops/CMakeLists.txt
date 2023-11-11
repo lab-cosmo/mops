@@ -25,6 +25,10 @@ else()
 endif()
 
 option(BUILD_SHARED_LIBS "Build shared libraries instead of static ones" OFF)
+
+OPTION(MOPS_OPENMP "Try to use OpenMP when compiling Sphericart" ON)
+OPTION(MOPS_ARCH_NATIVE "Try to use -march=native when compiling Sphericart" ON)
+
 set(LIB_INSTALL_DIR "lib" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install libraries")
 set(BIN_INSTALL_DIR "bin" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install DLL/binaries")
 set(INCLUDE_INSTALL_DIR "include" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install headers")
@@ -39,9 +43,9 @@ option(MOPS_TESTS "build and run mops unit tests" ${MOPS_MAIN_PROJECT})
 # Set a default build type if none was specified
 if (${MOPS_MAIN_PROJECT})
     if("${CMAKE_BUILD_TYPE}" STREQUAL "" AND "${CMAKE_CONFIGURATION_TYPES}" STREQUAL "")
-        message(STATUS "Setting build type to 'relwithdebinfo' as none was specified.")
+        message(STATUS "Setting build type to 'release' as none was specified.")
         set(
-            CMAKE_BUILD_TYPE "relwithdebinfo"
+            CMAKE_BUILD_TYPE "release"
             CACHE STRING
             "Choose the type of build, options are: none(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) debug release relwithdebinfo minsizerel."
             FORCE
@@ -107,6 +111,39 @@ target_include_directories(mops PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
+
+
+# Handle optimization and OpenMP flags
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-Wunknown-pragmas" COMPILER_SUPPORTS_WPRAGMAS)
+if (MOPS_OPENMP)
+    find_package(OpenMP)
+    if(OpenMP_CXX_FOUND)
+        message(STATUS "OpenMP is enabled")
+        target_link_libraries(mops PUBLIC OpenMP::OpenMP_CXX)
+    else()
+        message(WARNING "Could not find OpenMP")
+        if(COMPILER_SUPPORTS_WPRAGMAS)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
+        endif()
+    endif()
+else()
+    if(COMPILER_SUPPORTS_WPRAGMAS)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
+    endif()
+endif()
+
+if (MOPS_ARCH_NATIVE)
+    check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+    # for some reason COMPILER_SUPPORTS_MARCH_NATIVE is true with Apple clang,
+    # but then fails with `the clang compiler does not support '-march=native'`
+    if(COMPILER_SUPPORTS_MARCH_NATIVE AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        message(STATUS "march=native is enabled")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+    else()
+        message(STATUS "march=native is not supported by this compiler")
+    endif()
+endif()
 
 
 if (MOPS_TESTS)

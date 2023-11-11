@@ -1,6 +1,7 @@
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+import math
 
 
 def benchmark(function, repeats=1000, plot=True):
@@ -22,3 +23,23 @@ def benchmark(function, repeats=1000, plot=True):
         plt.savefig("benchmark_plot.pdf")
 
     return mean, std
+
+
+def format_mean_std(mean, std_dev, decimals=2):
+    # find the exponent
+    if mean != 0:
+        exponent = math.floor(math.log10(abs(mean)))
+    else:
+        exponent = 0
+
+    # scale the mean and standard deviation by the exponent
+    scaled_mean = mean / (10 ** exponent)
+    scaled_std_dev = std_dev / (10 ** exponent)
+
+    # format the scaled mean and standard deviation
+    format_string = f"{{:.{decimals}f}}"
+    formatted_mean = format_string.format(scaled_mean)
+    formatted_std_dev = format_string.format(scaled_std_dev)
+    final_string = f"({formatted_mean}±{formatted_std_dev})e{exponent}"
+
+    return final_string
