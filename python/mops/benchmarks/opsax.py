@@ -1,7 +1,9 @@
 import numpy as np
 from benchmark import benchmark, format_mean_std
+from mops.reference_implementations import (
+    outer_product_scatter_add_with_weights as ref_opsax,
+)
 
-from mops.reference_implementations import outer_product_scatter_add_with_weights as ref_opsax
 from mops import outer_product_scatter_add_with_weights as opsax
 
 np.random.seed(0xDEADBEEF)
@@ -21,4 +23,4 @@ mean, std = benchmark(lambda: opsax(A, R, X, I, J, 20))
 print("Reference implementation:", format_mean_std(ref_mean, ref_std))
 print("Optimized implementation:", format_mean_std(mean, std))
 
-print("Speed-up:", ref_mean/mean)
+print("Speed-up:", ref_mean / mean)
