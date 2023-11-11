@@ -61,6 +61,8 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     size_t o_shift_second_dim = output.shape[2];
     size_t x_shift_second_dim = tensor_x.shape[2];
 
+    std::fill(o_ptr, o_ptr+output.shape[0]*o_shift_first_dim, static_cast<scalar_t>(0.0));
+
     for (size_t e = 0; e < E; e++) {
         scalar_t* o_ptr_shifted_first_dim = o_ptr + i_ptr[e] * o_shift_first_dim;
         scalar_t* a_ptr_shifted_first_dim = a_ptr + e * size_a;

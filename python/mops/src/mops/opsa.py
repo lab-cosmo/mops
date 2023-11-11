@@ -28,7 +28,7 @@ def outer_product_scatter_add(A, B, P, n_O):
 
     P = P.astype(np.int32)
 
-    output = np.zeros((n_O, A.shape[1] * B.shape[1]), dtype=A.dtype)  # TODO: 3D arrays
+    output = np.empty((n_O, A.shape[1] * B.shape[1]), dtype=A.dtype)  # TODO: 3D arrays
 
     lib = _get_library()
 

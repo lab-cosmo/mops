@@ -48,6 +48,8 @@ void mops::outer_product_scatter_add_with_weights(
     size_t size_a = tensor_a.shape[1];
     size_t size_r = tensor_r.shape[1];
 
+    std::fill(o_ptr, o_ptr+output.shape[0]*output.shape[1]*output.shape[2], static_cast<scalar_t>(0.0));
+
     for (size_t e = 0; e < E; e++) {
         scalar_t* o_ptr_shifted_first_dim = o_ptr + i_ptr[e] * size_a * size_r;
         scalar_t* a_ptr_shifted_first_dim = a_ptr + e * size_a;

@@ -16,7 +16,7 @@ def outer_product_scatter_add_with_weights(A, R, X, I, J):
     I = I.astype(np.int32)
     J = J.astype(np.int32)
 
-    O = np.zeros((X.shape[0], A.shape[1], R.shape[1]), dtype=A.dtype)
+    O = np.empty((X.shape[0], A.shape[1], R.shape[1]), dtype=A.dtype)
 
     lib = _get_library()
 

@@ -18,7 +18,7 @@ def sparse_accumulation_of_products(A, B, C, P_A, P_B, P_O, n_O):
     P_B = P_B.astype(np.int32)
     P_O = P_O.astype(np.int32)
 
-    O = np.zeros((A.shape[0], n_O), dtype=A.dtype)
+    O = np.empty((A.shape[0], n_O), dtype=A.dtype)
 
     lib = _get_library()
 

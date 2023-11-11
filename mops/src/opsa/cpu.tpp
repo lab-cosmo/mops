@@ -39,6 +39,8 @@ void mops::outer_product_scatter_add(
         throw std::runtime_error("`indexes` values should be sorted");
     }
 
+    std::fill(output.data, output.data+output.shape[0]*output.shape[1], static_cast<scalar_t>(0.0));
+
     for (size_t i=0; i<tensor_a.shape[0]; i++) {
         auto i_output = indexes.data[i];
         for (size_t a_j=0; a_j<tensor_a.shape[1]; a_j++) {
@@ -50,45 +52,3 @@ void mops::outer_product_scatter_add(
         }
     }
 }
-
-
-
-// if (tensor_a.requires_grad()) {
-//         grad_a = torch::zeros_like(tensor_a);
-//         scalar_t* grad_a_ptr = grad_a.data_ptr<scalar_t>();
-
-//         #pragma omp parallel for
-//         for (long idx_out = 0; idx_out < out_dim; idx_out++) {
-//             long idx_in = first_occurrences_ptr[idx_out];
-//             if (idx_in < 0) continue;
-//             while (scatter_indices_ptr[idx_in] == idx_out) {
-//                 for (long idx_a = 0; idx_a < size_a; idx_a++) {
-//                     for (long idx_b = 0; idx_b < size_b; idx_b++) {
-//                         grad_a_ptr[size_a*idx_in+idx_a] += grad_output_ptr[size_a*size_b*idx_out+size_b*idx_a+idx_b] * tensor_b_ptr[size_b*idx_in+idx_b];
-//                     }
-//                 }
-//                 idx_in++;
-//                 if (idx_in == size_scatter) break;
-//             }
-//         }
-//     }
-
-//     if (tensor_b.requires_grad()) {
-//         grad_b = torch::zeros_like(tensor_b);
-//         scalar_t* grad_b_ptr = grad_b.data_ptr<scalar_t>();
-
-//         #pragma omp parallel for
-//         for (long idx_out = 0; idx_out < out_dim; idx_out++) {
-//             long idx_in = first_occurrences_ptr[idx_out];
-//             if (idx_in < 0) continue;
-//             while (scatter_indices_ptr[idx_in] == idx_out) {
-//                 for (long idx_a = 0; idx_a < size_a; idx_a++) {
-//                     for (long idx_b = 0; idx_b < size_b; idx_b++) {
-//                         grad_b_ptr[size_b*idx_in+idx_b] += grad_output_ptr[size_a*size_b*idx_out+size_b*idx_a+idx_b] * tensor_a_ptr[size_a*idx_in+idx_a];
-//                     }
-//                 }
-//                 idx_in++;
-//                 if (idx_in == size_scatter) break;
-//             }
-//         }
-//     }
