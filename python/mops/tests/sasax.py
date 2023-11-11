@@ -1,6 +1,8 @@
 import numpy as np
 import pytest
-from mops.reference_implementations import sparse_accumulation_scatter_add_with_weights as ref_sasax
+from mops.reference_implementations import (
+    sparse_accumulation_scatter_add_with_weights as ref_sasax,
+)
 
 from mops import sparse_accumulation_scatter_add_with_weights as sasax
 
@@ -22,6 +24,8 @@ def test_sasax():
 
     reference = ref_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2)
     actual = sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2)
+    print(reference)
+    print(actual)
     assert np.allclose(reference, actual)
 
 

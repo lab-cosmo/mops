@@ -1,6 +1,8 @@
 import numpy as np
 import pytest
-from mops.reference_implementations import outer_product_scatter_add_with_weights as ref_opsax
+from mops.reference_implementations import (
+    outer_product_scatter_add_with_weights as ref_opsax,
+)
 
 from mops import outer_product_scatter_add_with_weights as opsax
 

@@ -18,8 +18,8 @@ void MOPS_EXPORT outer_product_scatter_add_with_weights(
 // these templates will be precompiled and provided in the mops library
 extern template void outer_product_scatter_add_with_weights(
     Tensor<float, 3> output, Tensor<float, 2> tensor_a,
-    Tensor<float, 2> tensor_r, Tensor<float, 2> tensor_x, Tensor<int32_t, 1> tensor_i,
-    Tensor<int32_t, 1> tensor_j);
+    Tensor<float, 2> tensor_r, Tensor<float, 2> tensor_x,
+    Tensor<int32_t, 1> tensor_i, Tensor<int32_t, 1> tensor_j);
 
 extern template void outer_product_scatter_add_with_weights(
     Tensor<double, 3> output, Tensor<double, 2> tensor_a,
