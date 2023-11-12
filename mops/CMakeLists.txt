@@ -163,6 +163,11 @@ if(COMPILER_SUPPORTS_WERROR)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 endif()
 
+check_cxx_compiler_flag("-funroll-loops" COMPILER_SUPPORTS_FUNROLL_LOOPS)
+if(COMPILER_SUPPORTS_FUNROLL_LOOPS)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funroll-loops")
+endif()
+
 
 if (MOPS_TESTS)
     enable_testing()
