@@ -47,6 +47,34 @@ void interleave_tensor(
     }
 }
 
+template<typename scalar_t, size_t simd_element_count>
+void un_interleave_tensor(
+    mops::Tensor<scalar_t, 2> output_data,
+    scalar_t* interleft_data,
+    scalar_t* remainder_data
+) {
+
+    size_t batch_dim = output_data.shape[0];
+    size_t remainder = batch_dim % simd_element_count;
+    size_t quotient = batch_dim / simd_element_count;
+    size_t calculation_dim = output_data.shape[1];
+    scalar_t* output_data_ptr = output_data.data;
+
+    for (size_t i=0; i<quotient; i++) {
+        for (size_t j=0; j<calculation_dim; j++) {
+            for (size_t k=0; k<simd_element_count; k++) {
+                output_data_ptr[i*simd_element_count*calculation_dim+k*calculation_dim+j] = interleft_data[i*calculation_dim*simd_element_count+j*simd_element_count+k];
+            }
+        }
+    }
+
+    for (size_t j=0; j<calculation_dim; j++) {
+        for (size_t k=0; k<remainder; k++) {
+            output_data_ptr[quotient*simd_element_count*calculation_dim+k*calculation_dim+j] = remainder_data[j*remainder+k];
+        }
+    }
+}
+
 template<typename scalar_t>
 void mops::sparse_accumulation_of_products(
     Tensor<scalar_t, 2> output,
@@ -112,7 +140,6 @@ void mops::sparse_accumulation_of_products(
 
     scalar_t* interleft_o_ptr = new scalar_t[size_first_dimension_interleft*size_second_dimension_o*simd_element_count];
     scalar_t* remainder_o_ptr = new scalar_t[size_remainder*size_second_dimension_o];
-    interleave_tensor<scalar_t, simd_element_count>(output, interleft_o_ptr, remainder_o_ptr);
 
     scalar_t* interleft_a_ptr = new scalar_t[size_first_dimension_interleft*size_second_dimension_a*simd_element_count];
     scalar_t* remainder_a_ptr = new scalar_t[size_remainder*size_second_dimension_a];
@@ -122,24 +149,36 @@ void mops::sparse_accumulation_of_products(
     scalar_t* remainder_b_ptr = new scalar_t[size_remainder*size_second_dimension_b];
     interleave_tensor<scalar_t, simd_element_count>(tensor_b, interleft_b_ptr, remainder_b_ptr);
 
-
-    // std::fill(o_ptr, o_ptr+size_first_dimension*output.shape[1], static_cast<scalar_t>(0.0));
+    std::fill(interleft_o_ptr, interleft_o_ptr+size_first_dimension_interleft*size_second_dimension_o*simd_element_count, static_cast<scalar_t>(0.0));
+    std::fill(remainder_o_ptr, remainder_o_ptr+size_remainder*size_second_dimension_o, static_cast<scalar_t>(0.0));
     
     for (size_t i = 0; i < size_first_dimension_interleft; i++) {
-        scalar_t* a_ptr_shifted_first_dim = interleft_a_ptr + i * size_second_dimension_a;
-        scalar_t* b_ptr_shifted_first_dim = interleft_b_ptr + i * size_second_dimension_b;
-        scalar_t* o_ptr_shifted_first_dim = interleft_o_ptr + i * size_second_dimension_o;
+        scalar_t* a_ptr_shifted_first_dim = interleft_a_ptr + i * size_second_dimension_a*simd_element_count;
+        scalar_t* b_ptr_shifted_first_dim = interleft_b_ptr + i * size_second_dimension_b*simd_element_count;
+        scalar_t* o_ptr_shifted_first_dim = interleft_o_ptr + i * size_second_dimension_o*simd_element_count;
         for (size_t j = 0; j < c_size; j++) {
             scalar_t* a_ptr_shifted_second_dim = a_ptr_shifted_first_dim + p_a_ptr[j] * simd_element_count;
             scalar_t* b_ptr_shifted_second_dim = b_ptr_shifted_first_dim + p_b_ptr[j] * simd_element_count;
             scalar_t* o_ptr_shifted_second_dim = o_ptr_shifted_first_dim + p_o_ptr[j] * simd_element_count;
             scalar_t current_c = c_ptr[j];
-            // #pragma omp simd
             for (size_t k = 0; k < simd_element_count; k++) {
                 o_ptr_shifted_second_dim[k] += current_c * a_ptr_shifted_second_dim[k] * b_ptr_shifted_second_dim[k];
             }                                             
         }
     }
+
+    // Handle remainder
+    for (size_t j = 0; j < c_size; j++) {
+        scalar_t* a_ptr_shifted_second_dim = remainder_a_ptr + p_a_ptr[j] * size_remainder;
+        scalar_t* b_ptr_shifted_second_dim = remainder_b_ptr + p_b_ptr[j] * size_remainder;
+        scalar_t* o_ptr_shifted_second_dim = remainder_o_ptr + p_o_ptr[j] * size_remainder;
+        scalar_t current_c = c_ptr[j];
+        for (size_t k = 0; k < size_remainder; k++) {
+            o_ptr_shifted_second_dim[k] += current_c * a_ptr_shifted_second_dim[k] * b_ptr_shifted_second_dim[k];
+        }                                             
+    }
+
+    un_interleave_tensor<scalar_t, simd_element_count>(output, interleft_o_ptr, remainder_o_ptr);
 
     delete[] interleft_o_ptr;
     delete[] interleft_a_ptr;
