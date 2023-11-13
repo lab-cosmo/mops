@@ -3,7 +3,6 @@
 #include "mops.hpp"
 #include "utils.hpp"
 
-
 int main() {
 
     auto A = std::vector<double>(1000 * 20);
@@ -26,9 +25,11 @@ int main() {
 
     auto O = std::vector<double>(1000 * 50);
 
-    for (int i=0; i<10000; i++) mops::sparse_accumulation_of_products<double>(
-        {O.data(), {1000, 50}}, {A.data(), {1000, 20}}, {B.data(), {1000, 6}},
-        {C.data(), {100}}, {P_A.data(), {100}}, {P_B.data(), {100}}, {P_O.data(), {100}});
+    for (int i = 0; i < 10000; i++)
+        mops::sparse_accumulation_of_products<double>(
+            {O.data(), {1000, 50}}, {A.data(), {1000, 20}},
+            {B.data(), {1000, 6}}, {C.data(), {100}}, {P_A.data(), {100}},
+            {P_B.data(), {100}}, {P_O.data(), {100}});
 
     return 0;
 }
