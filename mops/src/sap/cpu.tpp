@@ -8,15 +8,14 @@
 
 template<typename scalar_t>
 constexpr size_t get_simd_element_count();
-
+// Assume 256-bit vector registers. A conservative choice.
 template<>
 constexpr size_t get_simd_element_count<double>() {
-    return 512 / (sizeof(double) * 8);  // 512 bits / 64 bits
+    return 256 / (sizeof(double) * 8);  // 256 bits / 64 bits
 }
-
 template<>
 constexpr size_t get_simd_element_count<float>() {
-    return 512 / (sizeof(float) * 8);   // 512 bits / 32 bits
+    return 256 / (sizeof(float) * 8);   // 256 bits / 32 bits
 }
 
 template<typename scalar_t, size_t simd_element_count>

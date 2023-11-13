@@ -40,6 +40,7 @@ else()
 endif()
 option(MOPS_TESTS "build and run mops unit tests" ${MOPS_MAIN_PROJECT})
 option(MOPS_EXAMPLES "build and run mops examples" ${MOPS_MAIN_PROJECT})
+option(MOPS_BENCHMARKS "build and run mops examples" ${MOPS_MAIN_PROJECT})
 
 # Set a default build type if none was specified
 if (${MOPS_MAIN_PROJECT})
@@ -167,6 +168,10 @@ endif()
 if (MOPS_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if (MOPS_BENCHMARKS)
+    add_subdirectory(benchmarks)
 endif()
 
 if (MOPS_EXAMPLES)
