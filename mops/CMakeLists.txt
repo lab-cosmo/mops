@@ -73,6 +73,7 @@ add_library(mops
     "include/mops.hpp"
     "include/mops.h"
     "include/mops/capi.hpp"
+    "include/mops/utils.hpp"
     "include/mops/opsa.hpp"
     "include/mops/opsa.h"
     "include/mops/sap.hpp"

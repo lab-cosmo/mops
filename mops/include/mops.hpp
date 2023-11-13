@@ -4,6 +4,7 @@
 #include "mops/exports.h" // IWYU pragma: export
 
 #include "mops/capi.hpp"  // IWYU pragma: export
+#include "mops/utils.hpp" // IWYU pragma: export
 #include "mops/hpe.hpp"   // IWYU pragma: export
 #include "mops/opsa.hpp"  // IWYU pragma: export
 #include "mops/opsax.hpp" // IWYU pragma: export
