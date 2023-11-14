@@ -111,6 +111,7 @@ for e in range(E):
 #### Math notation
 
 $$ O_{i{m_3}k} = \sum_{e \in \{e'|I_{e'}=i\}} R_{ek} \sum_{n \in \{n'|M^3_{n'}=m_3\}} C_n A_{e{M_n^1}} X_{{J_e}{M_n^2}k} $$
+
 #### Calculation
 
 ```python

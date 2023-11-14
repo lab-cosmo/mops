@@ -1,20 +1,25 @@
 import numpy as np
+np.random.seed(0xDEADBEEF)
 
-import mops
+import pytest
 
-
-def reference_implementation(A, B, indices):
-    assert A.shape[0] == B.shape[0]
-    output = np.zeros((np.max(indices) + 1, A.shape[1], B.shape[1]))
-
-    for a, b, i in zip(A, B, indices):
-        output[i] += np.tensordot(a, b, axes=0)
-
-    return output
+from mops.reference_implementations import outer_product_scatter_add as ref_opsa
+from mops import outer_product_scatter_add as opsa
 
 
-def test_opsa_numpy():
-    np.random.seed(0xDEADBEEF)
+def test_opsa():
+
+    A = np.random.rand(100, 20)
+    B = np.random.rand(100, 5)
+
+    indices = np.sort(np.random.randint(10, size=(100,)))
+
+    reference = ref_opsa(A, B, indices, np.max(indices)+1)
+    actual = opsa(A, B, indices, np.max(indices)+1)
+    assert np.allclose(reference, actual)
+
+
+def test_opsa_no_neighbors():
 
     A = np.random.rand(100, 20)
     B = np.random.rand(100, 5)
@@ -23,9 +28,15 @@ def test_opsa_numpy():
     # substitute all 1s by 2s so as to test the no-neighbor case
     indices[indices == 1] = 2
 
-    reference = reference_implementation(A, B, indices)
-    actual = mops.outer_product_scatter_add(A, B, indices)
+    reference = ref_opsa(A, B, indices, np.max(indices)+1)
+    actual = opsa(A, B, indices, np.max(indices)+1)
     assert np.allclose(reference, actual)
 
 
-test_opsa_numpy()
+def test_opsa_wrong_type():
+
+    with pytest.raises(
+        ValueError,
+        match="A must be a 2D array in opsa, got a 1D array"
+    ):
+        opsa(np.array([1]), 2, 3, 4)
