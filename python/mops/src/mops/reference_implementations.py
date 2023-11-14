@@ -27,6 +27,8 @@ def sparse_accumulation_of_products(A, B, C, P_A, P_B, P_O, n_O):
 
     return O
 
+    return O
+
 
 def outer_product_scatter_add(A, B, P, n_O):
     check_opsa(A, B, P, n_O)
