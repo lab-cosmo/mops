@@ -9,12 +9,12 @@ from mops import outer_product_scatter_add_with_weights as opsax
 np.random.seed(0xDEADBEEF)
 
 
-A = np.random.rand(100, 10)
-R = np.random.rand(100, 5)
-X = np.random.rand(20, 5)
+A = np.random.rand(60000, 13)
+R = np.random.rand(60000, 32)
+X = np.random.rand(1000, 32)
 
-I = np.random.randint(20, size=(100,))
-J = np.random.randint(20, size=(100,))
+I = np.random.randint(1000, size=(60000,))
+J = np.random.randint(1000, size=(60000,))
 
 ref_mean, ref_std = benchmark(lambda: ref_opsax(A, R, X, I, J))
 mean, std = benchmark(lambda: opsax(A, R, X, I, J))
