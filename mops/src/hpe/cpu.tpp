@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <stdexcept>
 #include <string>
+#include <vector>
+#include <array>
 
 #include "mops/hpe.hpp"
 #include "mops/utils.hpp"
