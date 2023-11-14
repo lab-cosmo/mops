@@ -23,8 +23,6 @@ def test_sasax():
 
     reference = ref_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O)
     actual = sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O)
-    print(reference)
-    print(actual)
     assert np.allclose(reference, actual)
 
 
