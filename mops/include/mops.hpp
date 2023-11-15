@@ -9,5 +9,6 @@
 #include "mops/opsax.hpp" // IWYU pragma: export
 #include "mops/sap.hpp"   // IWYU pragma: export
 #include "mops/sasax.hpp" // IWYU pragma: export
+#include "mops/utils.hpp" // IWYU pragma: export
 
 #endif

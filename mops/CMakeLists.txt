@@ -40,6 +40,7 @@ else()
 endif()
 option(MOPS_TESTS "build and run mops unit tests" ${MOPS_MAIN_PROJECT})
 option(MOPS_EXAMPLES "build and run mops examples" ${MOPS_MAIN_PROJECT})
+option(MOPS_BENCHMARKS "build and run mops examples" ${MOPS_MAIN_PROJECT})
 
 # Set a default build type if none was specified
 if (${MOPS_MAIN_PROJECT})
@@ -73,6 +74,7 @@ add_library(mops
     "include/mops.hpp"
     "include/mops.h"
     "include/mops/capi.hpp"
+    "include/mops/utils.hpp"
     "include/mops/opsa.hpp"
     "include/mops/opsa.h"
     "include/mops/sap.hpp"
@@ -165,12 +167,21 @@ if(COMPILER_SUPPORTS_WERROR)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 endif()
 
+check_cxx_compiler_flag("-funroll-loops" COMPILER_SUPPORTS_FUNROLL_LOOPS)
+if(COMPILER_SUPPORTS_FUNROLL_LOOPS)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funroll-loops")
+endif()
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
 
 
 if (MOPS_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if (MOPS_BENCHMARKS)
+    add_subdirectory(benchmarks)
 endif()
 
 if (MOPS_EXAMPLES)
