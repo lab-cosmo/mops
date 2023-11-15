@@ -14,7 +14,7 @@ def test_sasax():
     R = np.random.rand(100, 200)
     X = np.random.rand(25, 13, 200)
     C = np.random.rand(50)
-    I = np.random.randint(25, size=(100,))
+    I = np.sort(np.random.randint(25, size=(100,)))
     J = np.random.randint(25, size=(100,))
     n_O = 15
     M_1 = np.random.randint(20, size=(50,))

@@ -13,7 +13,7 @@ A = np.random.rand(60000, 13)
 R = np.random.rand(60000, 32)
 X = np.random.rand(1000, 7, 32)
 C = np.random.rand(900)
-I = np.random.randint(1000, size=(60000,))
+I = np.sort(np.random.randint(1000, size=(60000,)))
 J = np.random.randint(1000, size=(60000,))
 n_O = 100
 M_1 = np.random.randint(13, size=(900,))

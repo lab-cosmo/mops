@@ -68,6 +68,7 @@ add_library(mops
     "src/opsax/capi.cpp"
     "src/sasax/sasax.cpp"
     "src/sasax/capi.cpp"
+    "src/utils.cpp"
 
     "include/mops.hpp"
     "include/mops.h"
@@ -82,6 +83,7 @@ add_library(mops
     "include/mops/opsax.h"
     "include/mops/sasax.hpp"
     "include/mops/sasax.h"
+    "include/mops/utils.hpp"
 )
 
 if(CMAKE_CUDA_COMPILER)
@@ -162,6 +164,8 @@ check_cxx_compiler_flag("-Werror" COMPILER_SUPPORTS_WERROR)
 if(COMPILER_SUPPORTS_WERROR)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
 
 
 if (MOPS_TESTS)

@@ -14,7 +14,7 @@ def test_opsax():
     R = np.random.rand(100, 5)
     X = np.random.rand(20, 5)
 
-    I = np.random.randint(20, size=(100,))
+    I = np.sort(np.random.randint(20, size=(100,)))
     J = np.random.randint(20, size=(100,))
 
     reference = ref_opsax(A, R, X, I, J)
