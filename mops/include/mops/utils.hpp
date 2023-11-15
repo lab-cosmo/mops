@@ -1,14 +1,15 @@
 #ifndef MOPS_UTILS_HPP
 #define MOPS_UTILS_HPP
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 #include "mops/tensor.hpp"
 
-std::vector<int32_t> find_first_occurrences(const int32_t* scatter_indices, size_t scatter_size, size_t output_dim);
-
+std::vector<int32_t> find_first_occurrences(const int32_t *scatter_indices,
+                                            size_t scatter_size,
+                                            size_t output_dim);
 
 template <typename scalar_t> constexpr size_t get_simd_element_count();
 // Assume 256-bit vector registers. A conservative choice.

@@ -172,8 +172,6 @@ if(COMPILER_SUPPORTS_FUNROLL_LOOPS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funroll-loops")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
-
 
 if (MOPS_TESTS)
     enable_testing()

@@ -66,7 +66,7 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     std::fill(o_ptr, o_ptr+output.shape[0]*o_shift_first_dim, static_cast<scalar_t>(0.0));
 
     for (size_t i_position = 0; i_position < output.shape[0]; i_position++) {
-        scalar_t* o_ptr_shifted_first_dim = o_ptr + i_position * size_a * size_r;
+        scalar_t* o_ptr_shifted_first_dim = o_ptr + i_position * o_shift_first_dim;
         int32_t index_j_start = first_occurrences[i_position];
         int32_t index_j_end = first_occurrences[i_position+1];
         for (int32_t e = index_j_start; e < index_j_end; e++) {
