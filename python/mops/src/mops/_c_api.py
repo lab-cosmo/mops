@@ -17,7 +17,7 @@ class mops_tensor_2d_f64_t(ctypes.Structure):
 
 class mops_tensor_1d_f32_t(ctypes.Structure):
     _fields_ = [
-        ("data", ctypes.POINTER(ctypes.c_double)),
+        ("data", ctypes.POINTER(ctypes.c_float)),
         ("shape", ctypes.ARRAY(ctypes.c_int64, 1)),
     ]
 
