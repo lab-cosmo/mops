@@ -12,7 +12,7 @@ std::vector<int32_t> find_first_occurrences(const int32_t *scatter_indices,
         std::vector<int32_t>(output_dim + 1, -1);
     first_occurrences[scatter_indices[0]] = 0;
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (size_t i = 0; i < scatter_size - 1; i++) {
         if (scatter_indices[i] < scatter_indices[i + 1])
             first_occurrences[scatter_indices[i + 1]] = i + 1;
