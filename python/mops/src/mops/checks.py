@@ -1,5 +1,8 @@
 import numpy as np
 
+# For each operation, we only check the correctness of types and number of dimensions.
+# Size consistency checks will be performed in the C++ backend.
+
 
 def check_number_of_dimensions(array, expected_number_of_dimensions, operation, input):
     if len(array.shape) != expected_number_of_dimensions:
@@ -31,7 +34,6 @@ def check_hpe(A, C, P):
     check_number_of_dimensions(A, 2, "hpe", "A")
     check_number_of_dimensions(C, 1, "hpe", "C")
     check_number_of_dimensions(P, 2, "hpe", "P")
-    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
     check_array_dtype(A, np.floating, "hpe", "A")
@@ -48,7 +50,6 @@ def check_sap(A, B, C, P_A, P_B, P_O, n_O):
     check_number_of_dimensions(P_B, 1, "sap", "P_B")
     check_number_of_dimensions(P_O, 1, "sap", "P_O")
     check_scalar(n_O, "sap", "n_O")
-    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
     check_array_dtype(A, np.floating, "sap", "A")
@@ -66,7 +67,6 @@ def check_opsa(A, B, P, n_O):
     check_number_of_dimensions(B, 2, "opsa", "B")
     check_number_of_dimensions(P, 1, "opsa", "P")
     check_scalar(n_O, "opsa", "n_O")
-    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
     check_array_dtype(A, np.floating, "opsa", "A")
@@ -82,7 +82,6 @@ def check_opsax(A, R, X, I, J):
     check_number_of_dimensions(X, 2, "opsax", "X")
     check_number_of_dimensions(I, 1, "opsax", "I")
     check_number_of_dimensions(J, 1, "opsax", "J")
-    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
     check_array_dtype(A, np.floating, "opsax", "A")
@@ -104,7 +103,6 @@ def check_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O):
     check_number_of_dimensions(M_2, 1, "sasax", "M_2")
     check_number_of_dimensions(M_3, 1, "sasax", "M_3")
     check_scalar(n_O, "sasax", n_O)
-    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
     check_array_dtype(A, np.floating, "sasax", "A")

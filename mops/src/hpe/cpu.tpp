@@ -6,6 +6,7 @@
 #include <array>
 
 #include "mops/hpe.hpp"
+#include "mops/checks.hpp"
 #include "mops/utils.hpp"
 
 
@@ -86,6 +87,7 @@ void _homogeneous_polynomial_evaluation_templated_polynomial_order(
     delete[] remainder_a_ptr;
 }
 
+
 template<typename scalar_t>
 void mops::homogeneous_polynomial_evaluation(
     Tensor<scalar_t, 1> output,
@@ -93,22 +95,9 @@ void mops::homogeneous_polynomial_evaluation(
     Tensor<scalar_t, 1> tensor_c,
     Tensor<int32_t, 2> p
 ) {
-
-    if (tensor_a.shape[0] != output.shape[0]) {
-        throw std::runtime_error(
-            "A and O tensors must have the same number of elements along the "
-            "first dimension, got " + std::to_string(tensor_a.shape[0]) + " and " +
-            std::to_string(output.shape[0])
-        );
-    }
-
-    if (tensor_c.shape[0] != p.shape[0]) {
-        throw std::runtime_error(
-            "C and P tensors must have the same number of elements along the "
-            "first dimension, got " + std::to_string(tensor_c.shape[0]) + " and " +
-            std::to_string(p.shape[0])
-        );
-    }
+    check_sizes(tensor_a, "A", 0, output, "O", 0, "hpe");
+    check_sizes(tensor_c, "C", 0, p, "P", 0, "hpe");
+    check_index_tensor(p, "P", tensor_a.shape[1], "hpe");
 
     size_t polynomial_order = p.shape[1];
 

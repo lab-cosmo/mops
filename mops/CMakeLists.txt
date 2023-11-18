@@ -74,6 +74,7 @@ add_library(mops
     "include/mops.hpp"
     "include/mops.h"
     "include/mops/capi.hpp"
+    "include/mops/checks.hpp"
     "include/mops/utils.hpp"
     "include/mops/opsa.hpp"
     "include/mops/opsa.h"
@@ -86,7 +87,6 @@ add_library(mops
     "include/mops/sasax.hpp"
     "include/mops/sasax.h"
     "include/mops/utils.hpp"
-)
 
 if(CMAKE_CUDA_COMPILER)
     target_compile_definitions(mops PUBLIC MOPS_CUDA_ENABLED)
