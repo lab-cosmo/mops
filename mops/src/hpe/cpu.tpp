@@ -36,8 +36,9 @@ void _homogeneous_polynomial_evaluation_templated_polynomial_order(
     scalar_t* remainder_a_ptr = new scalar_t[size_remainder*size_second_dimension_a];
     interleave_tensor<scalar_t, simd_element_count>(tensor_a, interleft_a_ptr, remainder_a_ptr);
 
-    scalar_t* o_ptr_shifted = o_ptr;
+    #pragma omp parallel for
     for (size_t i = 0; i < size_first_dimension_interleft; i++) {
+        scalar_t* o_ptr_shifted = o_ptr + i * simd_element_count;
         std::array<scalar_t, simd_element_count> result = std::array<scalar_t, simd_element_count>();  // zero-initialized
         scalar_t* shifted_a_ptr = interleft_a_ptr + i*n_possible_factors*simd_element_count;
         int32_t* p_ptr_temp = p_ptr;
@@ -58,12 +59,12 @@ void _homogeneous_polynomial_evaluation_templated_polynomial_order(
         for (size_t l = 0; l < simd_element_count; l++) {
             o_ptr_shifted[l] = result[l];
         }
-        o_ptr_shifted += simd_element_count;
     }
 
     std::vector<scalar_t> result = std::vector<scalar_t>(size_remainder, 0.0);
     scalar_t* shifted_a_ptr = remainder_a_ptr;
     int32_t* p_ptr_temp = p_ptr;
+    scalar_t* o_ptr_shifted = o_ptr + size_first_dimension * simd_element_count;
     for (size_t j = 0; j < n_monomials; j++) {
         std::vector<scalar_t> temp = std::vector<scalar_t>(size_remainder, c_ptr[j]);
         for (size_t k = 0; k < polynomial_order; k++) {

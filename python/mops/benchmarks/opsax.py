@@ -16,10 +16,10 @@ X = np.random.rand(1000, 32)
 I = np.sort(np.random.randint(1000, size=(60000,)))
 J = np.random.randint(1000, size=(60000,))
 
-ref_mean, ref_std = benchmark(lambda: ref_opsax(A, R, X, I, J))
+# ref_mean, ref_std = benchmark(lambda: ref_opsax(A, R, X, I, J))
 mean, std = benchmark(lambda: opsax(A, R, X, I, J))
 
-print("Reference implementation:", format_mean_std(ref_mean, ref_std))
+# print("Reference implementation:", format_mean_std(ref_mean, ref_std))
 print("Optimized implementation:", format_mean_std(mean, std))
 
-print("Speed-up:", ref_mean / mean)
+# print("Speed-up:", ref_mean / mean)

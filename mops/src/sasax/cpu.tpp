@@ -65,6 +65,7 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     std::vector<int32_t> first_occurrences = find_first_occurrences(i_ptr, E, output.shape[0]);
     std::fill(o_ptr, o_ptr+output.shape[0]*o_shift_first_dim, static_cast<scalar_t>(0.0));
 
+    #pragma omp parallel for 
     for (size_t i_position = 0; i_position < output.shape[0]; i_position++) {
         scalar_t* o_ptr_shifted_first_dim = o_ptr + i_position * o_shift_first_dim;
         int32_t index_j_start = first_occurrences[i_position];

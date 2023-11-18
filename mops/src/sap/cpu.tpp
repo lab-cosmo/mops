@@ -50,10 +50,7 @@ void mops::sparse_accumulation_of_products(
     }
 
     // TODO: check sorting (not necessary here, necessary in CUDA implementation)?
-        
-    // scalar_t* a_ptr = tensor_a.data;
-    // scalar_t* b_ptr = tensor_b.data;
-    // scalar_t* o_ptr = output.data;
+
     scalar_t* c_ptr = tensor_c.data;
     int32_t* p_a_ptr = p_a.data;
     int32_t* p_b_ptr = p_b.data;
@@ -84,6 +81,7 @@ void mops::sparse_accumulation_of_products(
     std::fill(interleft_o_ptr, interleft_o_ptr+size_first_dimension_interleft*size_second_dimension_o*simd_element_count, static_cast<scalar_t>(0.0));
     std::fill(remainder_o_ptr, remainder_o_ptr+size_remainder*size_second_dimension_o, static_cast<scalar_t>(0.0));
     
+    #pragma omp parallel for
     for (size_t i = 0; i < size_first_dimension_interleft; i++) {
         scalar_t* a_ptr_shifted_first_dim = interleft_a_ptr + i * size_second_dimension_a*simd_element_count;
         scalar_t* b_ptr_shifted_first_dim = interleft_b_ptr + i * size_second_dimension_b*simd_element_count;

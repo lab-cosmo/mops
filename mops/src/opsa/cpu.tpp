@@ -55,6 +55,7 @@ void mops::outer_product_scatter_add(
     //     }
     // }
 
+    #pragma omp parallel for 
     for (size_t i_output=0; i_output<output.shape[0]; i_output++) {
         int32_t index_start = first_occurrences[i_output];
         int32_t index_end = first_occurrences[i_output+1];

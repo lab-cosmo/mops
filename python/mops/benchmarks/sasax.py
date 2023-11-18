@@ -22,7 +22,7 @@ M_3 = np.random.randint(n_O, size=(900,))
 
 # ref_mean, ref_std = benchmark(
 #     lambda: ref_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O), repeats=3, warmup=1
-# )  # very slow
+# )
 mean, std = benchmark(lambda: sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O))
 
 # print("Reference implementation:", format_mean_std(ref_mean, ref_std))
