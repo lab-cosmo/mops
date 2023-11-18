@@ -4,6 +4,7 @@
 #include <string>
 
 #include "mops/opsa.hpp"
+#include "mops/checks.hpp"
 
 template<typename scalar_t>
 void mops::outer_product_scatter_add(
@@ -12,28 +13,11 @@ void mops::outer_product_scatter_add(
     Tensor<scalar_t, 2> tensor_b,
     Tensor<int32_t, 1> indexes
 ) {
-    if (tensor_a.shape[0] != tensor_b.shape[0]) {
-        throw std::runtime_error(
-            "A and B tensors must have the same number of elements along the "
-            "first dimension, got " + std::to_string(tensor_a.shape[0]) + " and " +
-            std::to_string(tensor_b.shape[0])
-        );
-    }
-
-    if (tensor_a.shape[0] != indexes.shape[0]) {
-        throw std::runtime_error(
-            "indexes must contain the same number of elements as the first "
-            "dimension of A and B , got " + std::to_string(indexes.shape[0]) +
-            " and " + std::to_string(tensor_a.shape[0])
-        );
-    }
-
-    if (tensor_a.shape[1] * tensor_b.shape[1] != output.shape[1]) {
-        throw std::runtime_error(
-            "output tensor must have space for " + std::to_string(tensor_a.shape[1] * tensor_b.shape[1]) +
-            " along the second dimension, got " + std::to_string(output.shape[1])
-        );
-    }
+    // check_sizes(tensor_a, "A", 0, tensor_b, "B", 0, "opsa");
+    // check_sizes(tensor_a, "A", 1, output, "O", 1, "opsa");
+    // check_sizes(tensor_b, "B", 1, output, "O", 2, "opsa");
+    // check_sizes(tensor_a, "A", 0, indexes, "P", 0, "opsa");
+    // check_index_tensor(indexes, "P", output.shape[0], "opsa");
 
     if (!std::is_sorted(indexes.data, indexes.data + indexes.shape[0])) {
         throw std::runtime_error("`indexes` values should be sorted");

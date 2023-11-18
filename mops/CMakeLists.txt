@@ -84,6 +84,7 @@ add_library(mops
     "include/mops/opsax.h"
     "include/mops/sasax.hpp"
     "include/mops/sasax.h"
+    "include/mops/checks.hpp"
 )
 
 if(CMAKE_CUDA_COMPILER)
