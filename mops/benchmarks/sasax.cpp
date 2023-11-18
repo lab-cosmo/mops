@@ -38,9 +38,9 @@ int main() {
     auto M_3 = std::vector<int>(900);
     fill_vector_random_integers(M_3, 100);
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 100; i++) {
         mops::sparse_accumulation_scatter_add_with_weights<double>(
-            {O.data(), {1000 * 100 * 32}}, {A.data(), {60000, 13}},
+            {O.data(), {1000, 100, 32}}, {A.data(), {60000, 13}},
             {R.data(), {60000, 32}}, {X.data(), {1000, 7, 32}},
             {C.data(), {900}}, {I.data(), {60000}}, {J.data(), {60000}},
             {M_1.data(), {900}}, {M_2.data(), {900}}, {M_3.data(), {900}});

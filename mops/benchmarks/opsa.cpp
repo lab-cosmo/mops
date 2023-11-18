@@ -20,7 +20,7 @@ int main() {
 
     for (int i = 0; i < 1000; i++) {
         mops::outer_product_scatter_add<double>(
-            {O.data(), {1000, 13 * 20}}, {A.data(), {60000, 13}},
+            {O.data(), {1000, 13, 20}}, {A.data(), {60000, 13}},
             {B.data(), {60000, 20}}, {P.data(), {60000}});
     }
 
