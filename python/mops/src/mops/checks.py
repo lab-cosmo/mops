@@ -1,8 +1,7 @@
 import numpy as np
 
-
 # For each operation, we only check the correctness of types and number of dimensions.
-# Size consistency checks will be performed in the C++ backend. 
+# Size consistency checks will be performed in the C++ backend.
 
 
 def check_number_of_dimensions(array, expected_number_of_dimensions, operation, input):
