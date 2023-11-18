@@ -15,11 +15,11 @@ void mops::outer_product_scatter_add(
     Tensor<scalar_t, 2> tensor_b,
     Tensor<int32_t, 1> indexes
 ) {
-    // check_sizes(tensor_a, "A", 0, tensor_b, "B", 0, "opsa");
-    // check_sizes(tensor_a, "A", 1, output, "O", 1, "opsa");
-    // check_sizes(tensor_b, "B", 1, output, "O", 2, "opsa");
-    // check_sizes(tensor_a, "A", 0, indexes, "P", 0, "opsa");
-    // check_index_tensor(indexes, "P", output.shape[0], "opsa");
+    check_sizes(tensor_a, "A", 0, tensor_b, "B", 0, "opsa");
+    check_sizes(tensor_a, "A", 1, output, "O", 1, "opsa");
+    check_sizes(tensor_b, "B", 1, output, "O", 2, "opsa");
+    check_sizes(tensor_a, "A", 0, indexes, "P", 0, "opsa");
+    check_index_tensor(indexes, "P", output.shape[0], "opsa");
 
     if (!std::is_sorted(indexes.data, indexes.data + indexes.shape[0])) {
         throw std::runtime_error("`indexes` values should be sorted");

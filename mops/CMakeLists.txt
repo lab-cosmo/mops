@@ -87,6 +87,7 @@ add_library(mops
     "include/mops/sasax.hpp"
     "include/mops/sasax.h"
     "include/mops/utils.hpp"
+)
 
 if(CMAKE_CUDA_COMPILER)
     target_compile_definitions(mops PUBLIC MOPS_CUDA_ENABLED)
