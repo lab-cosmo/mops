@@ -13,12 +13,13 @@ static size_t checked_cast(int64_t value) {
 }
 
 extern "C" int mops_outer_product_scatter_add_f32(
-    mops_tensor_2d_f32_t output, mops_tensor_2d_f32_t tensor_a,
+    mops_tensor_3d_f32_t output, mops_tensor_2d_f32_t tensor_a,
     mops_tensor_2d_f32_t tensor_b, mops_tensor_1d_i32_t indexes) {
     MOPS_CATCH_EXCEPTIONS(
         mops::outer_product_scatter_add<float>(
             {output.data,
-             {checked_cast(output.shape[0]), checked_cast(output.shape[1])}},
+             {checked_cast(output.shape[0]), checked_cast(output.shape[1]),
+              checked_cast(output.shape[2])}},
             {tensor_a.data,
              {checked_cast(tensor_a.shape[0]),
               checked_cast(tensor_a.shape[1])}},
@@ -29,12 +30,13 @@ extern "C" int mops_outer_product_scatter_add_f32(
 }
 
 extern "C" int mops_outer_product_scatter_add_f64(
-    mops_tensor_2d_f64_t output, mops_tensor_2d_f64_t tensor_a,
+    mops_tensor_3d_f64_t output, mops_tensor_2d_f64_t tensor_a,
     mops_tensor_2d_f64_t tensor_b, mops_tensor_1d_i32_t indexes) {
     MOPS_CATCH_EXCEPTIONS(
         mops::outer_product_scatter_add<double>(
             {output.data,
-             {checked_cast(output.shape[0]), checked_cast(output.shape[1])}},
+             {checked_cast(output.shape[0]), checked_cast(output.shape[1]),
+              checked_cast(output.shape[2])}},
             {tensor_a.data,
              {checked_cast(tensor_a.shape[0]),
               checked_cast(tensor_a.shape[1])}},
@@ -45,12 +47,13 @@ extern "C" int mops_outer_product_scatter_add_f64(
 }
 
 extern "C" int mops_cuda_outer_product_scatter_add_f32(
-    mops_tensor_2d_f32_t output, mops_tensor_2d_f32_t tensor_a,
+    mops_tensor_3d_f32_t output, mops_tensor_2d_f32_t tensor_a,
     mops_tensor_2d_f32_t tensor_b, mops_tensor_1d_i32_t indexes) {
     MOPS_CATCH_EXCEPTIONS(
         mops::cuda::outer_product_scatter_add<float>(
             {output.data,
-             {checked_cast(output.shape[0]), checked_cast(output.shape[1])}},
+             {checked_cast(output.shape[0]), checked_cast(output.shape[1]),
+              checked_cast(output.shape[2])}},
             {tensor_a.data,
              {checked_cast(tensor_a.shape[0]),
               checked_cast(tensor_a.shape[1])}},
@@ -61,12 +64,13 @@ extern "C" int mops_cuda_outer_product_scatter_add_f32(
 }
 
 extern "C" int mops_cuda_outer_product_scatter_add_f64(
-    mops_tensor_2d_f64_t output, mops_tensor_2d_f64_t tensor_a,
+    mops_tensor_3d_f64_t output, mops_tensor_2d_f64_t tensor_a,
     mops_tensor_2d_f64_t tensor_b, mops_tensor_1d_i32_t indexes) {
     MOPS_CATCH_EXCEPTIONS(
         mops::cuda::outer_product_scatter_add<double>(
             {output.data,
-             {checked_cast(output.shape[0]), checked_cast(output.shape[1])}},
+             {checked_cast(output.shape[0]), checked_cast(output.shape[1]),
+              checked_cast(output.shape[2])}},
             {tensor_a.data,
              {checked_cast(tensor_a.shape[0]),
               checked_cast(tensor_a.shape[1])}},

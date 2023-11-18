@@ -1,8 +1,10 @@
 import numpy as np
 from benchmark import benchmark, format_mean_std
-from mops.reference_implementations import sparse_accumulation_of_products as ref_sap
 
 from mops import sparse_accumulation_of_products as sap
+
+# from mops.reference_implementations import sparse_accumulation_of_products as ref_sap
+
 
 np.random.seed(0xDEADBEEF)
 

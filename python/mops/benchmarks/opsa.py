@@ -1,8 +1,10 @@
 import numpy as np
 from benchmark import benchmark, format_mean_std
-from mops.reference_implementations import outer_product_scatter_add as ref_opsa
 
 from mops import outer_product_scatter_add as opsa
+
+# from mops.reference_implementations import outer_product_scatter_add as ref_opsa
+
 
 np.random.seed(0xDEADBEEF)
 

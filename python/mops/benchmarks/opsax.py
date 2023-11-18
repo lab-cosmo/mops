@@ -1,10 +1,12 @@
 import numpy as np
 from benchmark import benchmark, format_mean_std
-from mops.reference_implementations import (
-    outer_product_scatter_add_with_weights as ref_opsax,
-)
 
 from mops import outer_product_scatter_add_with_weights as opsax
+
+# from mops.reference_implementations import (
+#     outer_product_scatter_add_with_weights as ref_opsax,
+# )
+
 
 np.random.seed(0xDEADBEEF)
 
