@@ -27,7 +27,7 @@ int main() {
     for (int i = 0; i < 1000; i++) {
         mops::outer_product_scatter_add_with_weights<double>(
             {O.data(), {1000, 13, 20}}, {A.data(), {60000, 13}},
-            {R.data(), {60000, 20}}, {X.data(), {60000, 20}},
+            {R.data(), {60000, 20}}, {X.data(), {1000, 20}},
             {I.data(), {60000}}, {J.data(), {60000}});
     }
 
