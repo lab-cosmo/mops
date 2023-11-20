@@ -18,7 +18,7 @@ J = np.random.randint(1000, size=(60000,))
 n_O = 100
 M_1 = np.random.randint(13, size=(900,))
 M_2 = np.random.randint(7, size=(900,))
-M_3 = np.random.randint(n_O, size=(900,))
+M_3 = np.sort(np.random.randint(n_O, size=(900,)))
 
 # ref_mean, ref_std = benchmark(
 #     lambda: ref_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O), repeats=3, warmup=1

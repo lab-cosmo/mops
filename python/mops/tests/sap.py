@@ -16,7 +16,7 @@ def valid_arguments():
     P_A = np.random.randint(20, size=(30,))
     P_B = np.random.randint(6, size=(30,))
     n_O = 35
-    P_O = np.random.randint(n_O, size=(30,))
+    P_O = np.sort(np.random.randint(n_O, size=(30,)))
     return A, B, C, P_A, P_B, P_O, n_O
 
 

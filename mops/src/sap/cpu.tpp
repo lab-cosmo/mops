@@ -27,7 +27,9 @@ void mops::sparse_accumulation_of_products(
     check_index_tensor(p_b, "P_B", tensor_b.shape[1], "sap");
     check_index_tensor(p_o, "P_O", output.shape[1], "sap");
 
-    // TODO: check sorting (not necessary here, necessary in CUDA implementation)?
+    if (!std::is_sorted(p_o.data, p_o.data + p_o.shape[0])) {
+        throw std::runtime_error("P_O values should be sorted");
+    }
 
     scalar_t* c_ptr = tensor_c.data;
     int32_t* p_a_ptr = p_a.data;
@@ -58,20 +60,24 @@ void mops::sparse_accumulation_of_products(
 
     std::fill(interleft_o_ptr, interleft_o_ptr+size_first_dimension_interleft*size_second_dimension_o*simd_element_count, static_cast<scalar_t>(0.0));
     std::fill(remainder_o_ptr, remainder_o_ptr+size_remainder*size_second_dimension_o, static_cast<scalar_t>(0.0));
+    std::vector<int32_t> first_occurrences = find_first_occurrences(p_o_ptr, c_size, size_second_dimension_o);
     
     #pragma omp parallel for
     for (size_t i = 0; i < size_first_dimension_interleft; i++) {
         scalar_t* a_ptr_shifted_first_dim = interleft_a_ptr + i * size_second_dimension_a*simd_element_count;
         scalar_t* b_ptr_shifted_first_dim = interleft_b_ptr + i * size_second_dimension_b*simd_element_count;
         scalar_t* o_ptr_shifted_first_dim = interleft_o_ptr + i * size_second_dimension_o*simd_element_count;
-        for (size_t j = 0; j < c_size; j++) {
-            scalar_t* a_ptr_shifted_second_dim = a_ptr_shifted_first_dim + p_a_ptr[j] * simd_element_count;
-            scalar_t* b_ptr_shifted_second_dim = b_ptr_shifted_first_dim + p_b_ptr[j] * simd_element_count;
-            scalar_t* o_ptr_shifted_second_dim = o_ptr_shifted_first_dim + p_o_ptr[j] * simd_element_count;
-            scalar_t current_c = c_ptr[j];
-            for (size_t k = 0; k < simd_element_count; k++) {
-                o_ptr_shifted_second_dim[k] += current_c * a_ptr_shifted_second_dim[k] * b_ptr_shifted_second_dim[k];
-            }                                             
+        scalar_t* o_ptr_shifted_second_dim = o_ptr_shifted_first_dim;
+        for (size_t ji = 0; ji < size_second_dimension_o; ji++) {
+            for (int32_t j = first_occurrences[ji]; j < first_occurrences[ji+1]; j++) {
+                scalar_t* a_ptr_shifted_second_dim = a_ptr_shifted_first_dim + p_a_ptr[j] * simd_element_count;
+                scalar_t* b_ptr_shifted_second_dim = b_ptr_shifted_first_dim + p_b_ptr[j] * simd_element_count;
+                scalar_t current_c = c_ptr[j];
+                for (size_t k = 0; k < simd_element_count; k++) {
+                    o_ptr_shifted_second_dim[k] += current_c * a_ptr_shifted_second_dim[k] * b_ptr_shifted_second_dim[k];
+                }                                             
+            }
+            o_ptr_shifted_second_dim += simd_element_count;
         }
     }
 

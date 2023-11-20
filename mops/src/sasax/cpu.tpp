@@ -35,6 +35,10 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     check_index_tensor(tensor_m_2, "M_2", tensor_r.shape[1], "sasax");
     check_index_tensor(tensor_m_3, "M_3", output.shape[1], "sasax");
 
+    if (!std::is_sorted(tensor_m_3.data, tensor_m_3.data + tensor_m_3.shape[0])) {
+        throw std::runtime_error("P_O values should be sorted");
+    }
+
     scalar_t* o_ptr = output.data;
     scalar_t* a_ptr = tensor_a.data;
     scalar_t* r_ptr = tensor_r.data;

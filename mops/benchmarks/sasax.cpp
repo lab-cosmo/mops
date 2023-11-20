@@ -37,6 +37,7 @@ int main() {
 
     auto M_3 = std::vector<int>(900);
     fill_vector_random_integers(M_3, 100);
+    std::sort(M_3.begin(), M_3.end());
 
     for (int i = 0; i < 100; i++) {
         mops::sparse_accumulation_scatter_add_with_weights<double>(

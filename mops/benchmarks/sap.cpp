@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <vector>
 
 #include "mops.hpp"
@@ -22,6 +23,7 @@ int main() {
 
     auto P_O = std::vector<int>(900);
     fill_vector_random_integers(P_O, 100);
+    std::sort(P_O.begin(), P_O.end());
 
     auto O = std::vector<double>(32000 * 100);
 
