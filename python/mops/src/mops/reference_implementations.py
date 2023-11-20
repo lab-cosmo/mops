@@ -17,13 +17,15 @@ def homogeneous_polynomial_evaluation(C, A, P):
     return O
 
 
-def sparse_accumulation_of_products(C, A, B, P_A, P_B, P_O, n_O):
-    check_sap(C, A, B, P_A, P_B, P_O, n_O)
+def sparse_accumulation_of_products(A, B, C, P_A, P_B, P_O, n_O):
+    check_sap(A, B, C, P_A, P_B, P_O, n_O)
 
     O = np.zeros((A.shape[0], n_O), dtype=A.dtype)
     K = C.shape[0]
     for k in range(K):
-        O[:, P_O[k]] += C[k] * A[:, P_A[k]] * A[:, P_B[k]]
+        O[:, P_O[k]] += C[k] * A[:, P_A[k]] * B[:, P_B[k]]
+
+    return O
 
     return O
 
