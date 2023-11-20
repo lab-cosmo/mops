@@ -1,5 +1,5 @@
-#ifndef MOPS_OUTER_PRODUCT_SCATTER_ADD_H
-#define MOPS_OUTER_PRODUCT_SCATTER_ADD_H
+#ifndef MOPS_SPARSE_ACCUMULATION_OF_PRODUCTS_H
+#define MOPS_SPARSE_ACCUMULATION_OF_PRODUCTS_H
 
 #include "mops/exports.h"
 #include "mops/tensor.h"

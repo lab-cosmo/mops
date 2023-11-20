@@ -35,5 +35,8 @@ def test_opsa_no_neighbors():
 
 def test_opsa_wrong_type():
 
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match="A must be a 2D array in opsa, got a 1D array"
+    ):
         opsa(np.array([1]), 2, 3, 4)
