@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <stdexcept>
 #include <string>
+#include <numeric>
+#include <execution>
 
 #include "mops/sasax.hpp"
 #include "mops/checks.hpp"
@@ -62,8 +64,9 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     std::vector<int32_t> first_occurrences = find_first_occurrences(i_ptr, E, output.shape[0]);
     std::fill(o_ptr, o_ptr+output.shape[0]*o_shift_first_dim, static_cast<scalar_t>(0.0));
 
-    #pragma omp parallel for 
-    for (size_t i_position = 0; i_position < output.shape[0]; i_position++) {
+    std::vector<size_t> indices(output.shape[0]);
+    std::iota(indices.begin(), indices.end(), 0); // Fill with consecutive numbers
+    std::for_each(std::execution::par, indices.begin(), indices.end(), [&](size_t i_position) {
         scalar_t* o_ptr_shifted_first_dim = o_ptr + i_position * o_shift_first_dim;
         int32_t index_j_start = first_occurrences[i_position];
         int32_t index_j_end = first_occurrences[i_position+1];
@@ -82,5 +85,5 @@ void mops::sparse_accumulation_scatter_add_with_weights(
                 }
             }
         }
-    }
+    });
 }

@@ -1,4 +1,6 @@
 #include "mops/utils.hpp"
+#include <algorithm>
+#include <execution>
 #include <vector>
 
 std::vector<int32_t> find_first_occurrences(const int32_t *scatter_indices,
@@ -12,11 +14,13 @@ std::vector<int32_t> find_first_occurrences(const int32_t *scatter_indices,
         std::vector<int32_t>(output_dim + 1, -1);
     first_occurrences[scatter_indices[0]] = 0;
 
-#pragma omp parallel for
-    for (size_t i = 0; i < scatter_size - 1; i++) {
-        if (scatter_indices[i] < scatter_indices[i + 1])
-            first_occurrences[scatter_indices[i + 1]] = i + 1;
-    }
+    std::vector<size_t> indices(scatter_size - 1);
+    std::iota(indices.begin(), indices.end(), 0);
+    std::for_each(std::execution::par, indices.begin(), indices.end(),
+                  [&](size_t i) {
+                      if (scatter_indices[i] < scatter_indices[i + 1])
+                          first_occurrences[scatter_indices[i + 1]] = i + 1;
+                  });
     first_occurrences[output_dim] = scatter_size;
     for (int i = output_dim; i > -1;
          i--) { // size_t always positive, wouldn't stop loop

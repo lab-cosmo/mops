@@ -26,8 +26,7 @@ endif()
 
 option(BUILD_SHARED_LIBS "Build shared libraries instead of static ones" OFF)
 
-OPTION(MOPS_OPENMP "Try to use OpenMP when compiling Sphericart" ON)
-OPTION(MOPS_ARCH_NATIVE "Try to use -march=native when compiling Sphericart" ON)
+OPTION(MOPS_ARCH_NATIVE "Try to use -march=native when compiling Mops" ON)
 
 set(LIB_INSTALL_DIR "lib" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install libraries")
 set(BIN_INSTALL_DIR "bin" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install DLL/binaries")
@@ -119,25 +118,7 @@ target_include_directories(mops PUBLIC
 )
 
 
-# Handle optimization and OpenMP flags
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-Wunknown-pragmas" COMPILER_SUPPORTS_WPRAGMAS)
-if (MOPS_OPENMP)
-    find_package(OpenMP)
-    if(OpenMP_CXX_FOUND)
-        message(STATUS "OpenMP is enabled")
-        target_link_libraries(mops PUBLIC OpenMP::OpenMP_CXX)
-    else()
-        message(WARNING "Could not find OpenMP")
-        if(COMPILER_SUPPORTS_WPRAGMAS)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
-        endif()
-    endif()
-else()
-    if(COMPILER_SUPPORTS_WPRAGMAS)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
-    endif()
-endif()
+# Handle optimization flags
 
 if (MOPS_ARCH_NATIVE)
     check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
@@ -173,6 +154,8 @@ if(COMPILER_SUPPORTS_FUNROLL_LOOPS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funroll-loops")
 endif()
 
+find_package(TBB REQUIRED)
+target_link_libraries(mops PRIVATE TBB::tbb)
 
 if (MOPS_TESTS)
     enable_testing()

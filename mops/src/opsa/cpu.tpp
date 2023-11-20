@@ -2,6 +2,9 @@
 #include <algorithm>
 #include <stdexcept>
 #include <string>
+#include <execution>
+#include <numeric>
+#include <vector>
 
 #include "mops/opsa.hpp"
 #include "mops/checks.hpp"
@@ -29,18 +32,19 @@ void mops::outer_product_scatter_add(
 
     std::fill(output.data, output.data+output.shape[0]*output.shape[1]*output.shape[2], static_cast<scalar_t>(0.0));
 
-    #pragma omp parallel for
-    for (size_t i_output=0; i_output<output.shape[0]; i_output++) {
+    std::vector<size_t> indices(output.shape[0]);
+    std::iota(indices.begin(), indices.end(), 0);
+    std::for_each(std::execution::par, indices.begin(), indices.end(), [&](size_t i_output) {
         int32_t index_start = first_occurrences[i_output];
-        int32_t index_end = first_occurrences[i_output+1];
+        int32_t index_end = first_occurrences[i_output + 1];
         for (int32_t index_inputs = index_start; index_inputs < index_end; index_inputs++) {
-            for (size_t a_j=0; a_j<tensor_a.shape[1]; a_j++) {
-                for (size_t b_j=0; b_j<tensor_b.shape[1]; b_j++) {
+            for (size_t a_j = 0; a_j < tensor_a.shape[1]; a_j++) {
+                for (size_t b_j = 0; b_j < tensor_b.shape[1]; b_j++) {
                     auto output_index = tensor_b.shape[1] * (tensor_a.shape[1] * i_output + a_j) + b_j;
                     output.data[output_index] += tensor_a.data[tensor_a.shape[1] * index_inputs + a_j]
                                             * tensor_b.data[tensor_b.shape[1] * index_inputs + b_j];
                 }
             }
         }
-    }
+    });
 }
