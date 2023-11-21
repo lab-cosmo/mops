@@ -1,12 +1,13 @@
 import numpy as np
 
 from ._c_lib import _get_library
-from .checks import check_opsax
+from .checks import _check_opsaw
 from .utils import numpy_to_mops_tensor
 
 
+# TODO: rename, reorder
 def outer_product_scatter_add_with_weights(A, R, X, I, J, n_O):
-    check_opsax(A, R, X, I, J, n_O)
+    _check_opsaw(A, R, X, I, J, n_O)
 
     A = np.ascontiguousarray(A)
     R = np.ascontiguousarray(R)
