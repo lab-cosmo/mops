@@ -12,24 +12,24 @@ namespace mops {
     template<typename scalar_t>
     void MOPS_EXPORT outer_product_scatter_add(
         Tensor<scalar_t, 2> output,
-        Tensor<scalar_t, 2> tensor_a,
-        Tensor<scalar_t, 2> tensor_b,
-        Tensor<int32_t, 1> indexes
+        Tensor<scalar_t, 2> A,
+        Tensor<scalar_t, 2> B,
+        Tensor<int32_t, 1> indices_output
     );
 
     // these templates will be precompiled and provided in the mops library
     extern template void outer_product_scatter_add(
         Tensor<float, 2> output,
-        Tensor<float, 2> tensor_a,
-        Tensor<float, 2> tensor_b,
-        Tensor<int32_t, 1> indexes
+        Tensor<float, 2> A,
+        Tensor<float, 2> B,
+        Tensor<int32_t, 1> indices_output
     );
 
     extern template void outer_product_scatter_add(
         Tensor<double, 2> output,
-        Tensor<double, 2> tensor_a,
-        Tensor<double, 2> tensor_b,
-        Tensor<int32_t, 1> indexes
+        Tensor<double, 2> A,
+        Tensor<double, 2> B,
+        Tensor<int32_t, 1> indices_output
     );
 
     namespace cuda {
@@ -37,9 +37,9 @@ namespace mops {
         template<typename scalar_t>
         void MOPS_EXPORT outer_product_scatter_add(
             Tensor<scalar_t, 2> output,
-            Tensor<scalar_t, 2> tensor_a,
-            Tensor<scalar_t, 2> tensor_b,
-            Tensor<int32_t, 1> indexes
+            Tensor<scalar_t, 2> A,
+            Tensor<scalar_t, 2> B,
+            Tensor<int32_t, 1> indices_output
         );
     }
 }
