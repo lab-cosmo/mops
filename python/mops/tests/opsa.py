@@ -8,6 +8,7 @@ np.random.seed(0xDEADBEEF)
 
 np.random.seed(0xDEADBEEF)
 
+
 def test_opsa():
     A = np.random.rand(100, 20)
     B = np.random.rand(100, 5)

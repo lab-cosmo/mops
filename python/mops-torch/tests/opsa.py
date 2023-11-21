@@ -1,8 +1,7 @@
+import mops.torch
 import torch
 
-import mops.torch
 from mops import reference_implementations as ref
-
 
 torch.manual_seed(0xDEADBEEF)
 
