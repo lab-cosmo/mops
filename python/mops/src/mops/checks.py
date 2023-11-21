@@ -86,9 +86,9 @@ def _check_opsaw(A, B, W, indices_W, indices_output, output_size):
     function = "outer_product_scatter_add_with_weights"
 
     # Check dimensions
-    _check_number_of_dimensions(A, 3, function, "A")
-    _check_number_of_dimensions(B, 3, function, "B")
-    _check_number_of_dimensions(W, 3, function, "W")
+    _check_number_of_dimensions(A, 2, function, "A")
+    _check_number_of_dimensions(B, 2, function, "B")
+    _check_number_of_dimensions(W, 2, function, "W")
     _check_number_of_dimensions(indices_W, 1, function, "indices_W")
     _check_number_of_dimensions(indices_output, 1, function, "indices_output")
     _check_scalar(output_size, function, "output_size")
@@ -106,8 +106,8 @@ def _check_opsaw(A, B, W, indices_W, indices_output, output_size):
 def _check_sasaw(
     A,
     B,
-    C,
     W,
+    C,
     indices_A,
     indices_W_1,
     indices_W_2,
@@ -119,10 +119,10 @@ def _check_sasaw(
     function = "sparse_accumulation_scatter_add_with_weights"
 
     # Check dimensions
-    _check_number_of_dimensions(A, 3, function, "A")
-    _check_number_of_dimensions(B, 3, function, "B")
-    _check_number_of_dimensions(C, 1, function, "C")
+    _check_number_of_dimensions(A, 2, function, "A")
+    _check_number_of_dimensions(B, 2, function, "B")
     _check_number_of_dimensions(W, 3, function, "W")
+    _check_number_of_dimensions(C, 1, function, "C")
     _check_number_of_dimensions(indices_A, 1, function, "indices_A")
     _check_number_of_dimensions(indices_W_1, 1, function, "indices_W_1")
     _check_number_of_dimensions(indices_W_2, 1, function, "indices_W_2")
