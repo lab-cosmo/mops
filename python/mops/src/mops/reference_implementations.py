@@ -1,65 +1,99 @@
 import numpy as np
-from .checks import check_hpe, check_sap, check_opsa, check_opsax, check_sasax
+
+from .checks import _check_hpe, _check_opsa, _check_opsaw, _check_sap, _check_sasaw
 
 
-def homogeneous_polynomial_evaluation(C, A, P):
-    check_hpe(C, A, P)
+def homogeneous_polynomial_evaluation(C, A, indices_A):
+    _check_hpe(C, A, indices_A)
 
-    O = np.zeros((A.shape[0],), dtype=A.dtype)
-    J = P.shape[0]
-    K = P.shape[1]
-    for j in range(J):
+    output = np.zeros((A.shape[0],), dtype=A.dtype)
+    max_j = indices_A.shape[0]
+    max_k = indices_A.shape[1]
+    for j in range(max_j):
         temp = C[j]
-        for k in range(K):
-            temp *= A[:, P[j, k]]
-        O[:] += temp
+        for k in range(max_k):
+            temp *= A[:, indices_A[j, k]]
+        output[:] += temp
 
-    return O
+    return output
 
 
-def sparse_accumulation_of_products(A, B, C, P_A, P_B, P_O, n_O):
-    check_sap(A, B, C, P_A, P_B, P_O, n_O)
+def sparse_accumulation_of_products(
+    A, B, C, indices_A, indices_B, indices_output, output_size
+):
+    _check_sap(A, B, C, indices_A, indices_B, indices_output, output_size)
 
-    O = np.zeros((A.shape[0], n_O), dtype=A.dtype)
+    output = np.zeros((A.shape[0], output_size), dtype=A.dtype)
     K = C.shape[0]
     for k in range(K):
-        O[:, P_O[k]] += C[k] * A[:, P_A[k]] * B[:, P_B[k]]
+        output[:, indices_output[k]] += C[k] * A[:, indices_A[k]] * B[:, indices_B[k]]
 
-    return O
-
-    return O
+    return output
 
 
-def outer_product_scatter_add(A, B, P, n_O):
-    check_opsa(A, B, P, n_O)
+def outer_product_scatter_add(A, B, indices_output, output_size):
+    _check_opsa(A, B, indices_output, output_size)
 
-    O = np.zeros((n_O, A.shape[1], B.shape[1]), dtype=A.dtype)
-    J = P.shape[0]
+    output = np.zeros((output_size, A.shape[1], B.shape[1]), dtype=A.dtype)
+    J = indices_output.shape[0]
     for j in range(J):
-        O[P[j], :, :] += A[j, :, None] * B[j, None, :]
+        output[indices_output[j], :, :] += A[j, :, None] * B[j, None, :]
 
-    return O
-
-
-def outer_product_scatter_add_with_weights(A, R, X, I, J, n_O):
-    check_opsax(A, R, X, I, J, n_O)
-
-    O = np.zeros((n_O, A.shape[1], R.shape[1]), dtype=A.dtype)
-    E = I.shape[0]
-    for e in range(E):
-        O[I[e], :, :] += A[e, :, None] * R[e, None, :] * X[J[e], None, :]
-
-    return O
+    return output
 
 
-def sparse_accumulation_scatter_add_with_weights(C, A, R, X, I, J, M_1, M_2, M_3, n_O1, n_O2):
-    check_sasax(C, A, R, X, I, J, M_1, M_2, M_3, n_O1, n_O2)
+def outer_product_scatter_add_with_weights(
+    A, B, W, indices_W, indices_output, output_size
+):
+    _check_opsaw(A, B, W, indices_output, indices_W, output_size)
 
-    O = np.zeros((n_O1, n_O2, A.shape[1]), dtype=A.dtype)
-    E = E = I.shape[0]
+    output = np.zeros((output_size, A.shape[1], B.shape[1]), dtype=A.dtype)
+    max_e = indices_output.shape[0]
+    for e in range(max_e):
+        output[indices_output[e], :, :] += (
+            A[e, :, None] * B[e, None, :] * W[indices_W[e], None, :]
+        )
+
+    return output
+
+
+def sparse_accumulation_scatter_add_with_weights(
+    A,
+    B,
+    C,
+    W,
+    indices_A,
+    indices_W_1,
+    indices_W_2,
+    indices_output_1,
+    indices_output_2,
+    output_size_1,
+    output_size_2,
+):
+    _check_sasaw(
+        A,
+        B,
+        C,
+        W,
+        indices_A,
+        indices_W_1,
+        indices_W_2,
+        indices_output_1,
+        indices_output_2,
+        output_size_1,
+        output_size_2,
+    )
+
+    output = np.zeros((output_size_1, output_size_2, A.shape[1]), dtype=A.dtype)
+    E = indices_output_1.shape[0]
     N = C.shape[0]
     for e in range(E):
         for n in range(N):
-            O[I[e], M_3[n], :] += R[e, :] * C[n] * A[e, M_1[n]] * X[J[e], M_2[n], :]
+            output[indices_output_1[e], indices_output_2[n], :] += (
+                A[e, indices_A[n]]
+                * B[e, :]
+                * C[n]
+                * W[indices_W_1[e], indices_W_2[n], :]
+            )
 
-    return O
+    return output
