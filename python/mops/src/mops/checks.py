@@ -27,12 +27,12 @@ def _check_scalar_dtype(scalar, expected_dtype, operation, name):
         raise TypeError(f"Wrong dtype for {name} in {operation}: got {type(scalar)}")
 
 
-def _check_hpe(C, A, indices_A):
+def _check_hpe(A, C, indices_A):
     function = "homogeneous_polynomial_evaluation"
 
     # Check dimensions
-    _check_number_of_dimensions(C, 1, function, "C")
     _check_number_of_dimensions(A, 2, function, "A")
+    _check_number_of_dimensions(C, 1, function, "C")
     _check_number_of_dimensions(indices_A, 2, function, "indices_A")
     # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 

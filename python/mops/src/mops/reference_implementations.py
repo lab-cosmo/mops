@@ -3,8 +3,8 @@ import numpy as np
 from .checks import _check_hpe, _check_opsa, _check_opsaw, _check_sap, _check_sasaw
 
 
-def homogeneous_polynomial_evaluation(C, A, indices_A):
-    _check_hpe(C, A, indices_A)
+def homogeneous_polynomial_evaluation(A, C, indices_A):
+    _check_hpe(A, C, indices_A)
 
     output = np.zeros((A.shape[0],), dtype=A.dtype)
     max_j = indices_A.shape[0]
