@@ -28,16 +28,10 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install tox
 
-      - name: run C++ build and tests
-        run: |
-          mkdir build
-          cd build
-          cmake -DMOPS_TESTS=ON ../mops/
-          cmake --build .
-          ctest
-
-      - name: run Python tests
-        run: python -m tox
+      - name: run tests
+        run: tox
+        env:
+          PIP_EXTRA_INDEX_URL: https://download.pytorch.org/whl/cpu
 
   # check that we can build Python wheels on any Python version
   python-build:
@@ -57,7 +51,9 @@ jobs:
       - name: install python dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install tox wheel
+          python -m pip install tox
 
       - name: python build tests
         run: tox -e build-python
+        env:
+          PIP_EXTRA_INDEX_URL: https://download.pytorch.org/whl/cpu

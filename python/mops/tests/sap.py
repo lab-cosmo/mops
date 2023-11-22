@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
-from mops.reference_implementations import sparse_accumulation_of_products as ref_sap
 
-from mops import sparse_accumulation_of_products as sap
+import mops
+from mops import reference_implementations as ref
 
 np.random.seed(0xDEADBEEF)
 
@@ -12,16 +12,24 @@ def test_sap():
     B = np.random.rand(100, 6)
     C = np.random.rand(30)
 
-    P_A = np.random.randint(20, size=(30,))
-    P_B = np.random.randint(6, size=(30,))
-    n_O = 35
-    P_O = np.random.randint(n_O, size=(30,))
+    indices_A = np.random.randint(20, size=(30,))
+    indices_B = np.random.randint(6, size=(30,))
+    output_size = 35
+    indices_output = np.random.randint(output_size, size=(30,))
 
-    reference = ref_sap(A, B, C, P_A, P_B, P_O, n_O)
-    actual = sap(A, B, C, P_A, P_B, P_O, n_O)
+    reference = ref.sparse_accumulation_of_products(
+        A, B, C, indices_A, indices_B, indices_output, output_size
+    )
+    actual = mops.sparse_accumulation_of_products(
+        A, B, C, indices_A, indices_B, indices_output, output_size
+    )
     assert np.allclose(reference, actual)
 
 
 def test_sap_wrong_type():
-    with pytest.raises(ValueError):
-        sap(np.array(1), 2, 3, 4, 5, 6, 7)
+    message = (
+        "`A` must be a 2D array in sparse_accumulation_of_products, "
+        "got a 1D array instead"
+    )
+    with pytest.raises(ValueError, match=message):
+        mops.sparse_accumulation_of_products(np.array(1), 2, 3, 4, 5, 6, 7)

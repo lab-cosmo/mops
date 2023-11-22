@@ -1,122 +1,145 @@
 import numpy as np
 
 
-def check_number_of_dimensions(array, expected_number_of_dimensions, operation, input):
-    if len(array.shape) != expected_number_of_dimensions:
+def _check_number_of_dimensions(array, expected, operation, name):
+    if not isinstance(array, np.ndarray):
+        raise TypeError(f"`{name}` must be an array in {operation}, got {type(array)}")
+
+    if len(array.shape) != expected:
         raise ValueError(
-            f"{input} must be a {expected_number_of_dimensions}D "
-            f"array in {operation}, got a {len(array.shape)}D array"
+            f"`{name}` must be a {expected}D array in {operation}, "
+            f"got a {len(array.shape)}D array instead"
         )
 
 
-def check_scalar(variable, operation, input):
+def _check_scalar(variable, operation, name):
     if isinstance(variable, np.ndarray):
-        raise TypeError(
-            f"{input} must be a scalar in {operation}, found a `np.ndarray`"
-        )
+        raise TypeError(f"{name} must be a scalar in {operation}, found a `np.ndarray`")
 
 
-def check_array_dtype(array, expected_dtype, operation, input):
+def _check_array_dtype(array, expected_dtype, operation, name):
     if not np.issubdtype(array.dtype, expected_dtype):
-        raise TypeError(f"Wrong dtype for {input} in {operation}: got {array.dtype}")
+        raise TypeError(f"Wrong dtype for {name} in {operation}: got {array.dtype}")
 
 
-def check_scalar_dtype(scalar, expected_dtype, operation, input):
+def _check_scalar_dtype(scalar, expected_dtype, operation, name):
     if not np.issubdtype(type(scalar), expected_dtype):
-        raise TypeError(f"Wrong dtype for {input} in {operation}: got {type(scalar)}")
+        raise TypeError(f"Wrong dtype for {name} in {operation}: got {type(scalar)}")
 
 
-def check_hpe(A, C, P):
+def _check_hpe(A, C, indices_A):
+    function = "homogeneous_polynomial_evaluation"
+
     # Check dimensions
-    check_number_of_dimensions(A, 2, "hpe", "A")
-    check_number_of_dimensions(C, 1, "hpe", "C")
-    check_number_of_dimensions(P, 2, "hpe", "P")
+    _check_number_of_dimensions(A, 2, function, "A")
+    _check_number_of_dimensions(C, 1, function, "C")
+    _check_number_of_dimensions(indices_A, 2, function, "indices_A")
     # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
-    check_array_dtype(A, np.floating, "hpe", "A")
-    check_array_dtype(C, np.floating, "hpe", "C")
-    check_array_dtype(P, np.integer, "hpe", "P")
+    _check_array_dtype(C, np.floating, function, "C")
+    _check_array_dtype(A, np.floating, function, "A")
+    _check_array_dtype(indices_A, np.integer, function, "P")
 
 
-def check_sap(A, B, C, P_A, P_B, P_O, n_O):
+def _check_sap(A, B, C, indices_A, indices_B, indices_output, output_size):
+    function = "sparse_accumulation_of_products"
+
     # Check dimensions
-    check_number_of_dimensions(A, 2, "sap", "A")
-    check_number_of_dimensions(B, 2, "sap", "B")
-    check_number_of_dimensions(C, 1, "sap", "C")
-    check_number_of_dimensions(P_A, 1, "sap", "P_A")
-    check_number_of_dimensions(P_B, 1, "sap", "P_B")
-    check_number_of_dimensions(P_O, 1, "sap", "P_O")
-    check_scalar(n_O, "sap", "n_O")
+    _check_number_of_dimensions(A, 2, function, "A")
+    _check_number_of_dimensions(B, 2, function, "B")
+    _check_number_of_dimensions(C, 1, function, "C")
+    _check_number_of_dimensions(indices_A, 1, function, "indices_A")
+    _check_number_of_dimensions(indices_B, 1, function, "indices_B")
+    _check_number_of_dimensions(indices_output, 1, function, "indices_output")
+    _check_scalar(output_size, function, "output_size")
     # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
-    check_array_dtype(A, np.floating, "sap", "A")
-    check_array_dtype(B, np.floating, "sap", "B")
-    check_array_dtype(C, np.floating, "sap", "C")
-    check_array_dtype(P_A, np.integer, "sap", "P_A")
-    check_array_dtype(P_B, np.integer, "sap", "P_B")
-    check_array_dtype(P_O, np.integer, "sap", "P_O")
-    check_scalar_dtype(n_O, np.integer, "sap", "n_O")
+    _check_array_dtype(A, np.floating, function, "A")
+    _check_array_dtype(B, np.floating, function, "B")
+    _check_array_dtype(C, np.floating, function, "C")
+    _check_array_dtype(indices_A, np.integer, function, "indices_A")
+    _check_array_dtype(indices_B, np.integer, function, "indices_B")
+    _check_array_dtype(indices_output, np.integer, function, "indices_output")
+    _check_scalar_dtype(output_size, np.integer, function, "output_size")
 
 
-def check_opsa(A, B, P, n_O):
+def _check_opsa(A, B, indices_output, output_size):
+    function = "outer_product_scatter_add"
+
     # Check dimensions
-    check_number_of_dimensions(A, 2, "opsa", "A")
-    check_number_of_dimensions(B, 2, "opsa", "B")
-    check_number_of_dimensions(P, 1, "opsa", "P")
-    check_scalar(n_O, "opsa", "n_O")
+    _check_number_of_dimensions(A, 2, function, "A")
+    _check_number_of_dimensions(B, 2, function, "B")
+    _check_number_of_dimensions(indices_output, 1, function, indices_output)
+    _check_scalar(output_size, function, output_size)
     # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
-    check_array_dtype(A, np.floating, "opsa", "A")
-    check_array_dtype(B, np.floating, "opsa", "B")
-    check_array_dtype(P, np.integer, "opsa", "P")
-    check_scalar_dtype(n_O, np.integer, "opsa", "n_O")
+    _check_array_dtype(A, np.floating, function, "A")
+    _check_array_dtype(B, np.floating, function, "B")
+    _check_array_dtype(indices_output, np.integer, function, indices_output)
+    _check_scalar_dtype(output_size, np.integer, function, output_size)
 
 
-def check_opsax(A, R, X, I, J, n_O):
+def _check_opsaw(A, B, W, indices_W, indices_output, output_size):
+    function = "outer_product_scatter_add_with_weights"
+
     # Check dimensions
-    check_number_of_dimensions(A, 2, "opsax", "A")
-    check_number_of_dimensions(R, 2, "opsax", "R")
-    check_number_of_dimensions(X, 2, "opsax", "X")
-    check_number_of_dimensions(I, 1, "opsax", "I")
-    check_number_of_dimensions(J, 1, "opsax", "J")
-    check_scalar(n_O, "opsax", "n_O")
+    _check_number_of_dimensions(A, 3, function, "A")
+    _check_number_of_dimensions(B, 3, function, "B")
+    _check_number_of_dimensions(W, 3, function, "W")
+    _check_number_of_dimensions(indices_W, 1, function, "indices_W")
+    _check_number_of_dimensions(indices_output, 1, function, "indices_output")
+    _check_scalar(output_size, function, "output_size")
     # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
-    check_array_dtype(A, np.floating, "opsax", "A")
-    check_array_dtype(R, np.floating, "opsax", "R")
-    check_array_dtype(X, np.floating, "opsax", "X")
-    check_array_dtype(I, np.integer, "opsax", "I")
-    check_array_dtype(J, np.integer, "opsax", "J")
-    check_scalar_dtype(n_O, np.integer, "opsax", "n_O")
+    _check_array_dtype(A, np.floating, function, "A")
+    _check_array_dtype(B, np.floating, function, "B")
+    _check_array_dtype(W, np.floating, function, "W")
+    _check_array_dtype(indices_W, np.integer, function, "indices_W")
+    _check_array_dtype(indices_output, np.integer, function, "indices_output")
+    _check_scalar_dtype(output_size, np.integer, function, "output_size")
 
 
-def check_sasax(A, R, X, C, I, J, M_1, M_2, M_3, n_O1, n_O2):
+def _check_sasaw(
+    A,
+    B,
+    C,
+    W,
+    indices_A,
+    indices_W_1,
+    indices_W_2,
+    indices_output_1,
+    indices_output_2,
+    output_size_1,
+    output_size_2,
+):
+    function = "sparse_accumulation_scatter_add_with_weights"
+
     # Check dimensions
-    check_number_of_dimensions(A, 2, "sasax", "A")
-    check_number_of_dimensions(R, 2, "sasax", "R")
-    check_number_of_dimensions(X, 3, "sasax", "X")
-    check_number_of_dimensions(C, 1, "sasax", "C")
-    check_number_of_dimensions(I, 1, "sasax", "I")
-    check_number_of_dimensions(J, 1, "sasax", "J")
-    check_number_of_dimensions(M_1, 1, "sasax", "M_1")
-    check_number_of_dimensions(M_2, 1, "sasax", "M_2")
-    check_number_of_dimensions(M_3, 1, "sasax", "M_3")
-    check_scalar(n_O1, "sasax", n_O1)
-    check_scalar(n_O2, "sasax", n_O2)
+    _check_number_of_dimensions(A, 3, function, "A")
+    _check_number_of_dimensions(B, 3, function, "B")
+    _check_number_of_dimensions(C, 1, function, "C")
+    _check_number_of_dimensions(W, 3, function, "W")
+    _check_number_of_dimensions(indices_A, 1, function, "indices_A")
+    _check_number_of_dimensions(indices_W_1, 1, function, "indices_W_1")
+    _check_number_of_dimensions(indices_W_2, 1, function, "indices_W_2")
+    _check_number_of_dimensions(indices_output_1, 1, function, "indices_output_1")
+    _check_number_of_dimensions(indices_output_2, 1, function, "indices_output_2")
+    _check_scalar(output_size_1, function, "output_size_1")
+    _check_scalar(output_size_2, function, "output_size_2")
     # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
-    check_array_dtype(A, np.floating, "sasax", "A")
-    check_array_dtype(R, np.floating, "sasax", "R")
-    check_array_dtype(X, np.floating, "sasax", "X")
-    check_array_dtype(I, np.integer, "sasax", "I")
-    check_array_dtype(J, np.integer, "sasax", "J")
-    check_array_dtype(M_1, np.integer, "sasax", "M_1")
-    check_array_dtype(M_2, np.integer, "sasax", "M_2")
-    check_array_dtype(M_3, np.integer, "sasax", "M_3")
-    check_scalar_dtype(n_O1, np.integer, "sasax", "n_O1")
-    check_scalar_dtype(n_O2, np.integer, "sasax", "n_O2")
+    _check_array_dtype(A, np.floating, function, "A")
+    _check_array_dtype(B, np.floating, function, "R")
+    _check_array_dtype(W, np.floating, function, "X")
+    _check_array_dtype(indices_A, np.integer, function, "indices_A")
+    _check_array_dtype(indices_W_1, np.integer, function, "indices_W_1")
+    _check_array_dtype(indices_W_2, np.integer, function, "indices_W_2")
+    _check_array_dtype(indices_output_1, np.integer, function, "indices_output_1")
+    _check_array_dtype(indices_output_2, np.integer, function, "indices_output_2")
+    _check_scalar_dtype(output_size_1, np.integer, function, "output_size_1")
+    _check_scalar_dtype(output_size_2, np.integer, function, "output_size_2")
