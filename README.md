@@ -30,7 +30,7 @@ $$ O_i = \sum_{j=1}^J C_j \prod_{k=1}^K A_{iP_{jk}} $$
 
 #### Inputs
 
-- $A$ is a 2D array of floats, of size $I \times N_{A,2}$. It contains the individual factors in the monomials that make up the polynomial. 
+- $A$ is a 2D array of floats, of size $I \times N_{A,2}$. It contains the individual factors in the monomials that make up the polynomial.
 
 - $C$ is a vector of float multipliers of size $J$. They represent the coefficients of each monomial in the polynomial, so that $J$ is the number of monomials in the polynomial.
 
@@ -94,7 +94,7 @@ $$ O_{ikl} = \sum_{j=1}^J A_{jk} B_{jl} \delta_{iP_j} \hspace{1cm} \mathrm{or} \
 
 - $P$ is a large vector of integers (of size $J$) which maps the dimension $j$ of $A$ and $B$ into the dimension $i$ of $O$. In other words, it contains the position within $O$ where each $AB$ product needs to be summed.
 
-- $n_O$ is the size of the output array along its first dimension. It must be grater or equal than the larger element in $P$ plus one. 
+- $n_O$ is the size of the output array along its first dimension. It must be grater or equal than the larger element in $P$ plus one.
 
 #### Output
 
@@ -113,7 +113,7 @@ for j in range(J):
 
 #### Math notation
 
-$$ O_{imk} = \sum_{e \in \{e'|I_{e'}=i\}} A_{em} R_{ek} X_{{J_e}k} $$
+$$ O_{ikl} = \sum_{j \in \{j'|P_{j'}=i\}} A_{jk} B_{jl} W_{{PW_j}l} $$
 
 #### Inputs
 
@@ -130,8 +130,8 @@ $$ O_{imk} = \sum_{e \in \{e'|I_{e'}=i\}} A_{em} R_{ek} X_{{J_e}k} $$
 #### Calculation
 
 ```python
-for e in range(E):
-    O[I[e], :, :] += A[e, :, None] * R[e, None, :] * X[J[e], None, :]
+for j in range(J):
+    O[PO[j], :, :] += A[j, :, None] * B[j, None, :] * W[PW[j], None, :]
 ```
 
 ### 5. Sparse Accumulation Scatter-Add with Weights
@@ -163,7 +163,7 @@ $$ O_{i{m_3}k} = \sum_{e \in \{e'|I_{e'}=i\}} R_{ek} \sum_{n \in \{n'|M^3_{n'}=m
 #### Calculation
 
 ```python
-for e in range(E):
+for j in range(J):
     for n in range(N):
-        O[I[e], M_3[n], :] += R[e, :] * C[n] * A[e, M_1[n]] * X[J[e], M_2[n], :]
+        O[PO1[e], PO2[n], :] += A[e, PA[n]] * B[e, :] * C[n] * W[PW1[e], PW2[n], :]
 ```
