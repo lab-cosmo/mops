@@ -1,5 +1,5 @@
-#ifndef MOPS_SPARSE_ACCUMULATION_OF_PRODUCTS_HPP
-#define MOPS_SPARSE_ACCUMULATION_OF_PRODUCTS_HPP
+#ifndef MOPS_SAP_HPP
+#define MOPS_SAP_HPP
 
 #include <cstddef>
 #include <cstdint>

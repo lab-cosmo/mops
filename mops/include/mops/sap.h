@@ -1,5 +1,5 @@
-#ifndef MOPS_SPARSE_ACCUMULATION_OF_PRODUCTS_H
-#define MOPS_SPARSE_ACCUMULATION_OF_PRODUCTS_H
+#ifndef MOPS_SAP_H
+#define MOPS_SAP_H
 
 #include "mops/exports.h"
 #include "mops/tensor.h"

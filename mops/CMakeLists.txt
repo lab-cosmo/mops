@@ -59,6 +59,10 @@ add_library(mops
     "src/sap/capi.cpp"
     "src/hpe/hpe.cpp"
     "src/hpe/capi.cpp"
+    "src/opsax/opsax.cpp"
+    "src/opsax/capi.cpp"
+    "src/sasax/sasax.cpp"
+    "src/sasax/capi.cpp"
 
     "include/mops.hpp"
     "include/mops.h"
@@ -69,6 +73,10 @@ add_library(mops
     "include/mops/sap.h"
     "include/mops/hpe.hpp"
     "include/mops/hpe.h"
+    "include/mops/opsax.hpp"
+    "include/mops/opsax.h"
+    "include/mops/sasax.hpp"
+    "include/mops/sasax.h"
 )
 
 if(CMAKE_CUDA_COMPILER)
