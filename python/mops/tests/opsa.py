@@ -30,6 +30,29 @@ def test_opsa_no_neighbors():
     actual = mops.outer_product_scatter_add(A, B, indices, np.max(indices) + 1)
     assert np.allclose(reference, actual)
 
+    # just checking that the jvp runs
+    grad_A, grad_B = mops.outer_product_scatter_add_vjp(
+        np.ones_like(actual),
+        A,
+        B,
+        indices,
+        compute_grad_A=True,
+    )
+
+    assert grad_A.shape == A.shape
+    assert grad_B is None
+
+    grad_A, grad_B = mops.outer_product_scatter_add_vjp(
+        np.ones_like(actual),
+        A,
+        B,
+        indices,
+        compute_grad_B=True,
+    )
+
+    assert grad_A is None
+    assert grad_B.shape == B.shape
+
 
 def test_opsa_wrong_type():
     message = (
