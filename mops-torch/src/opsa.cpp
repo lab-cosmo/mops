@@ -1,4 +1,5 @@
 #include "mops/torch/opsa.hpp"
+#include "mops/torch/utils.hpp"
 
 using namespace mops_torch;
 
@@ -10,24 +11,6 @@ torch::Tensor mops_torch::outer_product_scatter_add(
     int64_t output_size
 ) {
     return OuterProductScatterAdd::apply(A, B, indices_output, output_size)[0];
-}
-
-template <typename scalar_t>
-static mops::Tensor<scalar_t, 1> torch_to_mops_1d(torch::Tensor tensor) {
-    assert(tensor.sizes().size() == 1);
-    return {
-        tensor.data_ptr<scalar_t>(),
-        {static_cast<size_t>(tensor.size(0))},
-    };
-}
-
-template <typename scalar_t>
-static mops::Tensor<scalar_t, 2> torch_to_mops_2d(torch::Tensor tensor) {
-    assert(tensor.sizes().size() == 2);
-    return {
-        tensor.data_ptr<scalar_t>(),
-        {static_cast<size_t>(tensor.size(0)), static_cast<size_t>(tensor.size(1))},
-    };
 }
 
 std::vector<torch::Tensor> OuterProductScatterAdd::forward(
