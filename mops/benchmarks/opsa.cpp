@@ -12,16 +12,16 @@ int main() {
     auto B = std::vector<double>(60000 * 20);
     fill_vector_random_floats(B);
 
-    auto P = std::vector<int>(60000);
-    fill_vector_random_integers(P, 1000);
-    std::sort(P.begin(), P.end());
+    auto indices_output = std::vector<int>(60000);
+    fill_vector_random_integers(indices_output, 1000);
+    std::sort(indices_output.begin(), indices_output.end());
 
-    auto O = std::vector<double>(1000 * 13 * 20);
+    auto output = std::vector<double>(1000 * 13 * 20);
 
     for (int i = 0; i < 1000; i++) {
         mops::outer_product_scatter_add<double>(
-            {O.data(), {1000, 13, 20}}, {A.data(), {60000, 13}},
-            {B.data(), {60000, 20}}, {P.data(), {60000}});
+            {output.data(), {1000, 13, 20}}, {A.data(), {60000, 13}},
+            {B.data(), {60000, 20}}, {indices_output.data(), {60000}});
     }
 
     return 0;

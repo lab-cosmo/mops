@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
+from mops.reference_implementations import sparse_accumulation_of_products as ref_sap
 
 import mops
 from mops import sparse_accumulation_of_products as sap
-from mops.reference_implementations import sparse_accumulation_of_products as ref_sap
 
 np.random.seed(0xDEADBEEF)
 
@@ -32,7 +32,10 @@ def test_sap_wrong_type(valid_arguments):
     A, B, C, indices_A, indices_B, indices_output, output_size = valid_arguments
     A = A.astype(np.int32)
 
-    with pytest.raises(TypeError, match="Wrong dtype for A in sap: got int32"):
+    with pytest.raises(
+        TypeError,
+        match="Wrong dtype for A in " "sparse_accumulation_of_products: got int32",
+    ):
         sap(A, B, C, indices_A, indices_B, indices_output, output_size)
 
 
@@ -40,7 +43,11 @@ def test_sap_wrong_number_of_dimensions(valid_arguments):
     A, B, C, indices_A, indices_B, indices_output, output_size = valid_arguments
     A = A[..., np.newaxis]
 
-    with pytest.raises(ValueError, match="A must be a 2D array in sap, got a 3D array"):
+    with pytest.raises(
+        ValueError,
+        match="`A` must be a 2D array in "
+        "sparse_accumulation_of_products, got a 3D array instead",
+    ):
         sap(A, B, C, indices_A, indices_B, indices_output, output_size)
 
 

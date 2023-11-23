@@ -6,12 +6,15 @@ from .utils import null_mops_tensor_like, numpy_to_mops_tensor
 
 
 def outer_product_scatter_add(A, B, indices_output, output_size):
+    _check_opsa(A, B, indices_output, output_size)
     A = np.ascontiguousarray(A)
     B = np.ascontiguousarray(B)
     indices_output = np.ascontiguousarray(indices_output)
     indices_output = indices_output.astype(np.int32)
 
-    output = np.empty((output_size, A.shape[1], B.shape[1]), dtype=A.dtype)  # TODO: 3D arrays
+    output = np.empty(
+        (output_size, A.shape[1], B.shape[1]), dtype=A.dtype
+    )  # TODO: 3D arrays
 
     lib = _get_library()
 
@@ -38,14 +41,14 @@ def outer_product_scatter_add_vjp(
     grad_output,
     A,
     B,
-    P,
+    indices_output,
     compute_grad_A=False,
     compute_grad_B=False,
 ):
     grad_output = np.ascontiguousarray(grad_output)
     A = np.ascontiguousarray(A)
     B = np.ascontiguousarray(B)
-    indices_output = np.ascontiguousarray(P)
+    indices_output = np.ascontiguousarray(indices_output)
 
     if A.dtype != B.dtype or A.dtype != grad_output.dtype:
         raise TypeError("A, B and grad_output must have the same dtype")
@@ -98,9 +101,7 @@ def outer_product_scatter_add_vjp(
     function(
         mops_grad_A,
         mops_grad_B,
-        numpy_to_mops_tensor(
-            grad_output.reshape(-1, grad_output.shape[1] * grad_output.shape[2])
-        ),
+        numpy_to_mops_tensor(grad_output),
         numpy_to_mops_tensor(A),
         numpy_to_mops_tensor(B),
         numpy_to_mops_tensor(indices_output),

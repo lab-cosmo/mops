@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
+from mops.reference_implementations import outer_product_scatter_add as ref_opsa
 
 import mops
 from mops import outer_product_scatter_add as opsa
-from mops.reference_implementations import outer_product_scatter_add as ref_opsa
 
 np.random.seed(0xDEADBEEF)
 
@@ -62,7 +62,9 @@ def test_opsa_wrong_type(valid_arguments):
     A, B, indices_output, output_size = valid_arguments
     A = A.astype(np.int32)
 
-    with pytest.raises(TypeError, match="Wrong dtype for A in opsa: got int32"):
+    with pytest.raises(
+        TypeError, match="Wrong dtype for A in outer_product_scatter_add: got int32"
+    ):
         opsa(A, B, indices_output, output_size)
 
 
@@ -71,7 +73,9 @@ def test_opsa_wrong_number_of_dimensions(valid_arguments):
     A = A[..., np.newaxis]
 
     with pytest.raises(
-        ValueError, match="A must be a 2D array in opsa, got a 3D array"
+        ValueError,
+        match="`A` must be a 2D array in "
+        "outer_product_scatter_add, got a 3D array instead",
     ):
         opsa(A, B, indices_output, output_size)
 
@@ -94,7 +98,8 @@ def test_opsa_out_of_bounds(valid_arguments):
 
     with pytest.raises(
         mops.status.MopsError,
-        match="Index array indices_output in operation opsa contains elements up to 20; "
+        match="Index array indices_output in operation opsa "
+        "contains elements up to 20; "
         "this would cause out-of-bounds accesses. With the provided "
         "parameters, it can only contain elements up to 19",
     ):

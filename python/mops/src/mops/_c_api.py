@@ -161,7 +161,7 @@ def setup_functions(lib):
     lib.mops_outer_product_scatter_add_vjp_f32.argtypes = [
         mops_tensor_2d_f32_t,
         mops_tensor_2d_f32_t,
-        mops_tensor_2d_f32_t,
+        mops_tensor_3d_f32_t,
         mops_tensor_2d_f32_t,
         mops_tensor_2d_f32_t,
         mops_tensor_1d_i32_t,
@@ -171,7 +171,7 @@ def setup_functions(lib):
     lib.mops_outer_product_scatter_add_vjp_f64.argtypes = [
         mops_tensor_2d_f64_t,
         mops_tensor_2d_f64_t,
-        mops_tensor_2d_f64_t,
+        mops_tensor_3d_f64_t,
         mops_tensor_2d_f64_t,
         mops_tensor_2d_f64_t,
         mops_tensor_1d_i32_t,

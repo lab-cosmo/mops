@@ -31,6 +31,7 @@ void mops::sparse_accumulation_of_products(
         throw std::runtime_error("indices_output values should be sorted");
     }
 
+    scalar_t* o_ptr = output.data;
     scalar_t* c_ptr = C.data;
     int32_t* indices_A_ptr = indices_A.data;
     int32_t* indices_B_ptr = indices_B.data;

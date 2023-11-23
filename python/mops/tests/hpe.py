@@ -28,7 +28,10 @@ def test_hpe_wrong_type(valid_arguments):
     A, C, indices_A = valid_arguments
     A = A.astype(np.int32)
 
-    with pytest.raises(TypeError, match="Wrong dtype for A in hpe: got int32"):
+    with pytest.raises(
+        TypeError,
+        match="Wrong dtype for A in " "homogeneous_polynomial_evaluation: got int32",
+    ):
         hpe(A, C, indices_A)
 
 
@@ -36,7 +39,11 @@ def test_hpe_wrong_number_of_dimensions(valid_arguments):
     A, C, indices_A = valid_arguments
     A = A[..., np.newaxis]
 
-    with pytest.raises(ValueError, match="A must be a 2D array in hpe, got a 3D array"):
+    with pytest.raises(
+        ValueError,
+        match="`A` must be a 2D array in "
+        "homogeneous_polynomial_evaluation, got a 3D array instead",
+    ):
         hpe(A, C, indices_A)
 
 

@@ -6,6 +6,8 @@
 #include "mops/checks.hpp"
 #include "mops/utils.hpp"
 
+#include <iostream>
+
 
 template<typename scalar_t>
 void mops::outer_product_scatter_add(
@@ -44,16 +46,11 @@ template<typename scalar_t>
 void mops::outer_product_scatter_add_vjp(
     Tensor<scalar_t, 2> grad_A,
     Tensor<scalar_t, 2> grad_B,
-    Tensor<scalar_t, 2> grad_output,
+    Tensor<scalar_t, 3> grad_output,
     Tensor<scalar_t, 2> A,
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_sizes(grad_A, "grad_A", 0, grad_B, "grad_B", 0, "opsa");
-    check_sizes(grad_A, "grad_A", 1, output, "grad_output", 1, "opsa");
-    check_sizes(grad_B, "grad_B", 1, grad_output, "grad_output", 2, "opsa");
-    check_sizes(grad_A, "grad_A", 0, indices_output, "indices_output", 0, "opsa");
-    check_index_tensor(indices_output, "indices_output", grad_output.shape[0], "opsa");
 
     if (grad_A.data != nullptr) {
         if (A.shape[0] != grad_A.shape[0] || A.shape[1] != grad_A.shape[1]) {

@@ -19,19 +19,19 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     Tensor<int, 1> indices_output_1,
     Tensor<int, 1> indices_output_2
 ) {
-    check_sizes(A, "A", 0, B, "B", 0, "sasax");
-    check_sizes(W, "W", 0, output, "O", 0, "sasax");
-    check_sizes(B, "B", 1, W, "W", 2, "sasax");
-    check_sizes(C, "C", 0, indices_A, "indices_A", 0, "sasax");
-    check_sizes(C, "C", 0, indices_W_2, "indices_W_2", 0, "sasax");
-    check_sizes(C, "C", 0, indices_output_2, "indices_output_2", 0, "sasax");
-    check_sizes(A, "A", 0, indices_output_1, "indices_output_1", 0, "sasax");
-    check_sizes(A, "A", 0, indices_W_1, "indices_W_1", 0, "sasax");
-    check_index_tensor(indices_output_1, "indices_output_1", output.shape[0], "sasax");
-    check_index_tensor(indices_W_1, "indices_W_1", output.shape[0], "sasax");
-    check_index_tensor(indices_A, "indices_A", A.shape[1], "sasax");
-    check_index_tensor(indices_W_2, "indices_W_2", B.shape[1], "sasax");
-    check_index_tensor(indices_output_2, "indices_output_2", output.shape[1], "sasax");
+    check_sizes(A, "A", 0, B, "B", 0, "sasaw");
+    check_sizes(W, "W", 0, output, "O", 0, "sasaw");
+    check_sizes(B, "B", 1, W, "W", 2, "sasaw");
+    check_sizes(C, "C", 0, indices_A, "indices_A", 0, "sasaw");
+    check_sizes(C, "C", 0, indices_W_2, "indices_W_2", 0, "sasaw");
+    check_sizes(C, "C", 0, indices_output_2, "indices_output_2", 0, "sasaw");
+    check_sizes(A, "A", 0, indices_output_1, "indices_output_1", 0, "sasaw");
+    check_sizes(A, "A", 0, indices_W_1, "indices_W_1", 0, "sasaw");
+    check_index_tensor(indices_output_1, "indices_output_1", output.shape[0], "sasaw");
+    check_index_tensor(indices_W_1, "indices_W_1", output.shape[0], "sasaw");
+    check_index_tensor(indices_A, "indices_A", A.shape[1], "sasaw");
+    check_index_tensor(indices_W_2, "indices_W_2", B.shape[1], "sasaw");
+    check_index_tensor(indices_output_2, "indices_output_2", output.shape[1], "sasaw");
 
     scalar_t* o_ptr = output.data;
     scalar_t* a_ptr = A.data;
