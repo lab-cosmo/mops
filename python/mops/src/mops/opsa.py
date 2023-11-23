@@ -62,7 +62,7 @@ def outer_product_scatter_add_vjp(
     grad_output = np.ascontiguousarray(grad_output)
     A = np.ascontiguousarray(A)
     B = np.ascontiguousarray(B)
-    indices = np.ascontiguousarray(P)
+    indices_output = np.ascontiguousarray(P)
 
     if A.dtype != B.dtype or A.dtype != grad_output.dtype:
         raise TypeError("A, B and grad_output must have the same dtype")
@@ -73,17 +73,17 @@ def outer_product_scatter_add_vjp(
     if len(grad_output.shape) != 3:
         raise TypeError("grad_output must be 3-dimensional arrays")
 
-    if not np.can_cast(indices, np.int32, "same_kind"):
-        raise TypeError("indices must be an array of integers")
+    if not np.can_cast(indices_output, np.int32, "same_kind"):
+        raise TypeError("indices_output must be an array of integers")
 
-    indices = indices.astype(np.int32)
+    indices_output = indices_output.astype(np.int32)
 
-    if len(indices.shape) != 1:
-        raise TypeError("indices must be 1-dimensional arrays")
+    if len(indices_output.shape) != 1:
+        raise TypeError("indices_output must be 1-dimensional arrays")
 
-    if A.shape[0] != B.shape[0] or A.shape[0] != indices.shape[0]:
+    if A.shape[0] != B.shape[0] or A.shape[0] != indices_output.shape[0]:
         raise TypeError(
-            "A, B and indices must have the same number of elements on the "
+            "A, B and indices_output must have the same number of elements on the "
             "first dimension"
         )
 
@@ -120,7 +120,7 @@ def outer_product_scatter_add_vjp(
         ),
         numpy_to_mops_tensor(A),
         numpy_to_mops_tensor(B),
-        numpy_to_mops_tensor(indices),
+        numpy_to_mops_tensor(indices_output),
     )
 
     return grad_A, grad_B
