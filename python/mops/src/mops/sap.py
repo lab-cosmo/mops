@@ -1,24 +1,27 @@
 import numpy as np
 
 from ._c_lib import _get_library
-from .checks import check_sap
+from .checks import _check_sap
 from .utils import numpy_to_mops_tensor
 
 
-def sparse_accumulation_of_products(A, B, C, P_A, P_B, P_O, n_O):
-    check_sap(A, B, C, P_A, P_B, P_O, n_O)
-
+def sparse_accumulation_of_products(
+    A, B, C, indices_A, indices_B, indices_output, output_size
+):
     A = np.ascontiguousarray(A)
     B = np.ascontiguousarray(B)
     C = np.ascontiguousarray(C)
-    P_A = np.ascontiguousarray(P_A)
-    P_B = np.ascontiguousarray(P_B)
-    P_O = np.ascontiguousarray(P_O)
-    P_A = P_A.astype(np.int32)
-    P_B = P_B.astype(np.int32)
-    P_O = P_O.astype(np.int32)
+    indices_A = np.ascontiguousarray(indices_A)
+    indices_B = np.ascontiguousarray(indices_B)
+    indices_output = np.ascontiguousarray(indices_output)
 
-    O = np.empty((A.shape[0], n_O), dtype=A.dtype)
+    _check_sap(A, B, C, indices_A, indices_B, indices_output, output_size)
+
+    indices_A = indices_A.astype(np.int32)
+    indices_B = indices_B.astype(np.int32)
+    indices_output = indices_output.astype(np.int32)
+
+    output = np.empty((A.shape[0], output_size), dtype=A.dtype)
 
     lib = _get_library()
 
@@ -32,13 +35,13 @@ def sparse_accumulation_of_products(A, B, C, P_A, P_B, P_O, n_O):
         )
 
     function(
-        numpy_to_mops_tensor(O),
+        numpy_to_mops_tensor(output),
         numpy_to_mops_tensor(A),
         numpy_to_mops_tensor(B),
         numpy_to_mops_tensor(C),
-        numpy_to_mops_tensor(P_A),
-        numpy_to_mops_tensor(P_B),
-        numpy_to_mops_tensor(P_O),
+        numpy_to_mops_tensor(indices_A),
+        numpy_to_mops_tensor(indices_B),
+        numpy_to_mops_tensor(indices_output),
     )
 
-    return O
+    return output

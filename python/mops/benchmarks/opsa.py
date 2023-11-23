@@ -9,10 +9,11 @@ np.random.seed(0xDEADBEEF)
 A = np.random.rand(60000, 13)
 B = np.random.rand(60000, 20)
 
-indices = np.sort(np.random.randint(1000, size=(60000,)))
+output_size = 1000
+indices_output = np.sort(np.random.randint(output_size, size=(60000,)))
 
-ref_mean, ref_std = benchmark(lambda: ref_opsa(A, B, indices, np.max(indices) + 1))
-mean, std = benchmark(lambda: opsa(A, B, indices, np.max(indices) + 1))
+ref_mean, ref_std = benchmark(lambda: ref_opsa(A, B, indices_output, output_size))
+mean, std = benchmark(lambda: opsa(A, B, indices_output, output_size))
 
 print("Reference implementation:", format_mean_std(ref_mean, ref_std))
 print("Optimized implementation:", format_mean_std(mean, std))
