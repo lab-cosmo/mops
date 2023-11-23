@@ -21,7 +21,8 @@ indices_W_2 = np.random.randint(7, size=(900,))
 indices_output_2 = np.random.randint(output_size, size=(900,))
 
 # ref_mean, ref_std = benchmark(
-#     lambda: ref_sasaw(A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2, output_size), repeats=3, warmup=1
+#     lambda: ref_sasaw(A, B, C, W, indices_A, indices_W_1, indices_W_2,
+# indices_output_1, indices_output_2, output_size), repeats=3, warmup=1
 # )  # very slow
 mean, std = benchmark(
     lambda: sasaw(

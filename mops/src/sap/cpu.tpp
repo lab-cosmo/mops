@@ -41,6 +41,8 @@ void mops::sparse_accumulation_of_products(
     size_t size_second_dimension_o = output.shape[1];
     size_t c_size = C.shape[0];
 
+    std::fill(o_ptr, o_ptr+output.shape[0]*output.shape[1], static_cast<scalar_t>(0.0));
+
     for (size_t i = 0; i < size_first_dimension; i++) {
         size_t shift_first_dimension_a = i * size_second_dimension_a;
         size_t shift_first_dimension_b = i * size_second_dimension_b;
