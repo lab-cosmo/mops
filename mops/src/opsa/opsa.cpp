@@ -24,10 +24,10 @@ template void mops::outer_product_scatter_add_vjp<double>(
 #include "cuda.tpp"
 #else
 template <typename scalar_t>
-void mops::cuda::outer_product_scatter_add(Tensor<scalar_t, 2> output,
-                                           Tensor<scalar_t, 2> A,
-                                           Tensor<scalar_t, 2> B,
-                                           Tensor<int32_t, 1> indices_output) {
+void mops::cuda::outer_product_scatter_add(Tensor<scalar_t, 2>,
+                                           Tensor<scalar_t, 2>,
+                                           Tensor<scalar_t, 2>,
+                                           Tensor<int32_t, 1>) {
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
 
