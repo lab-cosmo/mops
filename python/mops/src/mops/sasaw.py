@@ -1,7 +1,7 @@
 import numpy as np
 
 from ._c_lib import _get_library
-from .checks import check_sasaw
+from .checks import _check_sasaw
 from .utils import numpy_to_mops_tensor
 
 
@@ -18,7 +18,7 @@ def sparse_accumulation_scatter_add_with_weights(
     output_size_1,
     output_size_2,
 ):
-    check_sasaw(
+    _check_sasaw(
         A,
         B,
         C,
@@ -47,7 +47,7 @@ def sparse_accumulation_scatter_add_with_weights(
     indices_output_1 = indices_output_1.astype(np.int32)
     indices_output_2 = indices_output_2.astype(np.int32)
 
-    output = np.zeros((output_size_1, output_size_2, A.shape[1]), dtype=A.dtype)
+    output = np.zeros((output_size_1, output_size_2, B.shape[1]), dtype=A.dtype)
 
     lib = _get_library()
 

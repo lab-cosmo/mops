@@ -106,8 +106,8 @@ def _check_opsaw(A, B, W, indices_W, indices_output, output_size):
 def _check_sasaw(
     A,
     B,
-    W,
     C,
+    W,
     indices_A,
     indices_W_1,
     indices_W_2,
@@ -121,8 +121,8 @@ def _check_sasaw(
     # Check dimensions
     _check_number_of_dimensions(A, 2, function, "A")
     _check_number_of_dimensions(B, 2, function, "B")
-    _check_number_of_dimensions(W, 3, function, "W")
     _check_number_of_dimensions(C, 1, function, "C")
+    _check_number_of_dimensions(W, 3, function, "W")
     _check_number_of_dimensions(indices_A, 1, function, "indices_A")
     _check_number_of_dimensions(indices_W_1, 1, function, "indices_W_1")
     _check_number_of_dimensions(indices_W_2, 1, function, "indices_W_2")
