@@ -30,15 +30,6 @@ static mops::Tensor<scalar_t, 2> torch_to_mops_2d(torch::Tensor tensor) {
     };
 }
 
-template <typename scalar_t>
-static mops::Tensor<scalar_t, 3> torch_to_mops_3d(torch::Tensor tensor) {
-    assert(tensor.sizes().size() == 3);
-    return {
-        tensor.data_ptr<scalar_t>(),
-        {static_cast<size_t>(tensor.size(0)), static_cast<size_t>(tensor.size(1)), static_cast<size_t>(tensor.size(2))},
-    };
-}
-
 std::vector<torch::Tensor> OuterProductScatterAdd::forward(
     torch::autograd::AutogradContext *ctx,
     torch::Tensor A,
@@ -82,7 +73,7 @@ std::vector<torch::Tensor> OuterProductScatterAdd::forward(
 
         AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "outer_product_scatter_add", [&](){
             mops::outer_product_scatter_add<scalar_t>(
-                torch_to_mops_3d<scalar_t>(output.reshape({-1, output.size(1), output.size(2)})),
+                torch_to_mops_2d<scalar_t>(output.reshape({-1, output.size(1) * output.size(2)})),
                 torch_to_mops_2d<scalar_t>(A),
                 torch_to_mops_2d<scalar_t>(B),
                 torch_to_mops_1d<int32_t>(indices_output)
@@ -135,7 +126,7 @@ std::vector<torch::Tensor> OuterProductScatterAdd::backward(
             mops::outer_product_scatter_add_vjp<scalar_t>(
                 mops_grad_A,
                 mops_grad_B,
-                torch_to_mops_3d<scalar_t>(grad_output),
+                torch_to_mops_2d<scalar_t>(grad_output.reshape({-1, grad_output.size(1) * grad_output.size(2)})),
                 torch_to_mops_2d<scalar_t>(A),
                 torch_to_mops_2d<scalar_t>(B),
                 torch_to_mops_1d<int32_t>(indices_output)
