@@ -11,14 +11,17 @@ np.random.seed(0xDEADBEEF)
 
 def test_opsax():
     A = np.random.rand(100, 10)
-    R = np.random.rand(100, 5)
-    X = np.random.rand(20, 5)
+    B = np.random.rand(100, 5)
+    n_O = 20
+    W = np.random.rand(n_O, 5)
 
-    I = np.random.randint(20, size=(100,))
-    J = np.random.randint(20, size=(100,))
+    indices_W = np.random.randint(20, size=(100,))
+    indices_output = np.random.randint(20, size=(100,))
 
-    reference = ref_opsax(A, R, X, I, J)
-    actual = opsax(A, R, X, I, J)
+    reference = ref_opsax(A, B, W, indices_W, indices_output, 20)
+    actual = opsax(A, B, W, indices_W, indices_output, 20)
+    print(reference)
+    print(actual)
     assert np.allclose(reference, actual)
 
 
