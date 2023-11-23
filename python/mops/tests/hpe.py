@@ -11,10 +11,10 @@ def test_hpe():
     
     A = np.random.rand(100, 20)
     C = np.random.rand(200)
-    P = np.random.randint(20, size=(200, 4))
+    indices_A = np.random.randint(20, size=(200, 4))
 
-    reference = ref_hpe(A, C, P)
-    actual = hpe(A, C, P)
+    reference = ref_hpe(A, C, indices_A)
+    actual = hpe(A, C, indices_A)
     assert np.allclose(reference, actual)
 
 
