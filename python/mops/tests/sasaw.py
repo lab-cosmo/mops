@@ -22,8 +22,32 @@ def test_sasax():
     indices_W_2 = np.random.randint(13, size=(50,))
     indices_output_2 = np.random.randint(output_size_2, size=(50,))
 
-    reference = ref_sasax(A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2, output_size_1, output_size_2)
-    actual = sasax(A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2, output_size_1, output_size_2)
+    reference = ref_sasax(
+        A,
+        B,
+        C,
+        W,
+        indices_A,
+        indices_W_1,
+        indices_W_2,
+        indices_output_1,
+        indices_output_2,
+        output_size_1,
+        output_size_2,
+    )
+    actual = sasax(
+        A,
+        B,
+        C,
+        W,
+        indices_A,
+        indices_W_1,
+        indices_W_2,
+        indices_output_1,
+        indices_output_2,
+        output_size_1,
+        output_size_2,
+    )
     print(reference)
     print(actual)
     assert np.allclose(reference, actual)
