@@ -122,13 +122,13 @@ OuterProductScatterAdd::backward(torch::autograd::AutogradContext *ctx,
                 auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (A.requires_grad()) {
                     grad_A = torch::zeros_like(A);
-                    mops_grad_A = torch_to_mops_3d<scalar_t>(grad_A);
+                    mops_grad_A = torch_to_mops_2d<scalar_t>(grad_A);
                 }
 
                 auto mops_grad_B = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (B.requires_grad()) {
                     grad_B = torch::zeros_like(B);
-                    mops_grad_B = torch_to_mops_3d<scalar_t>(grad_B);
+                    mops_grad_B = torch_to_mops_2d<scalar_t>(grad_B);
                 }
 
                 mops::outer_product_scatter_add_vjp<scalar_t>(
