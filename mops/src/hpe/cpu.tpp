@@ -46,7 +46,7 @@ void mops::homogeneous_polynomial_evaluation(
         for (long j = 0; j < n_monomials; j++) {
             scalar_t temp = c_ptr[j];
             for (uint8_t k = 0; k < indices_Aolynomial_order; k++) {
-                temp *= shifted_a_ptr[indices_A_ptr_temp[k]];
+                temp *= shifted_a_ptr[indices_A_ptr_row[k]];
             }
             result += temp;
             indices_A_ptr_temp += polynomial_order;
