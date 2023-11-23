@@ -1,5 +1,5 @@
-#ifndef MOPS_OPSAX_H
-#define MOPS_OPSAX_H
+#ifndef MOPS_OPSAW_H
+#define MOPS_OPSAW_H
 
 #include "mops/exports.h"
 #include "mops/tensor.h"

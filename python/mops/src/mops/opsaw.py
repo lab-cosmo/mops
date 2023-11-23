@@ -2,11 +2,11 @@ import numpy as np
 
 from ._c_lib import _get_library
 from .utils import numpy_to_mops_tensor
-from .checks import check_opsax
+from .checks import check_opsaw
 
 
 def outer_product_scatter_add_with_weights(A, B, W, indices_w, indices_output, output_size):
-    check_opsax(A, B, W, indices_w, indices_output, output_size)
+    check_opsaw(A, B, W, indices_w, indices_output, output_size)
 
     A = np.ascontiguousarray(A)
     B = np.ascontiguousarray(B)

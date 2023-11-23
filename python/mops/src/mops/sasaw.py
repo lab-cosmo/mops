@@ -2,11 +2,11 @@ import numpy as np
 
 from ._c_lib import _get_library
 from .utils import numpy_to_mops_tensor
-from .checks import check_sasax
+from .checks import check_sasaw
 
 
 def sparse_accumulation_scatter_add_with_weights(A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2, output_size_1, output_size_2):
-    check_sasax(A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2, output_size_1, output_size_2)
+    check_sasaw(A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2, output_size_1, output_size_2)
 
     A = np.ascontiguousarray(A)
     B = np.ascontiguousarray(B)
