@@ -13,9 +13,10 @@ template void mops::homogeneous_polynomial_evaluation<double>(
 #include "cuda.tpp"
 #else
 template <typename scalar_t>
-void mops::cuda::homogeneous_polynomial_evaluation(
-    Tensor<scalar_t, 1> output, Tensor<scalar_t, 2> A, Tensor<scalar_t, 1> C,
-    Tensor<int32_t, 2> indices_A) {
+void mops::cuda::homogeneous_polynomial_evaluation(Tensor<scalar_t, 1>,
+                                                   Tensor<scalar_t, 2>,
+                                                   Tensor<scalar_t, 1>,
+                                                   Tensor<int32_t, 2>) {
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
 
