@@ -57,6 +57,12 @@ add_library(mops
     "src/opsa/capi.cpp"
     "src/sap/sap.cpp"
     "src/sap/capi.cpp"
+    "src/hpe/hpe.cpp"
+    "src/hpe/capi.cpp"
+    "src/opsaw/opsaw.cpp"
+    "src/opsaw/capi.cpp"
+    "src/sasaw/sasaw.cpp"
+    "src/sasaw/capi.cpp"
 
     "include/mops.hpp"
     "include/mops.h"
@@ -65,6 +71,12 @@ add_library(mops
     "include/mops/opsa.h"
     "include/mops/sap.hpp"
     "include/mops/sap.h"
+    "include/mops/hpe.hpp"
+    "include/mops/hpe.h"
+    "include/mops/opsaw.hpp"
+    "include/mops/opsaw.h"
+    "include/mops/sasaw.hpp"
+    "include/mops/sasaw.h"
 )
 
 if(CMAKE_CUDA_COMPILER)

@@ -3,8 +3,8 @@ import numpy as np
 from .checks import _check_hpe, _check_opsa, _check_opsaw, _check_sap, _check_sasaw
 
 
-def homogeneous_polynomial_evaluation(C, A, indices_A):
-    _check_hpe(C, A, indices_A)
+def homogeneous_polynomial_evaluation(A, C, indices_A):
+    _check_hpe(A, C, indices_A)
 
     output = np.zeros((A.shape[0],), dtype=A.dtype)
     max_j = indices_A.shape[0]
@@ -45,7 +45,7 @@ def outer_product_scatter_add(A, B, indices_output, output_size):
 def outer_product_scatter_add_with_weights(
     A, B, W, indices_W, indices_output, output_size
 ):
-    _check_opsaw(A, B, W, indices_output, indices_W, output_size)
+    _check_opsaw(A, B, W, indices_W, indices_output, output_size)
 
     output = np.zeros((output_size, A.shape[1], B.shape[1]), dtype=A.dtype)
     max_e = indices_output.shape[0]

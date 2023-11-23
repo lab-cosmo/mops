@@ -1,5 +1,5 @@
-#ifndef MOPS_OUTER_PRODUCT_SCATTER_ADD_HPP
-#define MOPS_OUTER_PRODUCT_SCATTER_ADD_HPP
+#ifndef MOPS_OPSA_HPP
+#define MOPS_OPSA_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -58,7 +58,7 @@ namespace mops {
         Tensor<float, 2> grad_output,
         Tensor<float, 2> A,
         Tensor<float, 2> B,
-        Tensor<int32_t, 1> indexes
+        Tensor<int32_t, 1> indices_output
     );
 
     extern template void outer_product_scatter_add_vjp(
@@ -67,7 +67,7 @@ namespace mops {
         Tensor<double, 2> grad_output,
         Tensor<double, 2> A,
         Tensor<double, 2> B,
-        Tensor<int32_t, 1> indexes
+        Tensor<int32_t, 1> indices_output
     );
 
     namespace cuda {
