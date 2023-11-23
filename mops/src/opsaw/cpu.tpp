@@ -4,6 +4,7 @@
 #include <string>
 
 #include "mops/opsaw.hpp"
+#include "mops/checks.hpp"
 
 template<typename scalar_t>
 void mops::outer_product_scatter_add_with_weights(
@@ -14,6 +15,17 @@ void mops::outer_product_scatter_add_with_weights(
     Tensor<int32_t, 1> indices_W,
     Tensor<int32_t, 1> indices_output
 ) {
+
+    check_sizes(A, "A", 0, B, "B", 0, "opsax");
+    check_sizes(A, "A", 1, output, "O", 1, "opsax");
+    check_sizes(B, "B", 1, output, "O", 2, "opsax");
+    check_sizes(A, "A", 0, indices_output, "indices_output", 0, "opsax");
+    check_sizes(A, "A", 0, indices_W, "indices_W", 0, "opsax");
+    check_sizes(W, "W", 0, output, "O", 0, "opsax");
+    check_sizes(B, "B", 1, W, "W", 1, "opsax");
+    check_index_tensor(indices_output, "indices_output", output.shape[0], "opsax");
+    check_index_tensor(indices_W, "indices_W", output.shape[0], "opsax");
+
     scalar_t* o_ptr = output.data;
     scalar_t* a_ptr = A.data;
     scalar_t* r_ptr = B.data;

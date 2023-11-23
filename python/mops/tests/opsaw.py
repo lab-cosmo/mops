@@ -27,4 +27,4 @@ def test_opsax():
 
 def test_opsax_wrong_type():
     with pytest.raises(ValueError):
-        opsax(np.array([1]), 2, 3, 4, 5)
+        opsax(np.array([1]), 2, 3, 4, 5, 6)
