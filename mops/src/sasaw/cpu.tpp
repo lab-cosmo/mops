@@ -19,24 +19,24 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     Tensor<int, 1> indices_output_2
 ) {
     scalar_t* o_ptr = output.data;
-    scalar_t* a_ptr = tensor_a.data;
-    scalar_t* r_ptr = tensor_r.data;
-    scalar_t* x_ptr = tensor_x.data;
-    scalar_t* c_ptr = tensor_c.data;
-    int* i_ptr = tensor_i.data;
-    int* j_ptr = tensor_j.data;
-    int* m_1_ptr = tensor_m_1.data;
-    int* m_2_ptr = tensor_m_2.data;
-    int* m_3_ptr = tensor_m_3.data;
+    scalar_t* a_ptr = A.data;
+    scalar_t* r_ptr = B.data;
+    scalar_t* x_ptr = W.data;
+    scalar_t* c_ptr = C.data;
+    int* i_ptr = indices_output_1.data;
+    int* j_ptr = indices_W_1.data;
+    int* m_1_ptr = indices_A.data;
+    int* m_2_ptr = indices_W_2.data;
+    int* m_3_ptr = indices_output_2.data;
 
-    size_t E = tensor_i.shape[0];
-    size_t N = tensor_c.shape[0];
-    size_t size_a = tensor_a.shape[1];
-    size_t size_r = tensor_r.shape[1];
+    size_t E = indices_output_1.shape[0];
+    size_t N = C.shape[0];
+    size_t size_a = A.shape[1];
+    size_t size_r = B.shape[1];
     size_t o_shift_first_dim = output.shape[1] * output.shape[2];
-    size_t x_shift_first_dim = tensor_x.shape[1] * tensor_x.shape[2];
+    size_t x_shift_first_dim = W.shape[1] * W.shape[2];
     size_t o_shift_second_dim = output.shape[2];
-    size_t x_shift_second_dim = tensor_x.shape[2];
+    size_t x_shift_second_dim = W.shape[2];
 
     std::fill(o_ptr, o_ptr+output.shape[0]*o_shift_first_dim, static_cast<scalar_t>(0.0));
 

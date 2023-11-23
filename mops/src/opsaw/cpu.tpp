@@ -15,15 +15,15 @@ void mops::outer_product_scatter_add_with_weights(
     Tensor<int32_t, 1> indices_output
 ) {
     scalar_t* o_ptr = output.data;
-    scalar_t* a_ptr = tensor_a.data;
-    scalar_t* r_ptr = tensor_r.data;
-    scalar_t* x_ptr = tensor_x.data;
-    int* i_ptr = tensor_i.data;
-    int* j_ptr = tensor_j.data;
+    scalar_t* a_ptr = A.data;
+    scalar_t* r_ptr = B.data;
+    scalar_t* x_ptr = W.data;
+    int* i_ptr = indices_output.data;
+    int* j_ptr = indices_W.data;
 
-    size_t E = tensor_i.shape[0];
-    size_t size_a = tensor_a.shape[1];
-    size_t size_r = tensor_r.shape[1];
+    size_t E = indices_W.shape[0];
+    size_t size_a = A.shape[1];
+    size_t size_r = B.shape[1];
 
     std::fill(o_ptr, o_ptr+output.shape[0]*output.shape[1]*output.shape[2], static_cast<scalar_t>(0.0));
 
