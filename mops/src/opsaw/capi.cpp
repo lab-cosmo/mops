@@ -1,7 +1,7 @@
 #include "mops/capi.hpp"
 
-#include "mops/opsax.hpp"
-#include "mops/opsax.h"
+#include "mops/opsaw.hpp"
+#include "mops/opsaw.h"
 
 static size_t checked_cast(int64_t value) {
     if (value < 0 || static_cast<uint64_t>(value) > static_cast<uint64_t>(SIZE_MAX)) {

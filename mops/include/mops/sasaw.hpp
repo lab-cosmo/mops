@@ -1,5 +1,5 @@
-#ifndef MOPS_SASAX_HPP
-#define MOPS_SASAX_HPP
+#ifndef MOPS_SASAW_HPP
+#define MOPS_SASAW_HPP
 
 #include <cstddef>
 #include <cstdint>

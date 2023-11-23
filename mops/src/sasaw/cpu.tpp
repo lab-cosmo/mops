@@ -1,9 +1,12 @@
+#include <cassert>
+#include <algorithm>
 #include <stdexcept>
+#include <string>
 
-#include "mops/sasax.hpp"
+#include "mops/sasaw.hpp"
 
 template<typename scalar_t>
-void mops::cuda::sparse_accumulation_scatter_add_with_weights(
+void mops::sparse_accumulation_scatter_add_with_weights(
     Tensor<scalar_t, 3> output,
     Tensor<scalar_t, 2> A,
     Tensor<scalar_t, 2> B,
@@ -15,5 +18,5 @@ void mops::cuda::sparse_accumulation_scatter_add_with_weights(
     Tensor<int, 1> indices_output_1,
     Tensor<int, 1> indices_output_2
 ) {
-    throw std::runtime_error("CUDA implementation does not exist yet");
+    // TODO
 }
