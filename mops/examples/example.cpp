@@ -12,22 +12,22 @@ int main() {
 
     auto A = std::vector<double>(100 * 100);
     auto C = std::vector<double>(100);
-    auto P = std::vector<int>(100 * 4);
-    auto O = std::vector<double>(100);
+    auto indices_A = std::vector<int>(100 * 4);
+    auto output = std::vector<double>(100);
 
     mops::homogeneous_polynomial_evaluation<double>(
-        {O.data(), {100}}, {A.data(), {100, 100}}, {C.data(), {100}},
-        {P.data(), {100, 4}});
+        {output.data(), {100}}, {A.data(), {100, 100}}, {C.data(), {100}},
+        {indices_A.data(), {100, 4}});
 
     // Another example, with a different function:
     A = std::vector<double>(100 * 10);
     auto B = std::vector<double>(100 * 20);
-    P = std::vector<int>(100);
-    O = std::vector<double>(10 * 10 * 20);
+    auto indices_output = std::vector<int>(100);
+    output = std::vector<double>(10 * 10 * 20);
 
     mops::outer_product_scatter_add<double>(
-        {O.data(), {10, 10, 20}}, {A.data(), {100, 10}}, {B.data(), {100, 20}},
-        {P.data(), {100}});
+        {output.data(), {10, 10, 20}}, {A.data(), {100, 10}},
+        {B.data(), {100, 20}}, {indices_output.data(), {100}});
 
     return 0;
 }

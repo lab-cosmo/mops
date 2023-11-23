@@ -12,28 +12,55 @@ namespace mops {
 /// TODO
 template <typename scalar_t>
 void MOPS_EXPORT outer_product_scatter_add(Tensor<scalar_t, 3> output,
-                                           Tensor<scalar_t, 2> tensor_a,
-                                           Tensor<scalar_t, 2> tensor_b,
-                                           Tensor<int32_t, 1> indexes);
+                                           Tensor<scalar_t, 2> A,
+                                           Tensor<scalar_t, 2> B,
+                                           Tensor<int32_t, 1> indices_output);
 
 // these templates will be precompiled and provided in the mops library
-extern template void outer_product_scatter_add(Tensor<float, 3> output,
-                                               Tensor<float, 2> tensor_a,
-                                               Tensor<float, 2> tensor_b,
-                                               Tensor<int32_t, 1> indexes);
+extern template void
+outer_product_scatter_add(Tensor<float, 3> output, Tensor<float, 2> A,
+                          Tensor<float, 2> B,
+                          Tensor<int32_t, 1> indices_output);
 
-extern template void outer_product_scatter_add(Tensor<double, 3> output,
-                                               Tensor<double, 2> tensor_a,
-                                               Tensor<double, 2> tensor_b,
-                                               Tensor<int32_t, 1> indexes);
+extern template void
+outer_product_scatter_add(Tensor<double, 3> output, Tensor<double, 2> A,
+                          Tensor<double, 2> B,
+                          Tensor<int32_t, 1> indices_output);
+
+/// Vector-Jacobian product for `outer_product_scatter_add` (i.e. backward
+/// propagation of gradients)
+///
+/// `grad_A` and `grad_B` are the outputs of this function, and should have
+/// the same shape as `A` and `B`. If you don't need one of these gradients,
+/// set the corresponding `.data` pointer to `NULL`.
+///
+/// `grad_output` should have the same shape as `output` in
+/// `outer_product_scatter_add`.
+template <typename scalar_t>
+void MOPS_EXPORT outer_product_scatter_add_vjp(
+    Tensor<scalar_t, 2> grad_A, Tensor<scalar_t, 2> grad_B,
+    Tensor<scalar_t, 3> grad_output, Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B, Tensor<int32_t, 1> indices_output);
+
+// these templates will be precompiled and provided in the mops library
+extern template void
+outer_product_scatter_add_vjp(Tensor<float, 2> grad_A, Tensor<float, 2> grad_B,
+                              Tensor<float, 3> grad_output, Tensor<float, 2> A,
+                              Tensor<float, 2> B,
+                              Tensor<int32_t, 1> indices_output);
+
+extern template void outer_product_scatter_add_vjp(
+    Tensor<double, 2> grad_A, Tensor<double, 2> grad_B,
+    Tensor<double, 3> grad_output, Tensor<double, 2> A, Tensor<double, 2> B,
+    Tensor<int32_t, 1> indices_output);
 
 namespace cuda {
 /// CUDA version of mops::outer_product_scatter_add
 template <typename scalar_t>
 void MOPS_EXPORT outer_product_scatter_add(Tensor<scalar_t, 3> output,
-                                           Tensor<scalar_t, 2> tensor_a,
-                                           Tensor<scalar_t, 2> tensor_b,
-                                           Tensor<int32_t, 1> indexes);
+                                           Tensor<scalar_t, 2> A,
+                                           Tensor<scalar_t, 2> B,
+                                           Tensor<int32_t, 1> indices_output);
 } // namespace cuda
 } // namespace mops
 

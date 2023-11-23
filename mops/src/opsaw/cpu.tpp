@@ -6,7 +6,7 @@
 #include <numeric>
 #include <vector>
 
-#include "mops/opsax.hpp"
+#include "mops/opsaw.hpp"
 #include "mops/checks.hpp"
 #include "mops/utils.hpp"
 
@@ -14,32 +14,33 @@
 template<typename scalar_t>
 void mops::outer_product_scatter_add_with_weights(
     Tensor<scalar_t, 3> output,
-    Tensor<scalar_t, 2> tensor_a,
-    Tensor<scalar_t, 2> tensor_r,
-    Tensor<scalar_t, 2> tensor_x,
-    Tensor<int32_t, 1> tensor_i,
-    Tensor<int32_t, 1> tensor_j
+    Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B,
+    Tensor<scalar_t, 2> W,
+    Tensor<int32_t, 1> indices_W,
+    Tensor<int32_t, 1> indices_output
 ) {
-    check_sizes(tensor_a, "A", 0, tensor_r, "R", 0, "opsax");
-    check_sizes(tensor_a, "A", 1, output, "O", 1, "opsax");
-    check_sizes(tensor_r, "R", 1, output, "O", 2, "opsax");
-    check_sizes(tensor_a, "A", 0, tensor_i, "I", 0, "opsax");
-    check_sizes(tensor_a, "A", 0, tensor_j, "J", 0, "opsax");
-    check_sizes(tensor_x, "X", 0, output, "O", 0, "opsax");
-    check_sizes(tensor_r, "R", 1, tensor_x, "X", 1, "opsax");
-    check_index_tensor(tensor_i, "I", output.shape[0], "opsax");
-    check_index_tensor(tensor_j, "J", output.shape[0], "opsax");
+
+    check_sizes(A, "A", 0, B, "B", 0, "opsaw");
+    check_sizes(A, "A", 1, output, "O", 1, "opsaw");
+    check_sizes(B, "B", 1, output, "O", 2, "opsaw");
+    check_sizes(A, "A", 0, indices_output, "indices_output", 0, "opsaw");
+    check_sizes(A, "A", 0, indices_W, "indices_W", 0, "opsaw");
+    check_sizes(W, "W", 0, output, "O", 0, "opsaw");
+    check_sizes(B, "B", 1, W, "W", 1, "opsaw");
+    check_index_tensor(indices_output, "indices_output", output.shape[0], "opsaw");
+    check_index_tensor(indices_W, "indices_W", output.shape[0], "opsaw");
 
     scalar_t* o_ptr = output.data;
-    scalar_t* a_ptr = tensor_a.data;
-    scalar_t* r_ptr = tensor_r.data;
-    scalar_t* x_ptr = tensor_x.data;
-    int* i_ptr = tensor_i.data;
-    int* j_ptr = tensor_j.data;
+    scalar_t* a_ptr = A.data;
+    scalar_t* r_ptr = B.data;
+    scalar_t* x_ptr = W.data;
+    int* i_ptr = indices_output.data;
+    int* j_ptr = indices_W.data;
 
-    size_t E = tensor_i.shape[0];
-    size_t size_a = tensor_a.shape[1];
-    size_t size_r = tensor_r.shape[1];
+    size_t E = indices_W.shape[0];
+    size_t size_a = A.shape[1];
+    size_t size_r = B.shape[1];
 
     std::vector<int32_t> first_occurrences = find_first_occurrences(i_ptr, E, output.shape[0]);
     std::fill(o_ptr, o_ptr+output.shape[0]*output.shape[1]*output.shape[2], static_cast<scalar_t>(0.0));
