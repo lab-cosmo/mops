@@ -50,6 +50,8 @@ void mops::outer_product_scatter_add(
         throw std::runtime_error("`indices_output` values should be sorted");
     }
 
+    std::fill(output.data, output.data+output.shape[0]*output.shape[1], static_cast<scalar_t>(0.0));
+
     for (size_t i=0; i<A.shape[0]; i++) {
         auto i_output = indices_output.data[i];
         assert(i_output < output.shape[0]);

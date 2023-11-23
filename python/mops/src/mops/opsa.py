@@ -28,7 +28,7 @@ def outer_product_scatter_add(A, B, indices_output, output_size):
 
     indices_output = indices_output.astype(np.int32)
 
-    output = np.zeros((output_size, A.shape[1] * B.shape[1]), dtype=A.dtype)
+    output = np.empty((output_size, A.shape[1] * B.shape[1]), dtype=A.dtype)
 
     lib = _get_library()
 
@@ -88,14 +88,14 @@ def outer_product_scatter_add_vjp(
         )
 
     if compute_grad_A:
-        grad_A = np.zeros_like(A)
+        grad_A = np.empty_like(A)
         mops_grad_A = numpy_to_mops_tensor(grad_A)
     else:
         grad_A = None
         mops_grad_A = null_mops_tensor_like(A)
 
     if compute_grad_B:
-        grad_B = np.zeros_like(B)
+        grad_B = np.empty_like(B)
         mops_grad_B = numpy_to_mops_tensor(grad_B)
     else:
         grad_B = None
