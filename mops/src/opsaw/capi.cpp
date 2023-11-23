@@ -15,20 +15,20 @@ static size_t checked_cast(int64_t value) {
 
 extern "C" int mops_outer_product_scatter_add_with_weights_f32(
     mops_tensor_3d_f32_t output,
-    mops_tensor_2d_f32_t tensor_a,
-    mops_tensor_2d_f32_t tensor_r,
-    mops_tensor_2d_f32_t tensor_x,
-    mops_tensor_1d_i32_t tensor_i,
-    mops_tensor_1d_i32_t tensor_j
+    mops_tensor_2d_f32_t A,
+    mops_tensor_2d_f32_t B,
+    mops_tensor_2d_f32_t W,
+    mops_tensor_1d_i32_t indices_W,
+    mops_tensor_1d_i32_t indices_output
 ) {
     MOPS_CATCH_EXCEPTIONS(
         mops::outer_product_scatter_add_with_weights<float>(
             {output.data, {checked_cast(output.shape[0]), checked_cast(output.shape[1]), checked_cast(output.shape[2])}},
-            {tensor_a.data, {checked_cast(tensor_a.shape[0]), checked_cast(tensor_a.shape[1])}},
-            {tensor_r.data, {checked_cast(tensor_r.shape[0]), checked_cast(tensor_r.shape[1])}},
-            {tensor_x.data, {checked_cast(tensor_x.shape[0]), checked_cast(tensor_x.shape[1])}},
-            {tensor_i.data, {checked_cast(tensor_i.shape[0])}},
-            {tensor_j.data, {checked_cast(tensor_j.shape[0])}}
+            {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
+            {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
+            {W.data, {checked_cast(W.shape[0]), checked_cast(W.shape[1])}},
+            {indices_W.data, {checked_cast(indices_W.shape[0])}},
+            {indices_output.data, {checked_cast(indices_output.shape[0])}}
         );
     );
 }
@@ -36,20 +36,20 @@ extern "C" int mops_outer_product_scatter_add_with_weights_f32(
 
 extern "C" int mops_outer_product_scatter_add_with_weights_f64(
     mops_tensor_3d_f64_t output,
-    mops_tensor_2d_f64_t tensor_a,
-    mops_tensor_2d_f64_t tensor_r,
-    mops_tensor_2d_f64_t tensor_x,
-    mops_tensor_1d_i32_t tensor_i,
-    mops_tensor_1d_i32_t tensor_j
+    mops_tensor_2d_f64_t A,
+    mops_tensor_2d_f64_t B,
+    mops_tensor_2d_f64_t W,
+    mops_tensor_1d_i32_t indices_W,
+    mops_tensor_1d_i32_t indices_output
 ) {
     MOPS_CATCH_EXCEPTIONS(
         mops::outer_product_scatter_add_with_weights<double>(
             {output.data, {checked_cast(output.shape[0]), checked_cast(output.shape[1]), checked_cast(output.shape[2])}},
-            {tensor_a.data, {checked_cast(tensor_a.shape[0]), checked_cast(tensor_a.shape[1])}},
-            {tensor_r.data, {checked_cast(tensor_r.shape[0]), checked_cast(tensor_r.shape[1])}},
-            {tensor_x.data, {checked_cast(tensor_x.shape[0]), checked_cast(tensor_x.shape[1])}},
-            {tensor_i.data, {checked_cast(tensor_i.shape[0])}},
-            {tensor_j.data, {checked_cast(tensor_j.shape[0])}}
+            {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
+            {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
+            {W.data, {checked_cast(W.shape[0]), checked_cast(W.shape[1])}},
+            {indices_W.data, {checked_cast(indices_W.shape[0])}},
+            {indices_output.data, {checked_cast(indices_output.shape[0])}}
         );
     );
 }
@@ -57,20 +57,20 @@ extern "C" int mops_outer_product_scatter_add_with_weights_f64(
 
 extern "C" int mops_cuda_outer_product_scatter_add_with_weights_f32(
     mops_tensor_3d_f32_t output,
-    mops_tensor_2d_f32_t tensor_a,
-    mops_tensor_2d_f32_t tensor_r,
-    mops_tensor_2d_f32_t tensor_x,
-    mops_tensor_1d_i32_t tensor_i,
-    mops_tensor_1d_i32_t tensor_j
+    mops_tensor_2d_f32_t A,
+    mops_tensor_2d_f32_t B,
+    mops_tensor_2d_f32_t W,
+    mops_tensor_1d_i32_t indices_W,
+    mops_tensor_1d_i32_t indices_output
 ) {
     MOPS_CATCH_EXCEPTIONS(
         mops::cuda::outer_product_scatter_add_with_weights<float>(
             {output.data, {checked_cast(output.shape[0]), checked_cast(output.shape[1]), checked_cast(output.shape[2])}},
-            {tensor_a.data, {checked_cast(tensor_a.shape[0]), checked_cast(tensor_a.shape[1])}},
-            {tensor_r.data, {checked_cast(tensor_r.shape[0]), checked_cast(tensor_r.shape[1])}},
-            {tensor_x.data, {checked_cast(tensor_x.shape[0]), checked_cast(tensor_x.shape[1])}},
-            {tensor_i.data, {checked_cast(tensor_i.shape[0])}},
-            {tensor_j.data, {checked_cast(tensor_j.shape[0])}}
+            {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
+            {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
+            {W.data, {checked_cast(W.shape[0]), checked_cast(W.shape[1])}},
+            {indices_W.data, {checked_cast(indices_W.shape[0])}},
+            {indices_output.data, {checked_cast(indices_output.shape[0])}}
         );
     );
 }
@@ -78,20 +78,20 @@ extern "C" int mops_cuda_outer_product_scatter_add_with_weights_f32(
 
 extern "C" int mops_cuda_outer_product_scatter_add_with_weights_f64(
     mops_tensor_3d_f64_t output,
-    mops_tensor_2d_f64_t tensor_a,
-    mops_tensor_2d_f64_t tensor_r,
-    mops_tensor_2d_f64_t tensor_x,
-    mops_tensor_1d_i32_t tensor_i,
-    mops_tensor_1d_i32_t tensor_j
+    mops_tensor_2d_f64_t A,
+    mops_tensor_2d_f64_t B,
+    mops_tensor_2d_f64_t W,
+    mops_tensor_1d_i32_t indices_W,
+    mops_tensor_1d_i32_t indices_output
 ) {
     MOPS_CATCH_EXCEPTIONS(
         mops::cuda::outer_product_scatter_add_with_weights<double>(
             {output.data, {checked_cast(output.shape[0]), checked_cast(output.shape[1]), checked_cast(output.shape[2])}},
-            {tensor_a.data, {checked_cast(tensor_a.shape[0]), checked_cast(tensor_a.shape[1])}},
-            {tensor_r.data, {checked_cast(tensor_r.shape[0]), checked_cast(tensor_r.shape[1])}},
-            {tensor_x.data, {checked_cast(tensor_x.shape[0]), checked_cast(tensor_x.shape[1])}},
-            {tensor_i.data, {checked_cast(tensor_i.shape[0])}},
-            {tensor_j.data, {checked_cast(tensor_j.shape[0])}}
+            {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
+            {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
+            {W.data, {checked_cast(W.shape[0]), checked_cast(W.shape[1])}},
+            {indices_W.data, {checked_cast(indices_W.shape[0])}},
+            {indices_output.data, {checked_cast(indices_output.shape[0])}}
         );
     );
 }
