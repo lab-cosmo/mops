@@ -38,11 +38,11 @@ void mops::outer_product_scatter_add(
         int32_t index_start = first_occurrences[i_output];
         int32_t index_end = first_occurrences[i_output + 1];
         for (int32_t index_inputs = index_start; index_inputs < index_end; index_inputs++) {
-            for (size_t a_j = 0; a_j < tensor_a.shape[1]; a_j++) {
-                for (size_t b_j = 0; b_j < tensor_b.shape[1]; b_j++) {
-                    auto output_index = tensor_b.shape[1] * (tensor_a.shape[1] * i_output + a_j) + b_j;
-                    output.data[output_index] += tensor_a.data[tensor_a.shape[1] * index_inputs + a_j]
-                                            * tensor_b.data[tensor_b.shape[1] * index_inputs + b_j];
+            for (size_t a_j = 0; a_j < A.shape[1]; a_j++) {
+                for (size_t b_j = 0; b_j < B.shape[1]; b_j++) {
+                    auto output_index = B.shape[1] * (A.shape[1] * i_output + a_j) + b_j;
+                    output.data[output_index] += A.data[A.shape[1] * index_inputs + a_j]
+                                            * B.data[B.shape[1] * index_inputs + b_j];
                 }
             }
         }
@@ -101,5 +101,6 @@ void mops::outer_product_scatter_add_vjp(
                 grad_B.data[grad_index] += sum;
             }
         }
+    }
 
 }
