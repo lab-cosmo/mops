@@ -11,8 +11,8 @@ void mops::outer_product_scatter_add_with_weights(
     Tensor<scalar_t, 2> A,
     Tensor<scalar_t, 2> B,
     Tensor<scalar_t, 2> W,
-    Tensor<int32_t, 1> i,
-    Tensor<int32_t, 1> j
+    Tensor<int32_t, 1> indices_W,
+    Tensor<int32_t, 1> indices_output
 ) {
     scalar_t* o_ptr = output.data;
     scalar_t* a_ptr = tensor_a.data;
