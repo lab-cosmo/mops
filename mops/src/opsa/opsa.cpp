@@ -20,8 +20,8 @@ template void mops::outer_product_scatter_add_vjp<float>(
     Tensor<float, 2> grad_B,
     Tensor<float, 2> grad_output,
     Tensor<float, 2> A,
-    Tensor<float, 2> tensor_b,
-    Tensor<int32_t, 1> indexe
+    Tensor<float, 2> B,
+    Tensor<int32_t, 1> indices_output
 );
 
 template void mops::outer_product_scatter_add_vjp<double>(
