@@ -1,11 +1,13 @@
 import numpy as np
 
 from ._c_lib import _get_library
-from .utils import numpy_to_mops_tensor
 from .checks import check_opsaw
+from .utils import numpy_to_mops_tensor
 
 
-def outer_product_scatter_add_with_weights(A, B, W, indices_w, indices_output, output_size):
+def outer_product_scatter_add_with_weights(
+    A, B, W, indices_w, indices_output, output_size
+):
     check_opsaw(A, B, W, indices_w, indices_output, output_size)
 
     A = np.ascontiguousarray(A)
@@ -25,7 +27,9 @@ def outer_product_scatter_add_with_weights(A, B, W, indices_w, indices_output, o
     elif A.dtype == np.float64:
         function = lib.mops_outer_product_scatter_add_with_weights_f64
     else:
-        raise TypeError("Unsupported dtype detected. outputnly float32 and float64 are supported")
+        raise TypeError(
+            "Unsupported dtype detected. outputnly float32 and float64 are supported"
+        )
 
     function(
         numpy_to_mops_tensor(output),
