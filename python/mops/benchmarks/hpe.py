@@ -11,10 +11,10 @@ np.random.seed(0xDEADBEEF)
 
 A = np.random.rand(1000, 2000)
 C = np.random.rand(100000)
-P = np.random.randint(2000, size=(100000, 4))
+indices_A = np.random.randint(2000, size=(100000, 4))
 
-# ref_mean, ref_std = benchmark(lambda: ref_hpe(A, C, P))
-mean, std = benchmark(lambda: hpe(A, C, P))
+# ref_mean, ref_std = benchmark(lambda: ref_hpe(A, C, indices_A))
+mean, std = benchmark(lambda: hpe(A, C, indices_A))
 
 # print("Reference implementation:", format_mean_std(ref_mean, ref_std))
 print("Optimized implementation:", format_mean_std(mean, std))
