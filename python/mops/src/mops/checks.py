@@ -37,9 +37,9 @@ def _check_hpe(A, C, indices_A):
     # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
-    _check_array_dtype(C, np.floating, function, "C")
     _check_array_dtype(A, np.floating, function, "A")
-    _check_array_dtype(indices_A, np.integer, function, "P")
+    _check_array_dtype(C, np.floating, function, "C")
+    _check_array_dtype(indices_A, np.integer, function, "indices_A")
 
 
 def _check_sap(A, B, C, indices_A, indices_B, indices_output, output_size):
@@ -135,6 +135,7 @@ def _check_sasaw(
     # Check types
     _check_array_dtype(A, np.floating, function, "A")
     _check_array_dtype(B, np.floating, function, "R")
+    _check_array_dtype(C, np.floating, function, "X")
     _check_array_dtype(W, np.floating, function, "X")
     _check_array_dtype(indices_A, np.integer, function, "indices_A")
     _check_array_dtype(indices_W_1, np.integer, function, "indices_W_1")

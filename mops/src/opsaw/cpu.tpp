@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "mops/opsax.hpp"
+#include "mops/opsaw.hpp"
 
 template<typename scalar_t>
 void mops::outer_product_scatter_add_with_weights(

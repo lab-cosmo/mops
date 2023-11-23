@@ -45,12 +45,13 @@ void MOPS_EXPORT outer_product_scatter_add_vjp(
 extern template void
 outer_product_scatter_add_vjp(Tensor<float, 2> grad_A, Tensor<float, 2> grad_B,
                               Tensor<float, 2> grad_output, Tensor<float, 2> A,
-                              Tensor<float, 2> B, Tensor<int32_t, 1> indexes);
+                              Tensor<float, 2> B,
+                              Tensor<int32_t, 1> indices_output);
 
 extern template void outer_product_scatter_add_vjp(
     Tensor<double, 2> grad_A, Tensor<double, 2> grad_B,
     Tensor<double, 2> grad_output, Tensor<double, 2> A, Tensor<double, 2> B,
-    Tensor<int32_t, 1> indexes);
+    Tensor<int32_t, 1> indices_output);
 
 namespace cuda {
 /// CUDA version of mops::outer_product_scatter_add

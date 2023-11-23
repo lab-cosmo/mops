@@ -45,8 +45,7 @@ def outer_product_scatter_add(A, B, indices_output, output_size):
 def outer_product_scatter_add_with_weights(
     A, B, W, indices_output, indices_W, output_size
 ):
-    # TODO: reorder
-    _check_opsaw(A, B, W, indices_output, indices_W, output_size)
+    _check_opsaw(A, B, W, indices_W, indices_output, output_size)
 
     output = np.zeros((output_size, A.shape[1], B.shape[1]), dtype=A.dtype)
     max_e = indices_output.shape[0]

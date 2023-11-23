@@ -13,10 +13,14 @@ def test_opsa():
     A = np.random.rand(100, 20)
     B = np.random.rand(100, 5)
 
-    indices = np.sort(np.random.randint(10, size=(100,)))
+    indices_output = np.sort(np.random.randint(10, size=(100,)))
 
-    reference = ref.outer_product_scatter_add(A, B, indices, np.max(indices) + 1)
-    actual = mops.outer_product_scatter_add(A, B, indices, np.max(indices) + 1)
+    reference = ref.outer_product_scatter_add(
+        A, B, indices_output, np.max(indices_output) + 1
+    )
+    actual = mops.outer_product_scatter_add(
+        A, B, indices_output, np.max(indices_output) + 1
+    )
     assert np.allclose(reference, actual)
 
 
@@ -24,12 +28,16 @@ def test_opsa_no_neighbors():
     A = np.random.rand(100, 20)
     B = np.random.rand(100, 5)
 
-    indices = np.sort(np.random.randint(10, size=(100,)))
+    indices_output = np.sort(np.random.randint(10, size=(100,)))
     # substitute all 1s by 2s so as to test the no-neighbor case
-    indices[indices == 1] = 2
+    indices_output[indices_output == 1] = 2
 
-    reference = ref.outer_product_scatter_add(A, B, indices, np.max(indices) + 1)
-    actual = mops.outer_product_scatter_add(A, B, indices, np.max(indices) + 1)
+    reference = ref.outer_product_scatter_add(
+        A, B, indices_output, np.max(indices_output) + 1
+    )
+    actual = mops.outer_product_scatter_add(
+        A, B, indices_output, np.max(indices_output) + 1
+    )
     assert np.allclose(reference, actual)
 
     # just checking that the jvp runs
@@ -37,7 +45,7 @@ def test_opsa_no_neighbors():
         np.ones_like(actual),
         A,
         B,
-        indices,
+        indices_output,
         compute_grad_A=True,
     )
 
@@ -48,7 +56,7 @@ def test_opsa_no_neighbors():
         np.ones_like(actual),
         A,
         B,
-        indices,
+        indices_output,
         compute_grad_B=True,
     )
 
