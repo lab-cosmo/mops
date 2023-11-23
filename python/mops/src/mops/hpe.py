@@ -1,8 +1,8 @@
 import numpy as np
 
 from ._c_lib import _get_library
-from .utils import numpy_to_mops_tensor
 from .checks import _check_hpe
+from .utils import numpy_to_mops_tensor
 
 
 def homogeneous_polynomial_evaluation(A, C, indices_A):
@@ -22,7 +22,9 @@ def homogeneous_polynomial_evaluation(A, C, indices_A):
     elif A.dtype == np.float64:
         function = lib.mops_homogeneous_polynomial_evaluation_f64
     else:
-        raise TypeError("Unsupported dtype detected. Only float32 and float64 are supported")
+        raise TypeError(
+            "Unsupported dtype detected. Only float32 and float64 are supported"
+        )
 
     function(
         numpy_to_mops_tensor(O),
