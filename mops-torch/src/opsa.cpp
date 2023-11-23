@@ -119,13 +119,13 @@ OuterProductScatterAdd::backward(torch::autograd::AutogradContext *ctx,
     if (A.device().is_cpu()) {
         AT_DISPATCH_FLOATING_TYPES(
             A.scalar_type(), "outer_product_scatter_add_vjp", [&]() {
-                auto mops_grad_A = mops::Tensor<scalar_t, 3>{nullptr, {0, 0, 0}};
+                auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (A.requires_grad()) {
                     grad_A = torch::zeros_like(A);
                     mops_grad_A = torch_to_mops_3d<scalar_t>(grad_A);
                 }
 
-                auto mops_grad_B = mops::Tensor<scalar_t, 3>{nullptr, {0, 0, 0}};
+                auto mops_grad_B = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (B.requires_grad()) {
                     grad_B = torch::zeros_like(B);
                     mops_grad_B = torch_to_mops_3d<scalar_t>(grad_B);
