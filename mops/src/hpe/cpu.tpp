@@ -49,7 +49,7 @@ void mops::homogeneous_polynomial_evaluation(
                 temp *= shifted_a_ptr[indices_A_ptr_row[k]];
             }
             result += temp;
-            indices_A_ptr_temp += polynomial_order;
+            indices_A_ptr_row += polynomial_order;
         }
         o_ptr[i] = result;
     }
