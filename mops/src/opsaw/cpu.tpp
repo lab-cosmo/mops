@@ -8,11 +8,11 @@
 template<typename scalar_t>
 void mops::outer_product_scatter_add_with_weights(
     Tensor<scalar_t, 3> output,
-    Tensor<scalar_t, 2> tensor_a,
-    Tensor<scalar_t, 2> tensor_r,
-    Tensor<scalar_t, 2> tensor_x,
-    Tensor<int32_t, 1> tensor_i,
-    Tensor<int32_t, 1> tensor_j
+    Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B,
+    Tensor<scalar_t, 2> W,
+    Tensor<int32_t, 1> i,
+    Tensor<int32_t, 1> j
 ) {
     scalar_t* o_ptr = output.data;
     scalar_t* a_ptr = tensor_a.data;
