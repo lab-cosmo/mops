@@ -55,3 +55,15 @@ void mops::homogeneous_polynomial_evaluation(
     }
 
 }
+
+
+template<typename scalar_t>
+void mops::homogeneous_polynomial_evaluation_vjp(
+    Tensor<scalar_t, 2> grad_A,
+    Tensor<scalar_t, 1> grad_output,
+    Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 1> C,
+    Tensor<int32_t, 2> indices_A
+) {
+    throw std::runtime_error("Not implemented");
+}
