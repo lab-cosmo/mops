@@ -7,7 +7,6 @@ torch.manual_seed(0xDEADBEEF)
 
 
 def test_opsa():
-
     A = torch.rand(100, 20)
     B = torch.rand(100, 5)
 
