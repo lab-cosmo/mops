@@ -56,10 +56,20 @@ set_target_properties(mops PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 add_library(mops_torch SHARED
     "src/register.cpp"
+    "src/hpe.cpp"
     "src/opsa.cpp"
+    "src/sap.cpp"
+    "src/opsaw.cpp"
+    "src/sasaw.cpp"
+    "src/utils.cpp"
 
     "include/mops/torch.hpp"
+    "include/mops/torch/hpe.hpp"
     "include/mops/torch/opsa.hpp"
+    "include/mops/torch/sap.hpp"
+    "include/mops/torch/opsaw.hpp"
+    "include/mops/torch/sasaw.hpp"
+    "include/mops/torch/utils.hpp"
 )
 
 if(CMAKE_CUDA_COMPILER)
