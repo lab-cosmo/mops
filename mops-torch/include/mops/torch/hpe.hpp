@@ -1,5 +1,5 @@
-#ifndef MOPS_TORCH_OPSA_H
-#define MOPS_TORCH_OPSA_H
+#ifndef MOPS_TORCH_HPE_H
+#define MOPS_TORCH_HPE_H
 
 #include <torch/script.h>
 
@@ -8,21 +8,19 @@
 namespace mops_torch {
 
 /// TODO
-torch::Tensor outer_product_scatter_add(
+torch::Tensor homogeneous_polynomial_evaluation(
     torch::Tensor A,
-    torch::Tensor B,
-    torch::Tensor indices_output,
-    int64_t output_size
+    torch::Tensor C,
+    torch::Tensor indices_A
 );
 
-class OuterProductScatterAdd: public torch::autograd::Function<mops_torch::OuterProductScatterAdd> {
+class HomogeneousPolynomialEvaluation: public torch::autograd::Function<mops_torch::HomogeneousPolynomialEvaluation> {
 public:
     static torch::Tensor forward(
         torch::autograd::AutogradContext *ctx,
         torch::Tensor A,
-        torch::Tensor B,
-        torch::Tensor indices_output,
-        int64_t output_size
+        torch::Tensor C,
+        torch::Tensor indices_A
     );
 
     static std::vector<torch::Tensor> backward(
@@ -31,6 +29,6 @@ public:
     );
 };
 
-} // namespace mops_torch
+}
 
 #endif
