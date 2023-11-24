@@ -57,16 +57,16 @@ void mops::sparse_accumulation_of_products(
     int32_t* p_b_ptr = indices_B.data;
     int32_t* p_o_ptr = indices_output.data;
 
-    long size_first_dimension = A.shape[0];
-    long size_second_dimension_a = A.shape[1];
-    long size_second_dimension_b = B.shape[1];
-    long size_second_dimension_o = output.shape[1];
-    long c_size = C.shape[0];
+    size_t size_first_dimension = A.shape[0];
+    size_t size_second_dimension_a = A.shape[1];
+    size_t size_second_dimension_b = B.shape[1];
+    size_t size_second_dimension_o = output.shape[1];
+    size_t c_size = C.shape[0];
 
     for (int i = 0; i < size_first_dimension; i++) {
-        long shift_first_dimension_a = i * size_second_dimension_a;
-        long shift_first_dimension_b = i * size_second_dimension_b;
-        long shift_first_dimension_o = i * size_second_dimension_o;
+        size_t shift_first_dimension_a = i * size_second_dimension_a;
+        size_t shift_first_dimension_b = i * size_second_dimension_b;
+        size_t shift_first_dimension_o = i * size_second_dimension_o;
         for (int j = 0; j < c_size; j++) {
             o_ptr[shift_first_dimension_o + p_o_ptr[j]] +=
             c_ptr[j] * a_ptr[shift_first_dimension_a + p_a_ptr[j]] * b_ptr[shift_first_dimension_b + p_b_ptr[j]];
@@ -87,5 +87,52 @@ void mops::sparse_accumulation_of_products_vjp(
     Tensor<int32_t, 1> indices_B,
     Tensor<int32_t, 1> indices_output
 ) {
-    // TODO
+    // TODO: checks
+
+    bool calculate_grad_A = grad_A.data != nullptr;
+    bool calculate_grad_B = grad_B.data != nullptr;
+
+    if (calculate_grad_A || calculate_grad_B) {
+
+        scalar_t* a_ptr = A.data;
+        scalar_t* b_ptr = B.data;
+        scalar_t* grad_o_ptr = grad_output.data;
+        scalar_t* c_ptr = C.data;
+        int32_t* p_a_ptr = indices_A.data;
+        int32_t* p_b_ptr = indices_B.data;
+        int32_t* p_o_ptr = indices_output.data;
+        scalar_t* grad_a_ptr = grad_A.data;
+        scalar_t* grad_b_ptr = grad_B.data;
+
+        size_t size_first_dimension = A.shape[0];
+        size_t size_second_dimension_a = A.shape[1];
+        size_t size_second_dimension_b = B.shape[1];
+        size_t size_second_dimension_o = grad_output.shape[1];
+        size_t c_size = C.shape[0];
+
+        scalar_t* grad_output_row = grad_o_ptr; 
+        scalar_t* grad_a_row = grad_a_ptr;
+        scalar_t* grad_b_row = grad_b_ptr;
+        scalar_t* a_row = a_ptr;
+        scalar_t* b_row = b_ptr;
+        for (int i = 0; i < size_first_dimension; i++){
+            for (int j = 0; j < c_size; j++) {                
+                scalar_t grad_output_j = grad_output_row[p_o_ptr[j]];
+                scalar_t common_factor = grad_output_j * c_ptr[j];
+                // These will have to be if constexpr
+                if (calculate_grad_A) {
+                    grad_a_row[p_a_ptr[j]] += common_factor * b_row[p_b_ptr[j]];
+                }
+                if (calculate_grad_B) {
+                    grad_b_row[p_b_ptr[j]] += common_factor * a_row[p_a_ptr[j]];
+                }
+            }
+            grad_output_row += size_second_dimension_o;
+            grad_a_row += size_second_dimension_a;
+            grad_b_row += size_second_dimension_b;
+            a_row += size_second_dimension_a;
+            b_row += size_second_dimension_b;
+        }
+    }
+
 }
