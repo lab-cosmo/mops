@@ -34,7 +34,17 @@ torch::Tensor SparseAccumulationScatterAddWithWeights::forward(
     torch::Tensor indices_output_2,
     int64_t output_size
 ) {
-    // TODO: checks
+    check_all_same_device({A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2});
+    check_all_same_dtype({A, B, C, W});
+    check_number_of_dimensions(A, 2, "A", "sparse_accumulation_scatter_add_with_weights");
+    check_number_of_dimensions(B, 2, "B", "sparse_accumulation_scatter_add_with_weights");
+    check_number_of_dimensions(W, 3, "W", "sparse_accumulation_scatter_add_with_weights");
+    check_number_of_dimensions(indices_A, 1, "indices_A", "sparse_accumulation_scatter_add_with_weights");
+    check_number_of_dimensions(indices_W_1, 1, "indices_W_1", "sparse_accumulation_scatter_add_with_weights");
+    check_number_of_dimensions(indices_W_2, 1, "indices_W_2", "sparse_accumulation_scatter_add_with_weights");
+    check_number_of_dimensions(indices_output_1, 1, "indices_output_1", "sparse_accumulation_scatter_add_with_weights");
+    check_number_of_dimensions(indices_output_2, 1, "indices_output_2", "sparse_accumulation_scatter_add_with_weights");
+    // Shape consistency checks are performed inside mops::sparse_accumulation_scatter_add_with_weights
 
     torch::Tensor output;
     if (A.device().is_cpu()) {
@@ -89,6 +99,12 @@ std::vector<torch::Tensor> SparseAccumulationScatterAddWithWeights::backward(
     if (!grad_output.is_contiguous()) {
         throw std::runtime_error("expected contiguous grad_output");
     }
+
+    if (C.requires_grad()) C10_THROW_ERROR(
+        ValueError,
+        "gradients with respect to C are not supported "
+        "in sparse_accumulation_scatter_add_with_weights"
+    );
 
     auto grad_A = torch::Tensor();
     auto grad_B = torch::Tensor();

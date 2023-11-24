@@ -26,7 +26,14 @@ torch::Tensor SparseAccumulationOfProducts::forward(
     torch::Tensor indices_output,
     int64_t output_size
 ) {
-    // TODO: checks
+    check_all_same_device({A, B, C, indices_A, indices_B, indices_output});
+    check_all_same_dtype({A, B, C});
+    check_number_of_dimensions(A, 2, "A", "sparse_accumulation_of_products");
+    check_number_of_dimensions(B, 2, "B", "sparse_accumulation_of_products");
+    check_number_of_dimensions(indices_A, 1, "indices_A", "sparse_accumulation_of_products");
+    check_number_of_dimensions(indices_B, 1, "indices_B", "sparse_accumulation_of_products");
+    check_number_of_dimensions(indices_output, 1, "indices_output", "sparse_accumulation_of_products");
+    // Shape consistency checks are performed inside mops::sparse_accumulation_of_products
 
     torch::Tensor output;
     if (A.device().is_cpu()) {
@@ -62,7 +69,7 @@ torch::Tensor SparseAccumulationOfProducts::forward(
 std::vector<torch::Tensor> SparseAccumulationOfProducts::backward(
     torch::autograd::AutogradContext *ctx,
     std::vector<torch::Tensor> grad_outputs
-) {
+) {    
     auto saved_variables = ctx->get_saved_variables();
     auto A = saved_variables[0];
     auto B = saved_variables[1];
@@ -75,6 +82,12 @@ std::vector<torch::Tensor> SparseAccumulationOfProducts::backward(
     if (!grad_output.is_contiguous()) {
         throw std::runtime_error("expected contiguous grad_output");
     }
+
+    if (C.requires_grad()) C10_THROW_ERROR(
+        ValueError,
+        "gradients with respect to C are not supported "
+        "in sparse_accumulation_of_products"
+    );
 
     auto grad_A = torch::Tensor();
     auto grad_B = torch::Tensor();

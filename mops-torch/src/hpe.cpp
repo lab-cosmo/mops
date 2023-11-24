@@ -18,7 +18,12 @@ torch::Tensor HomogeneousPolynomialEvaluation::forward(
     torch::Tensor C,
     torch::Tensor indices_A
 ) {
-    // TODO: check tensor shapes
+    check_all_same_device({A, C, indices_A});
+    check_all_same_dtype({A, C});
+    check_number_of_dimensions(A, 2, "A", "homogeneous_polynomial_evaluation");
+    check_number_of_dimensions(C, 1, "C", "homogeneous_polynomial_evaluation");
+    check_number_of_dimensions(indices_A, 2, "indices_A", "homogeneous_polynomial_evaluation");
+    // Shape consistency checks are performed inside mops::homogeneous_polynomial_evaluation
 
     torch::Tensor output;
     if (A.device().is_cpu()) {
@@ -62,8 +67,13 @@ std::vector<torch::Tensor> HomogeneousPolynomialEvaluation::backward(
         throw std::runtime_error("expected contiguous grad_output");
     }
 
-    auto grad_A = torch::Tensor();
+    if (C.requires_grad()) C10_THROW_ERROR(
+        ValueError,
+        "gradients with respect to C are not supported "
+        "in homogeneous_polynomial_evaluation"
+    );
 
+    auto grad_A = torch::Tensor();
     if (A.device().is_cpu()) {
         AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "homogeneous_polynomial_evaluation_vjp", [&](){
             auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};

@@ -61,6 +61,7 @@ add_library(mops_torch SHARED
     "src/sap.cpp"
     "src/opsaw.cpp"
     "src/sasaw.cpp"
+    "src/utils.cpp"
 
     "include/mops/torch.hpp"
     "include/mops/torch/hpe.hpp"

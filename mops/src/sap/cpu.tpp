@@ -119,13 +119,8 @@ void mops::sparse_accumulation_of_products_vjp(
             for (int j = 0; j < c_size; j++) {                
                 scalar_t grad_output_j = grad_output_row[p_o_ptr[j]];
                 scalar_t common_factor = grad_output_j * c_ptr[j];
-                // These will have to be if constexpr
-                if (calculate_grad_A) {
-                    grad_a_row[p_a_ptr[j]] += common_factor * b_row[p_b_ptr[j]];
-                }
-                if (calculate_grad_B) {
-                    grad_b_row[p_b_ptr[j]] += common_factor * a_row[p_a_ptr[j]];
-                }
+                if (calculate_grad_A) grad_a_row[p_a_ptr[j]] += common_factor * b_row[p_b_ptr[j]];
+                if (calculate_grad_B) grad_b_row[p_b_ptr[j]] += common_factor * a_row[p_a_ptr[j]];
             }
             grad_output_row += size_second_dimension_o;
             grad_a_row += size_second_dimension_a;
