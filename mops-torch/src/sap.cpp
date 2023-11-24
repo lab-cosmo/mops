@@ -13,10 +13,10 @@ torch::Tensor mops_torch::sparse_accumulation_of_products(
     torch::Tensor indices_output,
     int64_t output_size
 ) {
-    return SparseAccumulationOfProducts::apply(A, B, C, indices_A, indices_B, indices_output, output_size)[0];
+    return SparseAccumulationOfProducts::apply(A, B, C, indices_A, indices_B, indices_output, output_size);
 }
 
-std::vector<torch::Tensor> SparseAccumulationOfProducts::forward(
+torch::Tensor SparseAccumulationOfProducts::forward(
     torch::autograd::AutogradContext *ctx,
     torch::Tensor A,
     torch::Tensor B,

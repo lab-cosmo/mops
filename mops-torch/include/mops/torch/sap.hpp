@@ -20,7 +20,7 @@ torch::Tensor sparse_accumulation_of_products(
 
 class SparseAccumulationOfProducts: public torch::autograd::Function<mops_torch::SparseAccumulationOfProducts> {
 public:
-    static std::vector<torch::Tensor> forward(
+    static torch::Tensor forward(
         torch::autograd::AutogradContext *ctx,
         torch::Tensor A,
         torch::Tensor B,

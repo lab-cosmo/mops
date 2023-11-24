@@ -10,10 +10,10 @@ torch::Tensor mops_torch::outer_product_scatter_add(
     torch::Tensor indices_output,
     int64_t output_size
 ) {
-    return OuterProductScatterAdd::apply(A, B, indices_output, output_size)[0];
+    return OuterProductScatterAdd::apply(A, B, indices_output, output_size);
 }
 
-std::vector<torch::Tensor> OuterProductScatterAdd::forward(
+torch::Tensor OuterProductScatterAdd::forward(
     torch::autograd::AutogradContext *ctx,
     torch::Tensor A,
     torch::Tensor B,

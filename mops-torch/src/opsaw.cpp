@@ -11,10 +11,10 @@ torch::Tensor mops_torch::outer_product_scatter_add_with_weights(
     torch::Tensor indices_W,
     torch::Tensor indices_output
 ) {
-    return OuterProductScatterAddWithWeights::apply(A, B, W, indices_W, indices_output)[0];
+    return OuterProductScatterAddWithWeights::apply(A, B, W, indices_W, indices_output);
 }
 
-std::vector<torch::Tensor> OuterProductScatterAddWithWeights::forward(
+torch::Tensor OuterProductScatterAddWithWeights::forward(
     torch::autograd::AutogradContext *ctx,
     torch::Tensor A,
     torch::Tensor B,

@@ -18,10 +18,10 @@ torch::Tensor mops_torch::sparse_accumulation_scatter_add_with_weights(
 ) {
     return SparseAccumulationScatterAddWithWeights::apply(
         A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2, output_size
-    )[0];
+    );
 }
 
-std::vector<torch::Tensor> SparseAccumulationScatterAddWithWeights::forward(
+torch::Tensor SparseAccumulationScatterAddWithWeights::forward(
     torch::autograd::AutogradContext *ctx,
     torch::Tensor A,
     torch::Tensor B,

@@ -17,7 +17,7 @@ torch::Tensor outer_product_scatter_add(
 
 class OuterProductScatterAdd: public torch::autograd::Function<mops_torch::OuterProductScatterAdd> {
 public:
-    static std::vector<torch::Tensor> forward(
+    static torch::Tensor forward(
         torch::autograd::AutogradContext *ctx,
         torch::Tensor A,
         torch::Tensor B,

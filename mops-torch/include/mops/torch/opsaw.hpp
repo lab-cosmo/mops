@@ -18,7 +18,7 @@ torch::Tensor outer_product_scatter_add_with_weights(
 
 class OuterProductScatterAddWithWeights: public torch::autograd::Function<mops_torch::OuterProductScatterAddWithWeights> {
 public:
-    static std::vector<torch::Tensor> forward(
+    static torch::Tensor forward(
         torch::autograd::AutogradContext *ctx,
         torch::Tensor A,
         torch::Tensor B,

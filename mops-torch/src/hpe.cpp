@@ -9,10 +9,10 @@ torch::Tensor mops_torch::homogeneous_polynomial_evaluation(
     torch::Tensor C,
     torch::Tensor indices_A
 ) {
-    return HomogeneousPolynomialEvaluation::apply(A, C, indices_A)[0];
+    return HomogeneousPolynomialEvaluation::apply(A, C, indices_A);
 }
 
-std::vector<torch::Tensor> HomogeneousPolynomialEvaluation::forward(
+torch::Tensor HomogeneousPolynomialEvaluation::forward(
     torch::autograd::AutogradContext *ctx,
     torch::Tensor A,
     torch::Tensor C,
