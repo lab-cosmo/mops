@@ -19,8 +19,6 @@ def test_opsax():
 
     reference = ref_opsax(A, B, W, indices_W, indices_output)
     actual = opsax(A, B, W, indices_W, indices_output)
-    print(reference)
-    print(actual)
     assert np.allclose(reference, actual)
 
 
