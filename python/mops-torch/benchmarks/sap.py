@@ -5,18 +5,19 @@ from benchmark import benchmark, format_mean_std
 torch.manual_seed(0xDEADBEEF)
 
 
-A = torch.rand(1000, 20, requires_grad=True)
-B = torch.rand(1000, 5, requires_grad=True)
-C = torch.rand(100)
-
-P_A = torch.sort(torch.randint(20, size=(100,), dtype=torch.int32))[0]
-P_B = torch.sort(torch.randint(5, size=(100,), dtype=torch.int32))[0]
-n_O = 50
-P_O = torch.sort(torch.randint(n_O, size=(100,), dtype=torch.int32))[0]
+A = torch.rand(32000, 13, requires_grad=True)
+B = torch.rand(32000, 7, requires_grad=True)
+C = torch.rand(900)
+indices_A = torch.randint(13, size=(900,), dtype=torch.int32)
+indices_B = torch.randint(7, size=(900,), dtype=torch.int32)
+n_output = 100
+indices_output = torch.randint(n_output, size=(900,), dtype=torch.int32)
 
 mean_fwd, std_fwd, mean_bwd, std_bwd = benchmark(
     lambda: torch.sum(
-        mops.torch.sparse_accumulation_of_products(A, B, C, P_A, P_B, P_O, n_O)
+        mops.torch.sparse_accumulation_of_products(
+            A, B, C, indices_A, indices_B, indices_output, n_output
+        )
     ),
     repeats=10,
     warmup=10,

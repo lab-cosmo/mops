@@ -6,8 +6,9 @@ torch.manual_seed(0xDEADBEEF)
 
 
 A = torch.rand(1000, 300, requires_grad=True)
-C = torch.rand(2000)
-indices_A = torch.randint(300, size=(2000, 4), dtype=torch.int32)
+C = torch.rand(10000)
+indices_A = torch.randint(300, size=(10000, 4), dtype=torch.int32)
+
 
 mean_fwd, std_fwd, mean_bwd, std_bwd = benchmark(
     lambda: torch.sum(mops.torch.homogeneous_polynomial_evaluation(A, C, indices_A)),
