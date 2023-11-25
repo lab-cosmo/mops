@@ -71,10 +71,7 @@ std::vector<torch::Tensor> SparseAccumulationOfProducts::backward(
     auto indices_B = saved_variables[4];
     auto indices_output = saved_variables[5];
 
-    auto grad_output = grad_outputs[0];
-    if (!grad_output.is_contiguous()) {
-        throw std::runtime_error("expected contiguous grad_output");
-    }
+    auto grad_output = grad_outputs[0].contiguous();
 
     if (C.requires_grad())
         C10_THROW_ERROR(ValueError,

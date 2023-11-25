@@ -61,10 +61,7 @@ OuterProductScatterAdd::backward(torch::autograd::AutogradContext *ctx,
     auto B = saved_variables[1];
     auto indices_output = saved_variables[2];
 
-    auto grad_output = grad_outputs[0];
-    if (!grad_output.is_contiguous()) {
-        throw std::runtime_error("expected contiguous grad_output");
-    }
+    auto grad_output = grad_outputs[0].contiguous();
 
     auto grad_A = torch::Tensor();
     auto grad_B = torch::Tensor();
