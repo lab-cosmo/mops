@@ -30,7 +30,7 @@ torch::Tensor OuterProductScatterAddWithWeights::forward(
 
     torch::Tensor output;
     if (A.device().is_cpu()) {
-        output = torch::zeros(
+        output = torch::empty(
             {W.size(0), A.size(1), B.size(1)},
             torch::TensorOptions().dtype(A.scalar_type()).device(A.device()));
         assert(output.is_contiguous());
@@ -80,19 +80,19 @@ std::vector<torch::Tensor> OuterProductScatterAddWithWeights::backward(
             [&]() {
                 auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (A.requires_grad()) {
-                    grad_A = torch::zeros_like(A);
+                    grad_A = torch::empty_like(A);
                     mops_grad_A = torch_to_mops_2d<scalar_t>(grad_A);
                 }
 
                 auto mops_grad_B = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (B.requires_grad()) {
-                    grad_B = torch::zeros_like(B);
+                    grad_B = torch::empty_like(B);
                     mops_grad_B = torch_to_mops_2d<scalar_t>(grad_B);
                 }
 
                 auto mops_grad_W = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (W.requires_grad()) {
-                    grad_W = torch::zeros_like(W);
+                    grad_W = torch::empty_like(W);
                     mops_grad_W = torch_to_mops_2d<scalar_t>(grad_W);
                 }
 

@@ -24,7 +24,7 @@ torch::Tensor OuterProductScatterAdd::forward(
 
     torch::Tensor output;
     if (A.device().is_cpu()) {
-        output = torch::zeros(
+        output = torch::empty(
             {output_size, A.size(1), B.size(1)},
             torch::TensorOptions().dtype(A.scalar_type()).device(A.device()));
 
@@ -70,13 +70,13 @@ OuterProductScatterAdd::backward(torch::autograd::AutogradContext *ctx,
             A.scalar_type(), "outer_product_scatter_add_vjp", [&]() {
                 auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (A.requires_grad()) {
-                    grad_A = torch::zeros_like(A);
+                    grad_A = torch::empty_like(A);
                     mops_grad_A = torch_to_mops_2d<scalar_t>(grad_A);
                 }
 
                 auto mops_grad_B = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (B.requires_grad()) {
-                    grad_B = torch::zeros_like(B);
+                    grad_B = torch::empty_like(B);
                     mops_grad_B = torch_to_mops_2d<scalar_t>(grad_B);
                 }
 

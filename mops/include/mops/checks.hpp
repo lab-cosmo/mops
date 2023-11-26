@@ -46,4 +46,18 @@ void check_index_tensor(mops::Tensor<int32_t, N_DIMS> tensor, std::string name,
                                  "indices");
 }
 
+template <typename T, size_t N_DIMS>
+void check_same_shape(mops::Tensor<T, N_DIMS> tensor_1, std::string name_1,
+                      mops::Tensor<T, N_DIMS> tensor_2, std::string name_2,
+                      std::string operation) {
+    for (size_t i_dim = 0; i_dim < N_DIMS; i_dim++)
+        if (tensor_1.shape[i_dim] != tensor_2.shape[i_dim])
+            throw std::runtime_error(
+                "Dimension mismatch: the sizes of " + name_1 + " and " +
+                name_2 + " must match in " + operation + ", but they are " +
+                std::to_string(tensor_1.shape[i_dim]) + " and " +
+                std::to_string(tensor_2.shape[i_dim]) + " respectively" +
+                " along dimension " + std::to_string(i_dim));
+}
+
 #endif

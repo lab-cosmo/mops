@@ -24,7 +24,7 @@ HomogeneousPolynomialEvaluation::forward(torch::autograd::AutogradContext *ctx,
 
     torch::Tensor output;
     if (A.device().is_cpu()) {
-        output = torch::zeros(
+        output = torch::empty(
             {A.size(0)},
             torch::TensorOptions().dtype(A.scalar_type()).device(A.device()));
         assert(output.is_contiguous());
@@ -72,7 +72,7 @@ std::vector<torch::Tensor> HomogeneousPolynomialEvaluation::backward(
             A.scalar_type(), "homogeneous_polynomial_evaluation_vjp", [&]() {
                 auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (A.requires_grad()) {
-                    grad_A = torch::zeros_like(A);
+                    grad_A = torch::empty_like(A);
                     mops_grad_A = torch_to_mops_2d<scalar_t>(grad_A);
                 }
 

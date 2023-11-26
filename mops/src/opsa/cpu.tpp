@@ -22,22 +22,33 @@ void mops::outer_product_scatter_add(
     check_sizes(A, "A", 0, indices_output, "indices_output", 0, "opsa");
     check_index_tensor(indices_output, "indices_output", output.shape[0], "opsa");
 
-    // if (!std::is_sorted(indices_output.data, indices_output.data + indices_output.shape[0])) {
-    //     throw std::runtime_error("`indices_output` values should be sorted");
-    // }
+    size_t size_output = output.shape[0];
+    size_t size_output_inner = output.shape[1] * output.shape[2];
+    size_t size_a = A.shape[1];
+    size_t size_b = B.shape[1];
 
+    scalar_t* a_ptr = A.data;
+    scalar_t* b_ptr = B.data;
+    scalar_t* output_ptr = output.data;
+
+    // For each index in the first dimension of the outputs,
+    // get what indices in the inputs should write to it
     std::vector<std::vector<size_t>> write_list = get_write_list(indices_output);
 
     std::fill(output.data, output.data+output.shape[0]*output.shape[1]*output.shape[2], static_cast<scalar_t>(0.0));
 
     #pragma omp parallel for 
-    for (size_t i_output=0; i_output<output.shape[0]; i_output++) {
-        for (size_t index_inputs : write_list[i_output]) {
-            for (size_t a_j=0; a_j<A.shape[1]; a_j++) {
-                for (size_t b_j=0; b_j<B.shape[1]; b_j++) {
-                    auto output_index = B.shape[1] * (A.shape[1] * i_output + a_j) + b_j;
-                    output.data[output_index] += A.data[A.shape[1] * index_inputs + a_j]
-                                            * B.data[B.shape[1] * index_inputs + b_j];
+    for (size_t i=0; i < size_output; i++) {
+        scalar_t* output_ptr_i = output_ptr + i * size_output_inner;
+        // iterate over input indices that will write to the output index i
+        for (size_t i_inputs : write_list[i]) {
+            scalar_t* a_ptr_i_inputs = a_ptr + size_a * i_inputs;
+            scalar_t* b_ptr_i_inputs = b_ptr + size_b * i_inputs;
+            for (size_t a_j = 0; a_j < size_a; a_j++) {
+                scalar_t* output_ptr_i_aj = output_ptr_i + a_j * size_b;
+                scalar_t a_element = a_ptr_i_inputs[a_j];
+                for (size_t b_j = 0; b_j < size_b; b_j++) {
+                    output_ptr_i_aj[b_j] += a_element * b_ptr_i_inputs[b_j];
                 }
             }
         }
@@ -53,26 +64,51 @@ void mops::outer_product_scatter_add_vjp(
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> indices_output
 ) {
-    // TODO: checks
-    // TODO: set gradients to 0
+    check_sizes(A, "A", 0, B, "B", 0, "opsa_vjp");
+    check_sizes(A, "A", 1, grad_output, "grad_output", 1, "opsa_vjp");
+    check_sizes(B, "B", 1, grad_output, "grad_output", 2, "opsa_vjp");
+    check_sizes(A, "A", 0, indices_output, "indices_output", 0, "opsa_vjp");
+    check_index_tensor(indices_output, "indices_output", grad_output.shape[0], "opsa_vjp");
 
     bool calculate_grad_A = grad_A.data != nullptr;
     bool calculate_grad_B = grad_B.data != nullptr;
 
     if (calculate_grad_A || calculate_grad_B) {
+        size_t size_output_inner = grad_output.shape[1] * grad_output.shape[2];
+        size_t size_ab = A.shape[0];
+        size_t size_a = A.shape[1];
+        size_t size_b = B.shape[1];
+
+        if (calculate_grad_A) {
+            check_same_shape(grad_A, "grad_A", A, "A", "opsa_vjp");
+            std::fill(grad_A.data, grad_A.data + size_ab*size_a, static_cast<scalar_t>(0.0));
+        }
+        if (calculate_grad_B) {
+            check_same_shape(grad_B, "grad_B", B, "B", "opsa_vjp");
+            std::fill(grad_B.data, grad_B.data + size_ab*size_b, static_cast<scalar_t>(0.0));
+        }
+
+        scalar_t* grad_a_ptr = grad_A.data;
+        scalar_t* grad_b_ptr = grad_B.data;
+        scalar_t* grad_output_ptr = grad_output.data;
+        scalar_t* a_ptr = A.data;
+        scalar_t* b_ptr = B.data;
+        int32_t* indices_output_ptr = indices_output.data;
 
         #pragma omp parallel for
-        for (size_t i=0; i<A.shape[0]; i++) {
-            int32_t i_output = indices_output.data[i];
-            for (size_t a_j=0; a_j<A.shape[1]; a_j++) {
-                auto grad_a_index = A.shape[1] * i + a_j;
-                for (size_t b_j=0; b_j<B.shape[1]; b_j++) {
-                    auto grad_b_index = B.shape[1] * i + b_j;
-                    size_t output_index = B.shape[1] * (A.shape[1] * i_output + a_j) + b_j;
-                    if (calculate_grad_A) grad_A.data[grad_a_index] += grad_output.data[output_index]
-                        * B.data[B.shape[1] * i + b_j];
-                    if (calculate_grad_B) grad_B.data[grad_b_index] += grad_output.data[output_index]
-                        * A.data[A.shape[1] * i + a_j];
+        for (size_t i = 0; i < size_ab; i++) {
+            scalar_t* grad_output_ptr_i = grad_output_ptr + indices_output_ptr[i] * size_output_inner;
+            scalar_t* a_ptr_i = a_ptr + i * size_a;
+            scalar_t* b_ptr_i = b_ptr + i * size_b;
+            scalar_t* grad_a_ptr_i = grad_a_ptr + i * size_a;
+            scalar_t* grad_b_ptr_i = grad_b_ptr + i * size_b;
+            for (size_t a_j = 0; a_j < size_a; a_j++) {
+                scalar_t* grad_output_ptr_i_aj = grad_output_ptr_i + a_j * size_b;
+                scalar_t a_element = a_ptr_i[a_j];
+                scalar_t* grad_a_element = grad_a_ptr_i + a_j;
+                for (size_t b_j = 0; b_j < size_b; b_j++) {
+                    if (calculate_grad_A) *grad_a_element += grad_output_ptr_i_aj[b_j] * b_ptr_i[b_j];
+                    if (calculate_grad_B) grad_b_ptr_i[b_j] += grad_output_ptr_i_aj[b_j] * a_element;
                 }
             }
         }
