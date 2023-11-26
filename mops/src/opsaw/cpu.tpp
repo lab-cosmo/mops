@@ -32,22 +32,18 @@ void mops::outer_product_scatter_add_with_weights(
     scalar_t* a_ptr = A.data;
     scalar_t* r_ptr = B.data;
     scalar_t* x_ptr = W.data;
-    int* i_ptr = indices_output.data;
     int* j_ptr = indices_W.data;
 
-    size_t E = indices_W.shape[0];
     size_t size_a = A.shape[1];
     size_t size_r = B.shape[1];
 
-    std::vector<int32_t> first_occurrences = find_first_occurrences(i_ptr, E, output.shape[0]);
+    std::vector<std::vector<size_t>> write_list = get_write_list(indices_output);
     std::fill(o_ptr, o_ptr+output.shape[0]*output.shape[1]*output.shape[2], static_cast<scalar_t>(0.0));
 
     #pragma omp parallel for 
     for (size_t i_position = 0; i_position < output.shape[0]; i_position++) {
         scalar_t* o_ptr_shifted_first_dim = o_ptr + i_position * size_a * size_r;
-        int32_t index_j_start = first_occurrences[i_position];
-        int32_t index_j_end = first_occurrences[i_position+1];
-        for (int32_t e = index_j_start; e < index_j_end; e++) {
+        for (size_t e : write_list[i_position]) {
             scalar_t* a_ptr_shifted_first_dim = a_ptr + e * size_a;
             scalar_t* r_ptr_shifted_first_dim = r_ptr + e * size_r;
             scalar_t* x_ptr_shifted_first_dim = x_ptr + j_ptr[e] * size_r;

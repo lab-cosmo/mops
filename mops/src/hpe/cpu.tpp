@@ -64,7 +64,7 @@ void _homogeneous_polynomial_evaluation_templated_polynomial_order(
 
     std::vector<scalar_t> result = std::vector<scalar_t>(size_remainder, 0.0);
     scalar_t* shifted_a_ptr = remainder_a_ptr;
-    scalar_t* o_ptr_shifted = o_ptr + size_first_dimension * simd_element_count;
+    scalar_t* o_ptr_shifted = o_ptr + size_first_dimension_interleft * simd_element_count;
     int32_t* indices_A_ptr_temp = indices_A_ptr;
     for (size_t j = 0; j < n_monomials; j++) {
         std::vector<scalar_t> temp = std::vector<scalar_t>(size_remainder, c_ptr[j]);

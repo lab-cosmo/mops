@@ -12,6 +12,9 @@ def test_hpe():
 
     reference = torch.tensor(ref_hpe(A.numpy(), C.numpy(), indices_A.numpy()))
     actual = mops.torch.homogeneous_polynomial_evaluation(A, C, indices_A)
+    print(reference)
+    print(actual)
+    print(reference - actual)
     assert torch.allclose(reference, actual)
 
 

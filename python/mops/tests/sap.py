@@ -16,7 +16,7 @@ def valid_arguments():
     indices_A = np.random.randint(20, size=(30,))
     indices_B = np.random.randint(6, size=(30,))
     output_size = 35
-    indices_output = np.sort(np.random.randint(output_size, size=(30,)))
+    indices_output = np.random.randint(output_size, size=(30,))
     return A, B, C, indices_A, indices_B, indices_output, output_size
 
 

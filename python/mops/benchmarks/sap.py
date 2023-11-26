@@ -15,7 +15,7 @@ C = np.random.rand(900)
 indices_A = np.random.randint(13, size=(900,))
 indices_B = np.random.randint(7, size=(900,))
 output_size = 100
-indices_output = np.sort(np.random.randint(output_size, size=(900,)))
+indices_output = np.random.randint(output_size, size=(900,))
 
 # ref_mean, ref_std = benchmark(lambda: ref_sap(A, B, C, indices_A, indices_B,
 # indices_output, output_size))

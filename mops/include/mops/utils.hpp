@@ -7,9 +7,8 @@
 
 #include "mops/tensor.hpp"
 
-std::vector<int32_t> find_first_occurrences(const int32_t *scatter_indices,
-                                            size_t scatter_size,
-                                            size_t output_dim);
+std::vector<std::vector<size_t>>
+get_write_list(mops::Tensor<int32_t, 1> write_coordinates);
 
 template <typename scalar_t> constexpr size_t get_simd_element_count();
 // Assume 256-bit vector registers. A conservative choice.

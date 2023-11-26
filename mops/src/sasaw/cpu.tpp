@@ -44,7 +44,6 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     int* m_2_ptr = indices_W_2.data;
     int* m_3_ptr = indices_output_2.data;
 
-    size_t E = indices_output_1.shape[0];
     size_t N = C.shape[0];
     size_t size_a = A.shape[1];
     size_t size_r = B.shape[1];
@@ -53,21 +52,25 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     size_t o_shift_second_dim = output.shape[2];
     size_t x_shift_second_dim = W.shape[2];
 
+    std::vector<std::vector<size_t>> write_list = get_write_list(indices_output_1);
     std::fill(o_ptr, o_ptr+output.shape[0]*o_shift_first_dim, static_cast<scalar_t>(0.0));
 
-    for (size_t e = 0; e < E; e++) {
-        scalar_t* o_ptr_shifted_first_dim = o_ptr + i_ptr[e] * o_shift_first_dim;
-        scalar_t* a_ptr_shifted_first_dim = a_ptr + e * size_a;
-        scalar_t* r_ptr_shifted_first_dim = r_ptr + e * size_r;
-        scalar_t* x_ptr_shifted_first_dim = x_ptr + j_ptr[e] * x_shift_first_dim;
-        for (size_t n = 0; n < N; n++) {
-            scalar_t current_c = c_ptr[n];
-            scalar_t current_a = a_ptr_shifted_first_dim[m_1_ptr[n]];
-            scalar_t current_ac = current_c * current_a;
-            scalar_t* o_ptr_shifted_second_dim = o_ptr_shifted_first_dim + m_3_ptr[n] * o_shift_second_dim;
-            scalar_t* x_ptr_shifted_second_dim = x_ptr_shifted_first_dim + m_2_ptr[n] * x_shift_second_dim;
-            for (size_t r_idx = 0; r_idx < size_r; r_idx++) {
-                o_ptr_shifted_second_dim[r_idx] += current_ac * r_ptr_shifted_first_dim[r_idx] * x_ptr_shifted_second_dim[r_idx];
+    #pragma omp parallel for
+    for (size_t i = 0; i < output.shape[0]; i++) {
+        for (size_t e : write_list[i]) {
+            scalar_t* o_ptr_shifted_first_dim = o_ptr + i_ptr[e] * o_shift_first_dim;
+            scalar_t* a_ptr_shifted_first_dim = a_ptr + e * size_a;
+            scalar_t* r_ptr_shifted_first_dim = r_ptr + e * size_r;
+            scalar_t* x_ptr_shifted_first_dim = x_ptr + j_ptr[e] * x_shift_first_dim;
+            for (size_t n = 0; n < N; n++) {
+                scalar_t current_c = c_ptr[n];
+                scalar_t current_a = a_ptr_shifted_first_dim[m_1_ptr[n]];
+                scalar_t current_ac = current_c * current_a;
+                scalar_t* o_ptr_shifted_second_dim = o_ptr_shifted_first_dim + m_3_ptr[n] * o_shift_second_dim;
+                scalar_t* x_ptr_shifted_second_dim = x_ptr_shifted_first_dim + m_2_ptr[n] * x_shift_second_dim;
+                for (size_t r_idx = 0; r_idx < size_r; r_idx++) {
+                    o_ptr_shifted_second_dim[r_idx] += current_ac * r_ptr_shifted_first_dim[r_idx] * x_ptr_shifted_second_dim[r_idx];
+                }
             }
         }
     }

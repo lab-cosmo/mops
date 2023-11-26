@@ -22,19 +22,17 @@ void mops::outer_product_scatter_add(
     check_sizes(A, "A", 0, indices_output, "indices_output", 0, "opsa");
     check_index_tensor(indices_output, "indices_output", output.shape[0], "opsa");
 
-    if (!std::is_sorted(indices_output.data, indices_output.data + indices_output.shape[0])) {
-        throw std::runtime_error("`indices_output` values should be sorted");
-    }
+    // if (!std::is_sorted(indices_output.data, indices_output.data + indices_output.shape[0])) {
+    //     throw std::runtime_error("`indices_output` values should be sorted");
+    // }
 
-    std::vector<int32_t> first_occurrences = find_first_occurrences(indices_output.data, indices_output.shape[0], output.shape[0]);
+    std::vector<std::vector<size_t>> write_list = get_write_list(indices_output);
 
     std::fill(output.data, output.data+output.shape[0]*output.shape[1]*output.shape[2], static_cast<scalar_t>(0.0));
 
     #pragma omp parallel for 
     for (size_t i_output=0; i_output<output.shape[0]; i_output++) {
-        int32_t index_start = first_occurrences[i_output];
-        int32_t index_end = first_occurrences[i_output+1];
-        for (int32_t index_inputs = index_start; index_inputs < index_end; index_inputs++) {
+        for (size_t index_inputs : write_list[i_output]) {
             for (size_t a_j=0; a_j<A.shape[1]; a_j++) {
                 for (size_t b_j=0; b_j<B.shape[1]; b_j++) {
                     auto output_index = B.shape[1] * (A.shape[1] * i_output + a_j) + b_j;

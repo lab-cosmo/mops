@@ -12,7 +12,7 @@ np.random.seed(0xDEADBEEF)
 def valid_arguments():
     A = np.random.rand(100, 20)
     B = np.random.rand(100, 5)
-    indices_output = np.sort(np.random.randint(10, size=(100)))
+    indices_output = np.random.randint(10, size=(100))
     output_size = 20
     return A, B, indices_output, output_size
 
