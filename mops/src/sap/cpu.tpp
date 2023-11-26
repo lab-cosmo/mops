@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <string>
+#include <array>
 
 #include "mops/sap.hpp"
 #include "mops/checks.hpp"
