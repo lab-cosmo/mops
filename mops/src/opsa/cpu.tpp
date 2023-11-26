@@ -53,48 +53,29 @@ void mops::outer_product_scatter_add_vjp(
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> indices_output
 ) {
+    // TODO: checks
+    // TODO: set gradients to 0
 
-    if (grad_A.data != nullptr) {
-        if (A.shape[0] != grad_A.shape[0] || A.shape[1] != grad_A.shape[1]) {
-            throw std::runtime_error(
-                "A and grad_A tensors must have the same shape"
-            );
-        }
+    bool calculate_grad_A = grad_A.data != nullptr;
+    bool calculate_grad_B = grad_B.data != nullptr;
 
+    if (calculate_grad_A || calculate_grad_B) {
+
+        #pragma omp parallel for
         for (size_t i=0; i<A.shape[0]; i++) {
-            auto i_output = indices_output.data[i];
+            int32_t i_output = indices_output.data[i];
             for (size_t a_j=0; a_j<A.shape[1]; a_j++) {
-                auto grad_index = A.shape[1] * i + a_j;
-                auto sum = 0.0;
+                auto grad_a_index = A.shape[1] * i + a_j;
                 for (size_t b_j=0; b_j<B.shape[1]; b_j++) {
-                    auto output_index = B.shape[1] * (A.shape[1] * i_output + a_j) + b_j;
-                    sum += grad_output.data[output_index]
-                         * B.data[B.shape[1] * i + b_j];
+                    auto grad_b_index = B.shape[1] * i + b_j;
+                    size_t output_index = B.shape[1] * (A.shape[1] * i_output + a_j) + b_j;
+                    if (calculate_grad_A) grad_A.data[grad_a_index] += grad_output.data[output_index]
+                        * B.data[B.shape[1] * i + b_j];
+                    if (calculate_grad_B) grad_B.data[grad_b_index] += grad_output.data[output_index]
+                        * A.data[A.shape[1] * i + a_j];
                 }
-                grad_A.data[grad_index] += sum;
             }
         }
     }
 
-    if (grad_B.data != nullptr) {
-        if (B.shape[0] != grad_B.shape[0] || B.shape[1] != grad_B.shape[1]) {
-            throw std::runtime_error(
-                "B and grad_B tensors must have the same shape"
-            );
-        }
-
-        for (size_t i=0; i<A.shape[0]; i++) {
-            auto i_output = indices_output.data[i];
-            for (size_t b_j=0; b_j<B.shape[1]; b_j++) {
-                auto grad_index = B.shape[1] * i + b_j;
-                auto sum = 0.0;
-                for (size_t a_j=0; a_j<A.shape[1]; a_j++) {
-                    auto output_index = B.shape[1] * (A.shape[1] * i_output + a_j) + b_j;
-                    sum += grad_output.data[output_index]
-                         * A.data[A.shape[1] * i + a_j];
-                }
-                grad_B.data[grad_index] += sum;
-            }
-        }
-    }
 }

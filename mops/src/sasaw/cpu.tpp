@@ -108,12 +108,10 @@ void mops::sparse_accumulation_scatter_add_with_weights_vjp(
         scalar_t* x_ptr = W.data;
         scalar_t* c_ptr = C.data;
         int* i_ptr = indices_output_1.data;
-        int* j_ptr = indices_W_1.data;
         int* m_1_ptr = indices_A.data;
         int* m_2_ptr = indices_W_2.data;
         int* m_3_ptr = indices_output_2.data;
 
-        size_t E = indices_output_1.shape[0];
         size_t N = C.shape[0];
         size_t size_a = A.shape[1];
         size_t size_r = B.shape[1];
@@ -122,32 +120,37 @@ void mops::sparse_accumulation_scatter_add_with_weights_vjp(
         size_t o_shift_second_dim = grad_output.shape[2];
         size_t x_shift_second_dim = W.shape[2];
 
+        std::vector<std::vector<size_t>> write_list = get_write_list(indices_W_1);
+
         // For now, we assume that grad_A, grad_B, grad_W are zero-initialized
         // std::fill(grad_a_ptr, grad_a_ptr+A.shape[0]*A.shape[1], static_cast<scalar_t>(0.0));
         // std::fill(grad_b_ptr, grad_b_ptr+B.shape[0]*B.shape[1], static_cast<scalar_t>(0.0));
         // std::fill(grad_w_ptr, grad_w_ptr+W.shape[0]*W.shape[1], static_cast<scalar_t>(0.0));
 
-        for (size_t e = 0; e < E; e++) {
-            scalar_t* grad_o_ptr_shifted_first_dim = grad_o_ptr + i_ptr[e] * o_shift_first_dim;
-            scalar_t* a_ptr_shifted_first_dim = a_ptr + e * size_a;
-            scalar_t* r_ptr_shifted_first_dim = r_ptr + e * size_r;
-            scalar_t* x_ptr_shifted_first_dim = x_ptr + j_ptr[e] * x_shift_first_dim;
-            for (size_t n = 0; n < N; n++) {
-                scalar_t current_c = c_ptr[n];
-                scalar_t current_a = a_ptr_shifted_first_dim[m_1_ptr[n]];
-                scalar_t current_ac = current_c * current_a;
-                scalar_t* grad_o_ptr_shifted_second_dim = grad_o_ptr_shifted_first_dim + m_3_ptr[n] * o_shift_second_dim;
-                scalar_t* x_ptr_shifted_second_dim = x_ptr_shifted_first_dim + m_2_ptr[n] * x_shift_second_dim;
-                for (size_t r_idx = 0; r_idx < size_r; r_idx++) {
-                    scalar_t current_grad_o = grad_o_ptr_shifted_second_dim[r_idx];
-                    if (calculate_grad_A) {
-                        grad_a_ptr[e * size_a + m_1_ptr[n]] += current_grad_o * current_c * r_ptr_shifted_first_dim[r_idx] * x_ptr_shifted_second_dim[r_idx];
-                    }
-                    if (calculate_grad_B) {
-                        grad_b_ptr[e * size_r + r_idx] += current_grad_o * current_ac * x_ptr_shifted_second_dim[r_idx];
-                    }
-                    if (calculate_grad_W) {
-                        grad_w_ptr[j_ptr[e] * x_shift_first_dim + m_2_ptr[n] * x_shift_second_dim + r_idx] += current_grad_o * current_ac * r_ptr_shifted_first_dim[r_idx];
+        #pragma omp parallel for
+        for (size_t j = 0; j < W.shape[0]; j++) {
+            scalar_t* x_ptr_shifted_first_dim = x_ptr + j * x_shift_first_dim;;
+            for (size_t e : write_list[j]) {
+                scalar_t* grad_o_ptr_shifted_first_dim = grad_o_ptr + i_ptr[e] * o_shift_first_dim;
+                scalar_t* a_ptr_shifted_first_dim = a_ptr + e * size_a;
+                scalar_t* r_ptr_shifted_first_dim = r_ptr + e * size_r;
+                for (size_t n = 0; n < N; n++) {
+                    scalar_t current_c = c_ptr[n];
+                    scalar_t current_a = a_ptr_shifted_first_dim[m_1_ptr[n]];
+                    scalar_t current_ac = current_c * current_a;
+                    scalar_t* grad_o_ptr_shifted_second_dim = grad_o_ptr_shifted_first_dim + m_3_ptr[n] * o_shift_second_dim;
+                    scalar_t* x_ptr_shifted_second_dim = x_ptr_shifted_first_dim + m_2_ptr[n] * x_shift_second_dim;
+                    for (size_t r_idx = 0; r_idx < size_r; r_idx++) {
+                        scalar_t current_grad_o = grad_o_ptr_shifted_second_dim[r_idx];
+                        if (calculate_grad_A) {
+                            grad_a_ptr[e * size_a + m_1_ptr[n]] += current_grad_o * current_c * r_ptr_shifted_first_dim[r_idx] * x_ptr_shifted_second_dim[r_idx];
+                        }
+                        if (calculate_grad_B) {
+                            grad_b_ptr[e * size_r + r_idx] += current_grad_o * current_ac * x_ptr_shifted_second_dim[r_idx];
+                        }
+                        if (calculate_grad_W) {
+                            grad_w_ptr[j * x_shift_first_dim + m_2_ptr[n] * x_shift_second_dim + r_idx] += current_grad_o * current_ac * r_ptr_shifted_first_dim[r_idx];
+                        }
                     }
                 }
             }
