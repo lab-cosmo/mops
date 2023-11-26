@@ -10,36 +10,6 @@ mops_torch::outer_product_scatter_add(torch::Tensor A, torch::Tensor B,
     return OuterProductScatterAdd::apply(A, B, indices_output, output_size);
 }
 
-template <typename scalar_t>
-static mops::Tensor<scalar_t, 1> torch_to_mops_1d(torch::Tensor tensor) {
-    assert(tensor.sizes().size() == 1);
-    return {
-        tensor.data_ptr<scalar_t>(),
-        {static_cast<size_t>(tensor.size(0))},
-    };
-}
-
-template <typename scalar_t>
-static mops::Tensor<scalar_t, 2> torch_to_mops_2d(torch::Tensor tensor) {
-    assert(tensor.sizes().size() == 2);
-    return {
-        tensor.data_ptr<scalar_t>(),
-        {static_cast<size_t>(tensor.size(0)),
-         static_cast<size_t>(tensor.size(1))},
-    };
-}
-
-template <typename scalar_t>
-static mops::Tensor<scalar_t, 3> torch_to_mops_3d(torch::Tensor tensor) {
-    assert(tensor.sizes().size() == 3);
-    return {
-        tensor.data_ptr<scalar_t>(),
-        {static_cast<size_t>(tensor.size(0)),
-         static_cast<size_t>(tensor.size(1)),
-         static_cast<size_t>(tensor.size(2))},
-    };
-}
-
 torch::Tensor OuterProductScatterAdd::forward(
     torch::autograd::AutogradContext *ctx, torch::Tensor A, torch::Tensor B,
     torch::Tensor indices_output, int64_t output_size) {
