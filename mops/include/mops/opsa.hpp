@@ -62,6 +62,15 @@ void MOPS_EXPORT outer_product_scatter_add(Tensor<scalar_t, 3> output,
                                            Tensor<scalar_t, 2> B,
                                            Tensor<int32_t, 1> indices_output);
 } // namespace cuda
+
+namespace cuda {
+/// CUDA version of mops::outer_product_scatter_add
+template <typename scalar_t>
+void MOPS_EXPORT outer_product_scatter_add(Tensor<scalar_t, 2> output,
+                                           Tensor<scalar_t, 2> A,
+                                           Tensor<scalar_t, 2> B,
+                                           Tensor<int32_t, 1> indices_output);
+} // namespace cuda
 } // namespace mops
 
 #endif
