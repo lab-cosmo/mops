@@ -1,3 +1,4 @@
+import gc
 import math
 import time
 
@@ -6,6 +7,8 @@ import numpy as np
 
 
 def benchmark(function, repeats=1000, warmup=10, plot=True):
+    gc.disable()
+
     for _ in range(warmup):
         result = function()
         result.backward()
@@ -46,6 +49,7 @@ def benchmark(function, repeats=1000, warmup=10, plot=True):
         plt.legend()
         plt.savefig("benchmark_plot.pdf")
 
+    gc.enable()
     return mean_fwd, std_fwd, mean_bwd, std_bwd
 
 

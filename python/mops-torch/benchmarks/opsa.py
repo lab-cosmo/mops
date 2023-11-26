@@ -12,9 +12,7 @@ indices = torch.randint(10, size=(1000,), dtype=torch.int32)
 
 
 mean_fwd, std_fwd, mean_bwd, std_bwd = benchmark(
-    lambda: torch.sum(mops.torch.outer_product_scatter_add(A, B, indices, output_size)),
-    repeats=10,
-    warmup=10,
+    lambda: torch.sum(mops.torch.outer_product_scatter_add(A, B, indices, output_size))
 )
 
 print("Forward pass:", format_mean_std(mean_fwd, std_fwd))
