@@ -18,9 +18,7 @@ mean_fwd, std_fwd, mean_bwd, std_bwd = benchmark(
         mops.torch.sparse_accumulation_of_products(
             A, B, C, indices_A, indices_B, indices_output, n_output
         )
-    ),
-    repeats=10,
-    warmup=10,
+    )
 )
 
 print("Forward pass:", format_mean_std(mean_fwd, std_fwd))

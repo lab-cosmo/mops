@@ -1,8 +1,10 @@
 import numpy as np
 from benchmark import benchmark, format_mean_std
-from mops.reference_implementations import sparse_accumulation_of_products as ref_sap
 
 from mops import sparse_accumulation_of_products as sap
+
+# from mops.reference_implementations import sparse_accumulation_of_products as ref_sap
+
 
 np.random.seed(0xDEADBEEF)
 
@@ -12,15 +14,16 @@ C = np.random.rand(900)
 
 indices_A = np.random.randint(13, size=(900,))
 indices_B = np.random.randint(7, size=(900,))
-n_O = 100
-indices_output = np.random.randint(n_O, size=(900,))
+output_size = 100
+indices_output = np.random.randint(output_size, size=(900,))
 
-ref_mean, ref_std = benchmark(
-    lambda: ref_sap(A, B, C, indices_A, indices_B, indices_output, n_O)
+# ref_mean, ref_std = benchmark(lambda: ref_sap(A, B, C, indices_A, indices_B,
+# indices_output, output_size))
+mean, std = benchmark(
+    lambda: sap(A, B, C, indices_A, indices_B, indices_output, output_size)
 )
-mean, std = benchmark(lambda: sap(A, B, C, indices_A, indices_B, indices_output, n_O))
 
-print("Reference implementation:", format_mean_std(ref_mean, ref_std))
+# print("Reference implementation:", format_mean_std(ref_mean, ref_std))
 print("Optimized implementation:", format_mean_std(mean, std))
 
-print("Speed-up:", ref_mean / mean)
+# print("Speed-up:", ref_mean / mean)

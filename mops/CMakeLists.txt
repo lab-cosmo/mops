@@ -69,10 +69,12 @@ add_library(mops
     "src/opsaw/capi.cpp"
     "src/sasaw/sasaw.cpp"
     "src/sasaw/capi.cpp"
+    "src/utils.cpp"
 
     "include/mops.hpp"
     "include/mops.h"
     "include/mops/capi.hpp"
+    "include/mops/checks.hpp"
     "include/mops/utils.hpp"
     "include/mops/opsa.hpp"
     "include/mops/opsa.h"
@@ -85,6 +87,7 @@ add_library(mops
     "include/mops/sasaw.hpp"
     "include/mops/sasaw.h"
     "include/mops/checks.hpp"
+    "include/mops/utils.hpp"
 )
 
 if(CMAKE_CUDA_COMPILER)

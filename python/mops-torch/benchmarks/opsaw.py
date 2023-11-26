@@ -16,9 +16,7 @@ mean_fwd, std_fwd, mean_bwd, std_bwd = benchmark(
         mops.torch.outer_product_scatter_add_with_weights(
             A, B, W, indices_W, indices_output
         )
-    ),
-    repeats=10,
-    warmup=10,
+    )
 )
 
 print("Forward pass:", format_mean_std(mean_fwd, std_fwd))

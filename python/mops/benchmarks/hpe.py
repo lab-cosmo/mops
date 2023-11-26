@@ -1,19 +1,22 @@
 import numpy as np
 from benchmark import benchmark, format_mean_std
-from mops.reference_implementations import homogeneous_polynomial_evaluation as ref_hpe
 
 from mops import homogeneous_polynomial_evaluation as hpe
 
+# from mops.reference_implementations import
+# homogeneous_polynomial_evaluation as ref_hpe
+
+
 np.random.seed(0xDEADBEEF)
 
-A = np.random.rand(1000, 300)
-C = np.random.rand(10000)
-indices_A = np.random.randint(300, size=(10000, 4))
+A = np.random.rand(1000, 2000)
+C = np.random.rand(100000)
+indices_A = np.random.randint(2000, size=(100000, 4))
 
-ref_mean, ref_std = benchmark(lambda: ref_hpe(A, C, indices_A))
+# ref_mean, ref_std = benchmark(lambda: ref_hpe(A, C, indices_A))
 mean, std = benchmark(lambda: hpe(A, C, indices_A))
 
-print("Reference implementation:", format_mean_std(ref_mean, ref_std))
+# print("Reference implementation:", format_mean_std(ref_mean, ref_std))
 print("Optimized implementation:", format_mean_std(mean, std))
 
-print("Speed-up:", ref_mean / mean)
+# print("Speed-up:", ref_mean / mean)

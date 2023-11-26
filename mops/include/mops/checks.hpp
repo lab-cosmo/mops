@@ -33,13 +33,13 @@ void check_index_tensor(mops::Tensor<int32_t, N_DIMS> tensor, std::string name,
     int32_t min = *min_ptr;
     int32_t max = *max_ptr;
     int32_t max_value_int32 = static_cast<int32_t>(max_value);
-    if (max > max_value_int32)
+    if (max >= max_value_int32)
         throw std::runtime_error(
             "Index array " + name + " in operation " + operation +
             " contains elements up to " + std::to_string(max) +
             "; this would cause out-of-bounds accesses. With the " +
             "provided parameters, it can only contain elements up to " +
-            std::to_string(max_value));
+            std::to_string(max_value - 1));
     if (min < 0)
         throw std::runtime_error("Index array " + name + " in operation " +
                                  operation + " contains negative-valued" +

@@ -1,7 +1,14 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#ifndef MOPS_UTILS_HPP
+#define MOPS_UTILS_HPP
+
+#include <cstddef>
+#include <cstdint>
+#include <vector>
 
 #include "mops/tensor.hpp"
+
+std::vector<std::vector<size_t>>
+get_write_list(mops::Tensor<int32_t, 1> write_coordinates);
 
 template <typename scalar_t> constexpr size_t get_simd_element_count();
 // Assume 256-bit vector registers. A conservative choice.
@@ -31,6 +38,7 @@ void interleave_tensor(mops::Tensor<scalar_t, 2> initial_data,
     size_t calculation_dim = initial_data.shape[1];
     scalar_t *initial_data_ptr = initial_data.data;
 
+#pragma omp parallel for
     for (size_t i = 0; i < quotient; i++) {
         for (size_t j = 0; j < calculation_dim; j++) {
             for (size_t k = 0; k < simd_element_count; k++) {
@@ -62,6 +70,7 @@ void un_interleave_tensor(mops::Tensor<scalar_t, 2> output_data,
     size_t calculation_dim = output_data.shape[1];
     scalar_t *output_data_ptr = output_data.data;
 
+#pragma omp parallel for
     for (size_t i = 0; i < quotient; i++) {
         for (size_t j = 0; j < calculation_dim; j++) {
             for (size_t k = 0; k < simd_element_count; k++) {
@@ -73,6 +82,7 @@ void un_interleave_tensor(mops::Tensor<scalar_t, 2> output_data,
         }
     }
 
+    // Fill remainder_data
     for (size_t j = 0; j < calculation_dim; j++) {
         for (size_t k = 0; k < remainder; k++) {
             output_data_ptr[quotient * simd_element_count * calculation_dim +
