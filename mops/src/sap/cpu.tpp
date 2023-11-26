@@ -97,3 +97,61 @@ void mops::sparse_accumulation_of_products(
     delete[] remainder_a_ptr;
     delete[] remainder_b_ptr;
 }
+
+
+template<typename scalar_t>
+void mops::sparse_accumulation_of_products_vjp(
+    Tensor<scalar_t, 2> grad_A,
+    Tensor<scalar_t, 2> grad_B,
+    Tensor<scalar_t, 2> grad_output,
+    Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B,
+    Tensor<scalar_t, 1> C,
+    Tensor<int32_t, 1> indices_A,
+    Tensor<int32_t, 1> indices_B,
+    Tensor<int32_t, 1> indices_output
+) {
+    // TODO: checks
+
+    bool calculate_grad_A = grad_A.data != nullptr;
+    bool calculate_grad_B = grad_B.data != nullptr;
+
+    if (calculate_grad_A || calculate_grad_B) {
+
+        scalar_t* a_ptr = A.data;
+        scalar_t* b_ptr = B.data;
+        scalar_t* grad_o_ptr = grad_output.data;
+        scalar_t* c_ptr = C.data;
+        int32_t* p_a_ptr = indices_A.data;
+        int32_t* p_b_ptr = indices_B.data;
+        int32_t* p_o_ptr = indices_output.data;
+        scalar_t* grad_a_ptr = grad_A.data;
+        scalar_t* grad_b_ptr = grad_B.data;
+
+        size_t size_first_dimension = A.shape[0];
+        size_t size_second_dimension_a = A.shape[1];
+        size_t size_second_dimension_b = B.shape[1];
+        size_t size_second_dimension_o = grad_output.shape[1];
+        size_t c_size = C.shape[0];
+
+        scalar_t* grad_output_row = grad_o_ptr; 
+        scalar_t* grad_a_row = grad_a_ptr;
+        scalar_t* grad_b_row = grad_b_ptr;
+        scalar_t* a_row = a_ptr;
+        scalar_t* b_row = b_ptr;
+        for (size_t i = 0; i < size_first_dimension; i++){
+            for (size_t j = 0; j < c_size; j++) {                
+                scalar_t grad_output_j = grad_output_row[p_o_ptr[j]];
+                scalar_t common_factor = grad_output_j * c_ptr[j];
+                if (calculate_grad_A) grad_a_row[p_a_ptr[j]] += common_factor * b_row[p_b_ptr[j]];
+                if (calculate_grad_B) grad_b_row[p_b_ptr[j]] += common_factor * a_row[p_a_ptr[j]];
+            }
+            grad_output_row += size_second_dimension_o;
+            grad_a_row += size_second_dimension_a;
+            grad_b_row += size_second_dimension_b;
+            a_row += size_second_dimension_a;
+            b_row += size_second_dimension_b;
+        }
+    }
+
+}
