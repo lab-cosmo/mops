@@ -30,9 +30,7 @@ mean_fwd, std_fwd, mean_bwd, std_bwd = benchmark(
             indices_output_2,
             output_size,
         )
-    ),
-    repeats=10,
-    warmup=10,
+    )
 )
 
 print("Forward pass:", format_mean_std(mean_fwd, std_fwd))

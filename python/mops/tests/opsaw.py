@@ -16,7 +16,7 @@ def valid_arguments():
     B = np.random.rand(100, 5)
     W = np.random.rand(20, 5)
     indices_W = np.random.randint(20, size=(100,))
-    indices_output = np.sort(np.random.randint(20, size=(100,)))
+    indices_output = np.random.randint(20, size=(100,))
 
     return A, B, W, indices_W, indices_output
 

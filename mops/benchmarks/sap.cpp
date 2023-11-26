@@ -23,7 +23,6 @@ int main() {
 
     auto indices_output = std::vector<int>(900);
     fill_vector_random_integers(indices_output, 100);
-    std::sort(indices_output.begin(), indices_output.end());
 
     auto O = std::vector<double>(32000 * 100);
 

@@ -20,7 +20,6 @@ int main() {
 
     auto indices_output = std::vector<int>(60000);
     fill_vector_random_integers(indices_output, 1000);
-    std::sort(indices_output.begin(), indices_output.end());
 
     auto O = std::vector<double>(1000 * 13 * 20);
 

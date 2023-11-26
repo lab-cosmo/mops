@@ -16,12 +16,12 @@ def valid_arguments():
     B = np.random.rand(100, 200)
     W = np.random.rand(25, 13, 200)
     C = np.random.rand(50)
-    indices_output_1 = np.sort(np.random.randint(25, size=(100,)))
+    indices_output_1 = np.random.randint(25, size=(100,))
     indices_W_1 = np.random.randint(25, size=(100,))
     output_size = 15
     indices_A = np.random.randint(20, size=(50,))
     indices_W_2 = np.random.randint(13, size=(50,))
-    indices_output_2 = np.sort(np.random.randint(output_size, size=(50,)))
+    indices_output_2 = np.random.randint(output_size, size=(50,))
 
     return (
         A,
