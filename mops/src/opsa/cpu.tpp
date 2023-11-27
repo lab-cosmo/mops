@@ -1,4 +1,3 @@
-#include <cassert>
 #include <algorithm>
 #include <stdexcept>
 #include <string>
@@ -50,9 +49,10 @@ void mops::outer_product_scatter_add(
         throw std::runtime_error("`indices_output` values should be sorted");
     }
 
+    std::fill(output.data, output.data+output.shape[0]*output.shape[1], static_cast<scalar_t>(0.0));
+
     for (size_t i=0; i<A.shape[0]; i++) {
         auto i_output = indices_output.data[i];
-        assert(i_output < output.shape[0]);
         for (size_t a_j=0; a_j<A.shape[1]; a_j++) {
             for (size_t b_j=0; b_j<B.shape[1]; b_j++) {
                 auto output_index = B.shape[1] * (A.shape[1] * i_output + a_j) + b_j;
@@ -89,7 +89,6 @@ void mops::outer_product_scatter_add_vjp(
 
         for (size_t i=0; i<A.shape[0]; i++) {
             auto i_output = indices_output.data[i];
-            assert(i_output < grad_output.shape[0]);
             for (size_t a_j=0; a_j<A.shape[1]; a_j++) {
                 auto grad_index = A.shape[1] * i + a_j;
                 auto sum = 0.0;
@@ -112,7 +111,6 @@ void mops::outer_product_scatter_add_vjp(
 
         for (size_t i=0; i<A.shape[0]; i++) {
             auto i_output = indices_output.data[i];
-            assert(i_output < grad_output.shape[0]);
             for (size_t b_j=0; b_j<B.shape[1]; b_j++) {
                 auto grad_index = B.shape[1] * i + b_j;
                 auto sum = 0.0;

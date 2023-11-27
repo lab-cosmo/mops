@@ -7,8 +7,8 @@ from mops import homogeneous_polynomial_evaluation as hpe
 np.random.seed(0xDEADBEEF)
 
 A = np.random.rand(1000, 300)
-C = np.random.rand(2000)
-indices_A = np.random.randint(300, size=(2000, 4))
+C = np.random.rand(10000)
+indices_A = np.random.randint(300, size=(10000, 4))
 
 ref_mean, ref_std = benchmark(lambda: ref_hpe(A, C, indices_A))
 mean, std = benchmark(lambda: hpe(A, C, indices_A))

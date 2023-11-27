@@ -10,19 +10,13 @@ torch.manual_seed(0xDEADBEEF)
 def test_opsaw():
     A = torch.rand(100, 10)
     B = torch.rand(100, 5)
-    n_O = 20
-    W = torch.rand(n_O, 5)
+    W = torch.rand(20, 5)
     indices_W = torch.randint(20, size=(100,), dtype=torch.int32)
     indices_output = torch.randint(20, size=(100,), dtype=torch.int32)
 
     reference = torch.tensor(
         ref_opsaw(
-            A.numpy(),
-            B.numpy(),
-            W.numpy(),
-            indices_W.numpy(),
-            indices_output.numpy(),
-            20,
+            A.numpy(), B.numpy(), W.numpy(), indices_W.numpy(), indices_output.numpy()
         )
     )
     actual = mops.torch.outer_product_scatter_add_with_weights(

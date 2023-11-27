@@ -15,8 +15,7 @@ def sparse_accumulation_scatter_add_with_weights(
     indices_W_2,
     indices_output_1,
     indices_output_2,
-    output_size_1,
-    output_size_2,
+    output_size,
 ):
     _check_sasaw(
         A,
@@ -28,8 +27,7 @@ def sparse_accumulation_scatter_add_with_weights(
         indices_W_2,
         indices_output_1,
         indices_output_2,
-        output_size_1,
-        output_size_2,
+        output_size,
     )
 
     A = np.ascontiguousarray(A)
@@ -47,7 +45,7 @@ def sparse_accumulation_scatter_add_with_weights(
     indices_output_1 = indices_output_1.astype(np.int32)
     indices_output_2 = indices_output_2.astype(np.int32)
 
-    output = np.zeros((output_size_1, output_size_2, B.shape[1]), dtype=A.dtype)
+    output = np.empty((W.shape[0], output_size, B.shape[1]), dtype=A.dtype)
 
     lib = _get_library()
 

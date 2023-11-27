@@ -39,6 +39,7 @@ else()
     set(MOPS_MAIN_PROJECT OFF)
 endif()
 option(MOPS_TESTS "build and run mops unit tests" ${MOPS_MAIN_PROJECT})
+option(MOPS_EXAMPLES "build and run mops examples" ${MOPS_MAIN_PROJECT})
 
 # Set a default build type if none was specified
 if (${MOPS_MAIN_PROJECT})
@@ -81,6 +82,7 @@ add_library(mops
     "include/mops/opsaw.h"
     "include/mops/sasaw.hpp"
     "include/mops/sasaw.h"
+    "include/mops/checks.hpp"
 )
 
 if(CMAKE_CUDA_COMPILER)
@@ -146,9 +148,30 @@ if (MOPS_ARCH_NATIVE)
 endif()
 
 
+# handle warning flags
+check_cxx_compiler_flag("-Wall" COMPILER_SUPPORTS_WALL)
+if(COMPILER_SUPPORTS_WALL)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+endif()
+
+check_cxx_compiler_flag("-Wextra" COMPILER_SUPPORTS_WEXTRA)
+if(COMPILER_SUPPORTS_WEXTRA)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+endif()
+
+check_cxx_compiler_flag("-Werror" COMPILER_SUPPORTS_WERROR)
+if(COMPILER_SUPPORTS_WERROR)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+endif()
+
+
 if (MOPS_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if (MOPS_EXAMPLES)
+    add_subdirectory(examples)
 endif()
 
 

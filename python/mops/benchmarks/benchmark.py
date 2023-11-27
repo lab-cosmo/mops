@@ -1,3 +1,4 @@
+import gc
 import math
 import time
 
@@ -5,7 +6,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def benchmark(function, repeats=1000, warmup=10, plot=True):
+def benchmark(function, repeats=100, warmup=10, plot=True):
+    gc.disable()
+
     for _ in range(warmup):
         function()
 
@@ -26,6 +29,7 @@ def benchmark(function, repeats=1000, warmup=10, plot=True):
         plt.plot(np.arange(times_array.shape[0]), times_array, ".")
         plt.savefig("benchmark_plot.pdf")
 
+    gc.enable()
     return mean, std
 
 

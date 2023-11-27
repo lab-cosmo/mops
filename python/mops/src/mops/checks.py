@@ -1,5 +1,8 @@
 import numpy as np
 
+# For each operation, we only check the correctness of types and number of dimensions.
+# Size consistency checks will be performed in the C++ backend.
+
 
 def _check_number_of_dimensions(array, expected, operation, name):
     if not isinstance(array, np.ndarray):
@@ -34,7 +37,6 @@ def _check_hpe(A, C, indices_A):
     _check_number_of_dimensions(A, 2, function, "A")
     _check_number_of_dimensions(C, 1, function, "C")
     _check_number_of_dimensions(indices_A, 2, function, "indices_A")
-    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
     _check_array_dtype(A, np.floating, function, "A")
@@ -53,7 +55,6 @@ def _check_sap(A, B, C, indices_A, indices_B, indices_output, output_size):
     _check_number_of_dimensions(indices_B, 1, function, "indices_B")
     _check_number_of_dimensions(indices_output, 1, function, "indices_output")
     _check_scalar(output_size, function, "output_size")
-    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
     _check_array_dtype(A, np.floating, function, "A")
@@ -73,7 +74,6 @@ def _check_opsa(A, B, indices_output, output_size):
     _check_number_of_dimensions(B, 2, function, "B")
     _check_number_of_dimensions(indices_output, 1, function, indices_output)
     _check_scalar(output_size, function, output_size)
-    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
     _check_array_dtype(A, np.floating, function, "A")
@@ -82,7 +82,7 @@ def _check_opsa(A, B, indices_output, output_size):
     _check_scalar_dtype(output_size, np.integer, function, output_size)
 
 
-def _check_opsaw(A, B, W, indices_W, indices_output, output_size):
+def _check_opsaw(A, B, W, indices_W, indices_output):
     function = "outer_product_scatter_add_with_weights"
 
     # Check dimensions
@@ -91,8 +91,6 @@ def _check_opsaw(A, B, W, indices_W, indices_output, output_size):
     _check_number_of_dimensions(W, 2, function, "W")
     _check_number_of_dimensions(indices_W, 1, function, "indices_W")
     _check_number_of_dimensions(indices_output, 1, function, "indices_output")
-    _check_scalar(output_size, function, "output_size")
-    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
 
     # Check types
     _check_array_dtype(A, np.floating, function, "A")
@@ -100,7 +98,6 @@ def _check_opsaw(A, B, W, indices_W, indices_output, output_size):
     _check_array_dtype(W, np.floating, function, "W")
     _check_array_dtype(indices_W, np.integer, function, "indices_W")
     _check_array_dtype(indices_output, np.integer, function, "indices_output")
-    _check_scalar_dtype(output_size, np.integer, function, "output_size")
 
 
 def _check_sasaw(
@@ -113,8 +110,7 @@ def _check_sasaw(
     indices_W_2,
     indices_output_1,
     indices_output_2,
-    output_size_1,
-    output_size_2,
+    output_size,
 ):
     function = "sparse_accumulation_scatter_add_with_weights"
 
@@ -128,9 +124,7 @@ def _check_sasaw(
     _check_number_of_dimensions(indices_W_2, 1, function, "indices_W_2")
     _check_number_of_dimensions(indices_output_1, 1, function, "indices_output_1")
     _check_number_of_dimensions(indices_output_2, 1, function, "indices_output_2")
-    _check_scalar(output_size_1, function, "output_size_1")
-    _check_scalar(output_size_2, function, "output_size_2")
-    # TODO: additional dimension checks (some dimensions sizes of the inputs must match)
+    _check_scalar(output_size, function, "output_size")
 
     # Check types
     _check_array_dtype(A, np.floating, function, "A")
@@ -142,5 +136,4 @@ def _check_sasaw(
     _check_array_dtype(indices_W_2, np.integer, function, "indices_W_2")
     _check_array_dtype(indices_output_1, np.integer, function, "indices_output_1")
     _check_array_dtype(indices_output_2, np.integer, function, "indices_output_2")
-    _check_scalar_dtype(output_size_1, np.integer, function, "output_size_1")
-    _check_scalar_dtype(output_size_2, np.integer, function, "output_size_2")
+    _check_scalar_dtype(output_size, np.integer, function, "output_size")
