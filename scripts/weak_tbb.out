@@ -1,0 +1,126 @@
+STARTING AT Mon Nov 27 18:16:18 CET 2023
+Average Time: 4.48743 ms
+Standard Deviation: 0.248518 ms
+Average Time vjp: 37.0342 ms
+Standard Deviation vjp: 0.103698 ms
+Average Time: 6.19677 ms
+Standard Deviation: 0.077304 ms
+Average Time vjp: 41.6168 ms
+Standard Deviation vjp: 0.644887 ms
+Average Time: 4.53137 ms
+Standard Deviation: 0.315851 ms
+Average Time vjp: 42.0985 ms
+Standard Deviation vjp: 0.776508 ms
+Average Time: 4.64007 ms
+Standard Deviation: 0.392208 ms
+Average Time vjp: 47.6899 ms
+Standard Deviation vjp: 1.10135 ms
+Average Time: 4.90214 ms
+Standard Deviation: 0.628001 ms
+Average Time vjp: 50.2586 ms
+Standard Deviation vjp: 1.13675 ms
+Average Time: 9.38075 ms
+Standard Deviation: 0.712178 ms
+Average Time vjp: 61.1726 ms
+Standard Deviation vjp: 1.19574 ms
+
+Average Time: 0.462238 ms
+Standard Deviation: 0.0190495 ms
+Average Time vjp: 2.36975 ms
+Standard Deviation vjp: 0.00711141 ms
+Average Time: 0.601935 ms
+Standard Deviation: 0.0338781 ms
+Average Time vjp: 2.4383 ms
+Standard Deviation vjp: 0.0182975 ms
+Average Time: 1.20423 ms
+Standard Deviation: 0.222103 ms
+Average Time vjp: 3.17485 ms
+Standard Deviation vjp: 0.235611 ms
+Average Time: 1.15003 ms
+Standard Deviation: 0.157252 ms
+Average Time vjp: 2.83203 ms
+Standard Deviation vjp: 0.0626583 ms
+Average Time: 2.1502 ms
+Standard Deviation: 0.244702 ms
+Average Time vjp: 3.57684 ms
+Standard Deviation vjp: 0.114988 ms
+Average Time: 5.32068 ms
+Standard Deviation: 0.410375 ms
+Average Time vjp: 7.57505 ms
+Standard Deviation vjp: 0.272761 ms
+
+Average Time: 2.51766 ms
+Standard Deviation: 0.155297 ms
+Average Time vjp: 5.65544 ms
+Standard Deviation vjp: 0.129389 ms
+Average Time: 2.72113 ms
+Standard Deviation: 0.216774 ms
+Average Time vjp: 5.94935 ms
+Standard Deviation vjp: 0.0901753 ms
+Average Time: 3.19753 ms
+Standard Deviation: 0.352037 ms
+Average Time vjp: 6.95523 ms
+Standard Deviation vjp: 0.265882 ms
+Average Time: 5.92285 ms
+Standard Deviation: 1.00456 ms
+Average Time vjp: 8.33305 ms
+Standard Deviation vjp: 0.449133 ms
+Average Time: 13.4688 ms
+Standard Deviation: 2.42292 ms
+Average Time vjp: 10.0704 ms
+Standard Deviation vjp: 0.307488 ms
+Average Time: 28.9992 ms
+Standard Deviation: 0.667347 ms
+Average Time vjp: 11.1457 ms
+Standard Deviation vjp: 0.719669 ms
+
+Average Time: 0.583997 ms
+Standard Deviation: 0.0441305 ms
+Average Time vjp: 3.56662 ms
+Standard Deviation vjp: 0.0202433 ms
+Average Time: 0.728603 ms
+Standard Deviation: 0.0361393 ms
+Average Time vjp: 3.78503 ms
+Standard Deviation vjp: 0.0609044 ms
+Average Time: 0.892611 ms
+Standard Deviation: 0.0645606 ms
+Average Time vjp: 4.45503 ms
+Standard Deviation vjp: 0.699398 ms
+Average Time: 1.26156 ms
+Standard Deviation: 0.124051 ms
+Average Time vjp: 6.37563 ms
+Standard Deviation vjp: 0.890146 ms
+Average Time: 2.43639 ms
+Standard Deviation: 0.219016 ms
+Average Time vjp: 6.23661 ms
+Standard Deviation vjp: 0.239428 ms
+Average Time: 5.53364 ms
+Standard Deviation: 0.383245 ms
+Average Time vjp: 13.7421 ms
+Standard Deviation vjp: 0.1252 ms
+
+Average Time: 49.7666 ms
+Standard Deviation: 0.0768302 ms
+Average Time vjp: 372.374 ms
+Standard Deviation vjp: 0.0603492 ms
+Average Time: 50.6344 ms
+Standard Deviation: 0.470594 ms
+Average Time vjp: 376.136 ms
+Standard Deviation vjp: 1.49558 ms
+Average Time: 51.4732 ms
+Standard Deviation: 0.581545 ms
+Average Time vjp: 376.645 ms
+Standard Deviation vjp: 1.14003 ms
+Average Time: 53.2816 ms
+Standard Deviation: 0.634126 ms
+Average Time vjp: 380.197 ms
+Standard Deviation vjp: 0.934505 ms
+Average Time: 56.433 ms
+Standard Deviation: 1.022 ms
+Average Time vjp: 382.403 ms
+Standard Deviation vjp: 1.26145 ms
+Average Time: 63.9082 ms
+Standard Deviation: 0.784058 ms
+Average Time vjp: 392.376 ms
+Standard Deviation vjp: 1.48484 ms
+FINISHED at Mon Nov 27 18:21:30 CET 2023

@@ -176,12 +176,13 @@ void mops::sparse_accumulation_of_products_vjp(
             std::fill(remainder_grad_b_ptr, remainder_grad_b_ptr+size_remainder*size_second_dimension_b, static_cast<scalar_t>(0.0));
         }
 
-        scalar_t* grad_output_i = interleft_grad_o_ptr; 
-        scalar_t* grad_a_i = interleft_grad_a_ptr;
-        scalar_t* grad_b_i = interleft_grad_b_ptr;
-        scalar_t* a_i = interleft_a_ptr;
-        scalar_t* b_i = interleft_b_ptr;
+        #pragma omp parallel for
         for (size_t i = 0; i < size_first_dimension_interleft; i++){
+            scalar_t* grad_output_i = interleft_grad_o_ptr + i * size_second_dimension_o*simd_element_count;
+            scalar_t* grad_a_i = interleft_grad_a_ptr + i * size_second_dimension_a*simd_element_count;
+            scalar_t* grad_b_i = interleft_grad_b_ptr + i * size_second_dimension_b*simd_element_count;
+            scalar_t* a_i = interleft_a_ptr + i * size_second_dimension_a*simd_element_count;
+            scalar_t* b_i = interleft_b_ptr + i * size_second_dimension_b*simd_element_count;
             for (size_t j = 0; j < c_size; j++) {
                 scalar_t* grad_output_i_j = grad_output_i + p_o_ptr[j] * simd_element_count;      
                 std::array<scalar_t, simd_element_count> common_factor; 
@@ -198,19 +199,14 @@ void mops::sparse_accumulation_of_products_vjp(
                     for (size_t l = 0; l < simd_element_count; l++) grad_b_i_j[l] += common_factor[l] * a_i_j[l];
                 }
             }
-            grad_output_i += size_second_dimension_o * simd_element_count;
-            grad_a_i += size_second_dimension_a * simd_element_count;
-            grad_b_i += size_second_dimension_b * simd_element_count;
-            a_i += size_second_dimension_a * simd_element_count;
-            b_i += size_second_dimension_b * simd_element_count;
         }
 
         // Handle the remainder, i.e., the elements that do not fit inside a multiple of simd_element_count
-        grad_output_i = remainder_grad_o_ptr; 
-        grad_a_i = remainder_grad_a_ptr;
-        grad_b_i = remainder_grad_b_ptr;
-        a_i = remainder_a_ptr;
-        b_i = remainder_b_ptr;
+        scalar_t* grad_output_i = remainder_grad_o_ptr; 
+        scalar_t* grad_a_i = remainder_grad_a_ptr;
+        scalar_t* grad_b_i = remainder_grad_b_ptr;
+        scalar_t* a_i = remainder_a_ptr;
+        scalar_t* b_i = remainder_b_ptr;
         for (size_t i = 0; i < size_remainder; i++){
             for (size_t j = 0; j < c_size; j++) {                
                 scalar_t grad_output_j = grad_output_i[p_o_ptr[j]];
