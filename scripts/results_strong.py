@@ -19,8 +19,9 @@ x_axis = [1, 2, 4, 8, 16, 32]
 for i_operation, operation_name in enumerate(["hpe", "hpe_vjp", "opsa", "opsa_vjp", "sap", "sap_vjp", "opsaw", "opsaw_vjp", "sasaw", "sasaw_vjp"]):
     if i_operation % 2 == 0: plt.figure()
     plt.plot(x_axis, x_axis, color="black")
-    plt.plot(x_axis, results_per_category_omp[i_operation][0]/results_per_category_omp[i_operation], label=operation_name + " (OpenMP)")
-    plt.plot(x_axis, results_per_category_tbb[i_operation][0]/results_per_category_omp[i_operation], label=operation_name + " (TBB)")
+    style = "--" if "vjp" in operation_name else "-"
+    plt.plot(x_axis, results_per_category_omp[i_operation][0]/results_per_category_omp[i_operation], style, color="red", label=operation_name + " (OpenMP)")
+    plt.plot(x_axis, results_per_category_tbb[i_operation][0]/results_per_category_omp[i_operation], style, color="blue", label=operation_name + " (TBB)")
     plt.x_lim = (1, 32)
     plt.y_lim = (1, 32)
     plt.xscale('log')
