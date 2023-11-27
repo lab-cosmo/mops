@@ -1,12 +1,13 @@
 #include <algorithm>
 #include <stdexcept>
 #include <string>
+#include <vector>
+#include <execution>
+#include <numeric>
 
 #include "mops/opsa.hpp"
 #include "mops/checks.hpp"
 #include "mops/utils.hpp"
-
-#include <iostream>
 
 
 template<typename scalar_t>
@@ -37,22 +38,25 @@ void mops::outer_product_scatter_add(
 
     std::fill(output.data, output.data+output.shape[0]*output.shape[1]*output.shape[2], static_cast<scalar_t>(0.0));
 
-    #pragma omp parallel for 
-    for (size_t i=0; i < size_output; i++) {
-        scalar_t* output_ptr_i = output_ptr + i * size_output_inner;
-        // iterate over input indices that will write to the output index i
-        for (size_t i_inputs : write_list[i]) {
-            scalar_t* a_ptr_i_inputs = a_ptr + size_a * i_inputs;
-            scalar_t* b_ptr_i_inputs = b_ptr + size_b * i_inputs;
-            for (size_t a_j = 0; a_j < size_a; a_j++) {
-                scalar_t* output_ptr_i_aj = output_ptr_i + a_j * size_b;
-                scalar_t a_element = a_ptr_i_inputs[a_j];
-                for (size_t b_j = 0; b_j < size_b; b_j++) {
-                    output_ptr_i_aj[b_j] += a_element * b_ptr_i_inputs[b_j];
+    std::vector<size_t> indices(size_output);
+    std::iota(indices.begin(), indices.end(), 0);
+    std::for_each(std::execution::par, indices.begin(), indices.end(), 
+        [&](size_t i) {
+            scalar_t* output_ptr_i = output_ptr + i * size_output_inner;
+            for (size_t i_inputs : write_list[i]) {
+                scalar_t* a_ptr_i_inputs = a_ptr + size_a * i_inputs;
+                scalar_t* b_ptr_i_inputs = b_ptr + size_b * i_inputs;
+                for (size_t a_j = 0; a_j < size_a; a_j++) {
+                    scalar_t* output_ptr_i_aj = output_ptr_i + a_j * size_b;
+                    scalar_t a_element = a_ptr_i_inputs[a_j];
+                    for (size_t b_j = 0; b_j < size_b; b_j++) {
+                        output_ptr_i_aj[b_j] += a_element * b_ptr_i_inputs[b_j];
+                    }
                 }
             }
         }
-    }
+    );
+
 }
 
 template<typename scalar_t>
@@ -95,23 +99,27 @@ void mops::outer_product_scatter_add_vjp(
         scalar_t* b_ptr = B.data;
         int32_t* indices_output_ptr = indices_output.data;
 
-        #pragma omp parallel for
-        for (size_t i = 0; i < size_ab; i++) {
-            scalar_t* grad_output_ptr_i = grad_output_ptr + indices_output_ptr[i] * size_output_inner;
-            scalar_t* a_ptr_i = a_ptr + i * size_a;
-            scalar_t* b_ptr_i = b_ptr + i * size_b;
-            scalar_t* grad_a_ptr_i = grad_a_ptr + i * size_a;
-            scalar_t* grad_b_ptr_i = grad_b_ptr + i * size_b;
-            for (size_t a_j = 0; a_j < size_a; a_j++) {
-                scalar_t* grad_output_ptr_i_aj = grad_output_ptr_i + a_j * size_b;
-                scalar_t a_element = a_ptr_i[a_j];
-                scalar_t* grad_a_element = grad_a_ptr_i + a_j;
-                for (size_t b_j = 0; b_j < size_b; b_j++) {
-                    if (calculate_grad_A) *grad_a_element += grad_output_ptr_i_aj[b_j] * b_ptr_i[b_j];
-                    if (calculate_grad_B) grad_b_ptr_i[b_j] += grad_output_ptr_i_aj[b_j] * a_element;
+        std::vector<size_t> indices(size_ab);
+        std::iota(indices.begin(), indices.end(), 0);
+
+        std::for_each(std::execution::par, indices.begin(), indices.end(), 
+            [&](size_t i) {
+                scalar_t* grad_output_ptr_i = grad_output_ptr + indices_output_ptr[i] * size_output_inner;
+                scalar_t* a_ptr_i = a_ptr + i * size_a;
+                scalar_t* b_ptr_i = b_ptr + i * size_b;
+                scalar_t* grad_a_ptr_i = grad_a_ptr + i * size_a;
+                scalar_t* grad_b_ptr_i = grad_b_ptr + i * size_b;
+                for (size_t a_j = 0; a_j < size_a; a_j++) {
+                    scalar_t* grad_output_ptr_i_aj = grad_output_ptr_i + a_j * size_b;
+                    scalar_t a_element = a_ptr_i[a_j];
+                    scalar_t* grad_a_element = grad_a_ptr_i + a_j;
+                    for (size_t b_j = 0; b_j < size_b; b_j++) {
+                        if (calculate_grad_A) *grad_a_element += grad_output_ptr_i_aj[b_j] * b_ptr_i[b_j];
+                        if (calculate_grad_B) grad_b_ptr_i[b_j] += grad_output_ptr_i_aj[b_j] * a_element;
+                    }
                 }
             }
-        }
+        );
     }
 
 }

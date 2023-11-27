@@ -2,6 +2,9 @@
 #include <algorithm>
 #include <stdexcept>
 #include <string>
+#include <vector>
+#include <execution>
+#include <numeric>
 
 #include "mops/opsaw.hpp"
 #include "mops/checks.hpp"
@@ -44,23 +47,26 @@ void mops::outer_product_scatter_add_with_weights(
 
     std::fill(o_ptr, o_ptr+output.shape[0]*output.shape[1]*output.shape[2], static_cast<scalar_t>(0.0));
 
-    #pragma omp parallel for 
-    for (size_t i = 0; i < size_output_first_dimension; i++) {
-        scalar_t* o_ptr_e = o_ptr + i * size_ab;
-        // iterate over input indices that will write to the output index i
-        for (size_t e : write_list[i]) {
-            scalar_t* a_ptr_e = a_ptr + e * size_a;
-            scalar_t* b_ptr_e = b_ptr + e * size_b;
-            scalar_t* w_ptr_e = w_ptr + j_ptr[e] * size_b;
-            for (size_t a_idx = 0; a_idx < size_a; a_idx++) {
-                scalar_t current_a = a_ptr_e[a_idx];
-                scalar_t* o_ptr_e_a = o_ptr_e + a_idx * size_b;
-                for (size_t b_idx = 0; b_idx < size_b; b_idx++) {
-                    o_ptr_e_a[b_idx] += current_a * b_ptr_e[b_idx] * w_ptr_e[b_idx];
+    std::vector<size_t> indices(size_output_first_dimension);
+    std::iota(indices.begin(), indices.end(), 0);
+
+    std::for_each(std::execution::par, indices.begin(), indices.end(), 
+        [&](size_t i) {
+            scalar_t* o_ptr_e = o_ptr + i * size_ab;
+            for (size_t e : write_list[i]) {
+                scalar_t* a_ptr_e = a_ptr + e * size_a;
+                scalar_t* b_ptr_e = b_ptr + e * size_b;
+                scalar_t* w_ptr_e = w_ptr + j_ptr[e] * size_b;
+                for (size_t a_idx = 0; a_idx < size_a; a_idx++) {
+                    scalar_t current_a = a_ptr_e[a_idx];
+                    scalar_t* o_ptr_e_a = o_ptr_e + a_idx * size_b;
+                    for (size_t b_idx = 0; b_idx < size_b; b_idx++) {
+                        o_ptr_e_a[b_idx] += current_a * b_ptr_e[b_idx] * w_ptr_e[b_idx];
+                    }
                 }
             }
         }
-    }
+    );
 }
 
 
@@ -122,31 +128,34 @@ void mops::outer_product_scatter_add_with_weights_vjp(
         // get what indices in the first dimension of grad_output should be write to it
         std::vector<std::vector<size_t>> write_list = get_write_list(indices_W);
 
-        #pragma omp parallel for
-        for (size_t j = 0; j < size_output_first_dimension; j++) {
-            scalar_t* w_ptr_e = w_ptr + j * size_b;
-            // iterate over grad_output indices that will write to the grad_W index j
-            for (size_t e : write_list[j]) {
-                scalar_t* grad_o_ptr_e = grad_o_ptr + i_ptr[e] * size_a * size_b;
-                scalar_t* a_ptr_e = a_ptr + e * size_a;
-                scalar_t* b_ptr_e = b_ptr + e * size_b;
-                for (size_t a_idx = 0; a_idx < size_a; a_idx++) {
-                    scalar_t current_a = a_ptr_e[a_idx];
-                    scalar_t* grad_o_ptr_e_a = grad_o_ptr_e + a_idx * size_b;
-                    for (size_t b_idx = 0; b_idx < size_b; b_idx++) {
-                        scalar_t current_grad_o = grad_o_ptr_e_a[b_idx];
-                        if (calculate_grad_A) {
-                            grad_a_ptr[e * size_a + a_idx] += current_grad_o * b_ptr_e[b_idx] * w_ptr_e[b_idx];
-                        }
-                        if (calculate_grad_B) {
-                            grad_b_ptr[e * size_b + b_idx] += current_grad_o * current_a * w_ptr_e[b_idx];
-                        }
-                        if (calculate_grad_W) {
-                            grad_w_ptr[j * size_b + b_idx] += current_grad_o * current_a * b_ptr_e[b_idx];
+        std::vector<size_t> indices(size_output_first_dimension);
+        std::iota(indices.begin(), indices.end(), 0);
+
+        std::for_each(std::execution::par, indices.begin(), indices.end(), 
+            [&](size_t j) {
+                scalar_t* w_ptr_e = w_ptr + j * size_b;
+                for (size_t e : write_list[j]) {
+                    scalar_t* grad_o_ptr_e = grad_o_ptr + i_ptr[e] * size_a * size_b;
+                    scalar_t* a_ptr_e = a_ptr + e * size_a;
+                    scalar_t* b_ptr_e = b_ptr + e * size_b;
+                    for (size_t a_idx = 0; a_idx < size_a; a_idx++) {
+                        scalar_t current_a = a_ptr_e[a_idx];
+                        scalar_t* grad_o_ptr_e_a = grad_o_ptr_e + a_idx * size_b;
+                        for (size_t b_idx = 0; b_idx < size_b; b_idx++) {
+                            scalar_t current_grad_o = grad_o_ptr_e_a[b_idx];
+                            if (calculate_grad_A) {
+                                grad_a_ptr[e * size_a + a_idx] += current_grad_o * b_ptr_e[b_idx] * w_ptr_e[b_idx];
+                            }
+                            if (calculate_grad_B) {
+                                grad_b_ptr[e * size_b + b_idx] += current_grad_o * current_a * w_ptr_e[b_idx];
+                            }
+                            if (calculate_grad_W) {
+                                grad_w_ptr[j * size_b + b_idx] += current_grad_o * current_a * b_ptr_e[b_idx];
+                            }
                         }
                     }
                 }
             }
-        }
+        );
     }
 }

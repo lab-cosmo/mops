@@ -174,6 +174,9 @@ if(COMPILER_SUPPORTS_FUNROLL_LOOPS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funroll-loops")
 endif()
 
+find_package(TBB REQUIRED)
+target_link_libraries(mops PRIVATE TBB::tbb)
+
 
 if (MOPS_TESTS)
     enable_testing()

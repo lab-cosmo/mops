@@ -4,6 +4,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <vector>
+#include <algorithm>
+#include <numeric>
+#include <execution>
 
 #include "mops/tensor.hpp"
 
@@ -38,17 +41,18 @@ void interleave_tensor(mops::Tensor<scalar_t, 2> initial_data,
     size_t calculation_dim = initial_data.shape[1];
     scalar_t *initial_data_ptr = initial_data.data;
 
-#pragma omp parallel for
-    for (size_t i = 0; i < quotient; i++) {
+std::vector<size_t> indices(quotient);
+std::iota(indices.begin(), indices.end(), 0);
+std::for_each(std::execution::par, indices.begin(), indices.end(), 
+    [&](size_t i) {
         for (size_t j = 0; j < calculation_dim; j++) {
             for (size_t k = 0; k < simd_element_count; k++) {
-                interleft_data[i * calculation_dim * simd_element_count +
-                               j * simd_element_count + k] =
-                    initial_data_ptr[i * simd_element_count * calculation_dim +
-                                     k * calculation_dim + j];
+                interleft_data[i * calculation_dim * simd_element_count + j * simd_element_count + k] =
+                    initial_data_ptr[i * simd_element_count * calculation_dim + k * calculation_dim + j];
             }
         }
     }
+);
 
     for (size_t j = 0; j < calculation_dim; j++) {
         for (size_t k = 0; k < remainder; k++) {
@@ -70,17 +74,18 @@ void un_interleave_tensor(mops::Tensor<scalar_t, 2> output_data,
     size_t calculation_dim = output_data.shape[1];
     scalar_t *output_data_ptr = output_data.data;
 
-#pragma omp parallel for
-    for (size_t i = 0; i < quotient; i++) {
-        for (size_t j = 0; j < calculation_dim; j++) {
-            for (size_t k = 0; k < simd_element_count; k++) {
-                output_data_ptr[i * simd_element_count * calculation_dim +
-                                k * calculation_dim + j] =
-                    interleft_data[i * calculation_dim * simd_element_count +
-                                   j * simd_element_count + k];
+    std::vector<size_t> indices(quotient);
+    std::iota(indices.begin(), indices.end(), 0);
+    std::for_each(std::execution::par, indices.begin(), indices.end(), 
+        [&](size_t i) {
+            for (size_t j = 0; j < calculation_dim; j++) {
+                for (size_t k = 0; k < simd_element_count; k++) {
+                    output_data_ptr[i * simd_element_count * calculation_dim + k * calculation_dim + j] =
+                        interleft_data[i * calculation_dim * simd_element_count + j * simd_element_count + k];
+                }
             }
         }
-    }
+    );
 
     // Fill remainder_data
     for (size_t j = 0; j < calculation_dim; j++) {

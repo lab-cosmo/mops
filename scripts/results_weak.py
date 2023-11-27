@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Read the data from the file
-with open("weak_openmp.out", 'r') as file:
+with open("weak_tbb.out", 'r') as file:
     lines = file.readlines()
 
 # Filter out lines that contain 'Standard Deviation'

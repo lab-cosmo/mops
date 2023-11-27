@@ -1,11 +1,16 @@
 #include <chrono>
 #include <iostream>
 #include <vector>
+#include <tbb/task_scheduler_init.h>
 
 #include "mops.hpp"
 #include "utils.hpp"
 
 int main(int argc, char **argv) {
+    const char* omp_num_threads_str = std::getenv("OMP_NUM_THREADS");
+    int number_of_threads = omp_num_threads_str ? std::stoi(omp_num_threads_str) : tbb::task_scheduler_init::automatic;
+    tbb::task_scheduler_init init(number_of_threads);
+
     size_t size = 1000;
     if (argc > 2) {
         std::cout << "This program only takes one command-line argument\n";
