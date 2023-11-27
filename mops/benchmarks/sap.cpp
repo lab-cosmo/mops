@@ -1,11 +1,11 @@
-#include <iostream>
 #include <chrono>
+#include <iostream>
 #include <vector>
 
 #include "mops.hpp"
 #include "utils.hpp"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     size_t size = 1000;
     if (argc > 2) {
         std::cout << "This program only takes one command-line argument\n";
@@ -42,9 +42,8 @@ int main(int argc, char** argv) {
         auto start = std::chrono::high_resolution_clock::now();
         mops::sparse_accumulation_of_products<double>(
             {O.data(), {size, 100}}, {A.data(), {size, 13}},
-            {B.data(), {size, 7}}, {C.data(), {900}},
-            {indices_A.data(), {900}}, {indices_B.data(), {900}},
-            {indices_output.data(), {900}});
+            {B.data(), {size, 7}}, {C.data(), {900}}, {indices_A.data(), {900}},
+            {indices_B.data(), {900}}, {indices_output.data(), {900}});
         auto end = std::chrono::high_resolution_clock::now();
 
         std::chrono::duration<double, std::milli> elapsed = end - start;
@@ -67,9 +66,8 @@ int main(int argc, char** argv) {
         mops::sparse_accumulation_of_products_vjp<double>(
             {grad_A.data(), {size, 13}}, {grad_B.data(), {size, 7}},
             {grad_output.data(), {size, 100}}, {A.data(), {size, 13}},
-            {B.data(), {size, 7}}, {C.data(), {900}},
-            {indices_A.data(), {900}}, {indices_B.data(), {900}},
-            {indices_output.data(), {900}});
+            {B.data(), {size, 7}}, {C.data(), {900}}, {indices_A.data(), {900}},
+            {indices_B.data(), {900}}, {indices_output.data(), {900}});
         auto end = std::chrono::high_resolution_clock::now();
 
         std::chrono::duration<double, std::milli> elapsed = end - start;

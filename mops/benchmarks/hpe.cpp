@@ -1,11 +1,11 @@
-#include <vector>
 #include <chrono>
 #include <iostream>
+#include <vector>
 
 #include "mops.hpp"
 #include "utils.hpp"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     size_t output_size = 1000;
     if (argc > 2) {
         std::cout << "This program only takes one command-line argument\n";
@@ -44,7 +44,6 @@ int main(int argc, char** argv) {
     std::cout << "Average Time: " << mean << " ms\n";
     std::cout << "Standard Deviation: " << stddev << " ms\n";
 
-
     auto grad_output = std::vector<double>(output_size);
     fill_vector_random_floats(grad_output);
 
@@ -53,8 +52,10 @@ int main(int argc, char** argv) {
     for (int i = 0; i < 100; i++) {
         auto start = std::chrono::high_resolution_clock::now();
         mops::homogeneous_polynomial_evaluation_vjp<double>(
-            {grad_A.data(), {output_size, 2000}}, {grad_output.data(), {output_size}}, {A.data(), {output_size, 2000}},
-            {C.data(), {100000}}, {indices_A.data(), {100000, 4}});
+            {grad_A.data(), {output_size, 2000}},
+            {grad_output.data(), {output_size}},
+            {A.data(), {output_size, 2000}}, {C.data(), {100000}},
+            {indices_A.data(), {100000, 4}});
         auto end = std::chrono::high_resolution_clock::now();
 
         std::chrono::duration<double, std::milli> elapsed = end - start;

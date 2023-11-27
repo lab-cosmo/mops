@@ -1,11 +1,11 @@
 #include <chrono>
-#include <vector>
 #include <iostream>
+#include <vector>
 
 #include "mops.hpp"
 #include "utils.hpp"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     size_t output_size = 1000;
     if (argc > 2) {
         std::cout << "This program only takes one command-line argument\n";
@@ -40,7 +40,8 @@ int main(int argc, char** argv) {
         mops::outer_product_scatter_add_with_weights<double>(
             {O.data(), {output_size, 13, 20}}, {A.data(), {input_size, 13}},
             {B.data(), {input_size, 20}}, {W.data(), {output_size, 20}},
-            {indices_W.data(), {input_size}}, {indices_output.data(), {input_size}});
+            {indices_W.data(), {input_size}},
+            {indices_output.data(), {input_size}});
         auto end = std::chrono::high_resolution_clock::now();
 
         std::chrono::duration<double, std::milli> elapsed = end - start;
@@ -62,8 +63,10 @@ int main(int argc, char** argv) {
     for (int i = 0; i < 100; i++) {
         auto start = std::chrono::high_resolution_clock::now();
         mops::outer_product_scatter_add_with_weights_vjp<double>(
-            {grad_A.data(), {input_size, 13}}, {grad_B.data(), {input_size, 20}},
-            {grad_W.data(), {output_size, 20}}, {grad_output.data(), {output_size, 13, 20}},
+            {grad_A.data(), {input_size, 13}},
+            {grad_B.data(), {input_size, 20}},
+            {grad_W.data(), {output_size, 20}},
+            {grad_output.data(), {output_size, 13, 20}},
             {A.data(), {input_size, 13}}, {B.data(), {input_size, 20}},
             {W.data(), {output_size, 20}}, {indices_W.data(), {input_size}},
             {indices_output.data(), {input_size}});

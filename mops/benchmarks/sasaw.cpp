@@ -1,11 +1,11 @@
-#include <iostream>
 #include <chrono>
+#include <iostream>
 #include <vector>
 
 #include "mops.hpp"
 #include "utils.hpp"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     size_t output_size = 1000;
     if (argc > 2) {
         std::cout << "This program only takes one command-line argument\n";
@@ -51,10 +51,11 @@ int main(int argc, char** argv) {
     for (int i = 0; i < 100; i++) {
         auto start = std::chrono::high_resolution_clock::now();
         mops::sparse_accumulation_scatter_add_with_weights<double>(
-            {output.data(), {output_size, 100, 32}}, {A.data(), {input_size, 13}},
-            {B.data(), {input_size, 32}}, {C.data(), {900}},
-            {W.data(), {output_size, 7, 32}}, {indices_A.data(), {900}},
-            {indices_W_1.data(), {input_size}}, {indices_W_2.data(), {900}},
+            {output.data(), {output_size, 100, 32}},
+            {A.data(), {input_size, 13}}, {B.data(), {input_size, 32}},
+            {C.data(), {900}}, {W.data(), {output_size, 7, 32}},
+            {indices_A.data(), {900}}, {indices_W_1.data(), {input_size}},
+            {indices_W_2.data(), {900}},
             {indices_output_1.data(), {input_size}},
             {indices_output_2.data(), {900}});
         auto end = std::chrono::high_resolution_clock::now();
@@ -78,12 +79,15 @@ int main(int argc, char** argv) {
     for (int i = 0; i < 100; i++) {
         auto start = std::chrono::high_resolution_clock::now();
         mops::sparse_accumulation_scatter_add_with_weights_vjp<double>(
-            {grad_A.data(), {input_size, 13}}, {grad_B.data(), {input_size, 32}},
-            {grad_W.data(), {output_size, 7, 32}}, {grad_output.data(), {output_size, 100, 32}},
+            {grad_A.data(), {input_size, 13}},
+            {grad_B.data(), {input_size, 32}},
+            {grad_W.data(), {output_size, 7, 32}},
+            {grad_output.data(), {output_size, 100, 32}},
             {A.data(), {input_size, 13}}, {B.data(), {input_size, 32}},
             {C.data(), {900}}, {W.data(), {output_size, 7, 32}},
             {indices_A.data(), {900}}, {indices_W_1.data(), {input_size}},
-            {indices_W_2.data(), {900}}, {indices_output_1.data(), {input_size}},
+            {indices_W_2.data(), {900}},
+            {indices_output_1.data(), {input_size}},
             {indices_output_2.data(), {900}});
         auto end = std::chrono::high_resolution_clock::now();
 
