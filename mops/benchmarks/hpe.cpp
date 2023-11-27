@@ -5,8 +5,18 @@
 #include "mops.hpp"
 #include "utils.hpp"
 
-int main() {
-    auto A = std::vector<double>(1000 * 2000);
+int main(int argc, char** argv) {
+    size_t output_size = 1000;
+    if (argc > 2) {
+        std::cout << "This program only takes one command-line argument\n";
+        return 1;
+    } else if (argc == 2) {
+        output_size = std::stoi(argv[1]);
+    } else {
+        // Use default value of 1000
+    }
+
+    auto A = std::vector<double>(output_size * 2000);
     fill_vector_random_floats(A);
 
     auto C = std::vector<double>(100000);
@@ -15,13 +25,13 @@ int main() {
     auto indices_A = std::vector<int>(100000 * 4);
     fill_vector_random_integers(indices_A, 2000);
 
-    auto output = std::vector<double>(1000);
+    auto output = std::vector<double>(output_size);
 
-    std::vector<double> execution_times(1000);
-    for (int i = 0; i < 1000; i++) {
+    std::vector<double> execution_times(100);
+    for (int i = 0; i < 100; i++) {
         auto start = std::chrono::high_resolution_clock::now();
         mops::homogeneous_polynomial_evaluation<double>(
-            {output.data(), {1000}}, {A.data(), {1000, 2000}},
+            {output.data(), {output_size}}, {A.data(), {output_size, 2000}},
             {C.data(), {100000}}, {indices_A.data(), {100000, 4}});
         auto end = std::chrono::high_resolution_clock::now();
 
@@ -35,15 +45,15 @@ int main() {
     std::cout << "Standard Deviation: " << stddev << " ms\n";
 
 
-    auto grad_output = std::vector<double>(1000);
+    auto grad_output = std::vector<double>(output_size);
     fill_vector_random_floats(grad_output);
 
-    auto grad_A = std::vector<double>(1000 * 2000);
+    auto grad_A = std::vector<double>(output_size * 2000);
 
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 100; i++) {
         auto start = std::chrono::high_resolution_clock::now();
         mops::homogeneous_polynomial_evaluation_vjp<double>(
-            {grad_A.data(), {1000, 2000}}, {grad_output.data(), {1000}}, {A.data(), {1000, 2000}},
+            {grad_A.data(), {output_size, 2000}}, {grad_output.data(), {output_size}}, {A.data(), {output_size, 2000}},
             {C.data(), {100000}}, {indices_A.data(), {100000, 4}});
         auto end = std::chrono::high_resolution_clock::now();
 
