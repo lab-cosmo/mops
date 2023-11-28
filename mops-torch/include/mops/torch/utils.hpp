@@ -32,6 +32,8 @@ static mops::Tensor<T, 3> torch_to_mops_3d(torch::Tensor tensor) {
 
 void check_all_same_device(std::vector<torch::Tensor> tensors);
 
-void check_all_same_dtype(std::vector<torch::Tensor> tensors);
+void check_floating_dtype(std::vector<torch::Tensor> tensors);
+
+void check_integer_dtype(std::vector<torch::Tensor> tensors);
 
 void check_number_of_dimensions(torch::Tensor tensor, int64_t expected, std::string tensor_name, std::string operation_name);

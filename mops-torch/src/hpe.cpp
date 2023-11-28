@@ -19,7 +19,8 @@ torch::Tensor HomogeneousPolynomialEvaluation::forward(
     torch::Tensor indices_A
 ) {
     check_all_same_device({A, C, indices_A});
-    check_all_same_dtype({A, C});
+    check_floating_dtype({A, C});
+    check_integer_dtype({indices_A});
     check_number_of_dimensions(A, 2, "A", "homogeneous_polynomial_evaluation");
     check_number_of_dimensions(C, 1, "C", "homogeneous_polynomial_evaluation");
     check_number_of_dimensions(indices_A, 2, "indices_A", "homogeneous_polynomial_evaluation");

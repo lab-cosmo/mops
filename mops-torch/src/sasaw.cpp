@@ -35,7 +35,8 @@ torch::Tensor SparseAccumulationScatterAddWithWeights::forward(
     int64_t output_size
 ) {
     check_all_same_device({A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2});
-    check_all_same_dtype({A, B, C, W});
+    check_floating_dtype({A, B, C, W});
+    check_integer_dtype({indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2});
     check_number_of_dimensions(A, 2, "A", "sparse_accumulation_scatter_add_with_weights");
     check_number_of_dimensions(B, 2, "B", "sparse_accumulation_scatter_add_with_weights");
     check_number_of_dimensions(W, 3, "W", "sparse_accumulation_scatter_add_with_weights");
