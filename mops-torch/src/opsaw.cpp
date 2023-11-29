@@ -14,19 +14,14 @@ torch::Tensor OuterProductScatterAddWithWeights::forward(
     torch::autograd::AutogradContext *ctx, torch::Tensor A, torch::Tensor B,
     torch::Tensor W, torch::Tensor indices_W, torch::Tensor indices_output) {
     check_all_same_device({A, B, W, indices_W, indices_output});
-    check_all_same_dtype({A, B, W});
-    check_number_of_dimensions(A, 2, "A",
-                               "outer_product_scatter_add_with_weights");
-    check_number_of_dimensions(B, 2, "B",
-                               "outer_product_scatter_add_with_weights");
-    check_number_of_dimensions(W, 3, "W",
-                               "outer_product_scatter_add_with_weights");
-    check_number_of_dimensions(indices_W, 1, "indices_W",
-                               "outer_product_scatter_add_with_weights");
-    check_number_of_dimensions(indices_output, 1, "indices_output",
-                               "outer_product_scatter_add_with_weights");
-    // Shape consistency checks are performed inside
-    // mops::outer_product_scatter_add_with_weights
+    check_floating_dtype({A, B, W});
+    check_integer_dtype({indices_W, indices_output});
+    check_number_of_dimensions(A, 2, "A", "outer_product_scatter_add_with_weights");
+    check_number_of_dimensions(B, 2, "B", "outer_product_scatter_add_with_weights");
+    check_number_of_dimensions(W, 3, "W", "outer_product_scatter_add_with_weights");
+    check_number_of_dimensions(indices_W, 1, "indices_W", "outer_product_scatter_add_with_weights");
+    check_number_of_dimensions(indices_output, 1, "indices_output", "outer_product_scatter_add_with_weights");
+    // Shape consistency checks are performed inside mops::outer_product_scatter_add_with_weights
 
     torch::Tensor output;
     if (A.device().is_cpu()) {

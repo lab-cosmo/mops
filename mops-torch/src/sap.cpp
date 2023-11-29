@@ -16,7 +16,8 @@ torch::Tensor SparseAccumulationOfProducts::forward(
     torch::Tensor C, torch::Tensor indices_A, torch::Tensor indices_B,
     torch::Tensor indices_output, int64_t output_size) {
     check_all_same_device({A, B, C, indices_A, indices_B, indices_output});
-    check_all_same_dtype({A, B, C});
+    check_floating_dtype({A, B, C});
+    check_integer_dtype({indices_A, indices_B, indices_output});
     check_number_of_dimensions(A, 2, "A", "sparse_accumulation_of_products");
     check_number_of_dimensions(B, 2, "B", "sparse_accumulation_of_products");
     check_number_of_dimensions(indices_A, 1, "indices_A",
