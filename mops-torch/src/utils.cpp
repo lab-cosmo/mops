@@ -17,25 +17,29 @@ void check_all_same_device(std::vector<torch::Tensor> tensors) {
 }
 
 void check_floating_dtype(std::vector<torch::Tensor> tensors) {
-    if (tensors.size() == 0) return;
+    if (tensors.size() == 0)
+        return;
     auto dtype = tensors[0].dtype();
-    if ((dtype != torch::kF64) && (dtype != torch::kF32)) C10_THROW_ERROR(
-        TypeError,
-        "Found dtype" + std::string(dtype.name()) + ", only float32 and float64 are supported"
-    );
-        if (tensor.dtype() != dtype) C10_THROW_ERROR(
-            TypeError,
-            "All floating point tensors must be of the same dtype, found " + std::string(tensor.dtype().name()) + " and " + std::string(dtype.name())
-        );
+    if ((dtype != torch::kF64) && (dtype != torch::kF32))
+        C10_THROW_ERROR(TypeError,
+                        "Found dtype" + std::string(dtype.name()) +
+                            ", only float32 and float64 are supported");
+    for (auto tensor : tensors) {
+        if (tensor.dtype() != dtype)
+            C10_THROW_ERROR(
+                TypeError,
+                "All floating point tensors must be of the same dtype, found " +
+                    std::string(tensor.dtype().name()) + " and " +
+                    std::string(dtype.name()));
     }
 }
 
 void check_integer_dtype(std::vector<torch::Tensor> tensors) {
     for (auto tensor : tensors) {
-        if (tensor.dtype() != torch::kI32) C10_THROW_ERROR(
-            TypeError,
-            "All index tensors must be of type int32, found " + std::string(tensor.dtype().name())
-        );
+        if (tensor.dtype() != torch::kI32)
+            C10_THROW_ERROR(TypeError,
+                            "All index tensors must be of type int32, found " +
+                                std::string(tensor.dtype().name()));
     }
 }
 

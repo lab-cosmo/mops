@@ -14,30 +14,34 @@ torch::Tensor mops_torch::sparse_accumulation_scatter_add_with_weights(
 }
 
 torch::Tensor SparseAccumulationScatterAddWithWeights::forward(
-    torch::autograd::AutogradContext *ctx,
-    torch::Tensor A,
-    torch::Tensor B,
-    torch::Tensor C,
-    torch::Tensor W,
-    torch::Tensor indices_A,
-    torch::Tensor indices_W_1,
-    torch::Tensor indices_W_2,
-    torch::Tensor indices_output_1,
-    torch::Tensor indices_output_2,
-    int64_t output_size
-) {
-    check_all_same_device({A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2});
+    torch::autograd::AutogradContext *ctx, torch::Tensor A, torch::Tensor B,
+    torch::Tensor C, torch::Tensor W, torch::Tensor indices_A,
+    torch::Tensor indices_W_1, torch::Tensor indices_W_2,
+    torch::Tensor indices_output_1, torch::Tensor indices_output_2,
+    int64_t output_size) {
+    check_all_same_device({A, B, C, W, indices_A, indices_W_1, indices_W_2,
+                           indices_output_1, indices_output_2});
     check_floating_dtype({A, B, C, W});
-    check_integer_dtype({indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2});
-    check_number_of_dimensions(A, 2, "A", "sparse_accumulation_scatter_add_with_weights");
-    check_number_of_dimensions(B, 2, "B", "sparse_accumulation_scatter_add_with_weights");
-    check_number_of_dimensions(W, 3, "W", "sparse_accumulation_scatter_add_with_weights");
-    check_number_of_dimensions(indices_A, 1, "indices_A", "sparse_accumulation_scatter_add_with_weights");
-    check_number_of_dimensions(indices_W_1, 1, "indices_W_1", "sparse_accumulation_scatter_add_with_weights");
-    check_number_of_dimensions(indices_W_2, 1, "indices_W_2", "sparse_accumulation_scatter_add_with_weights");
-    check_number_of_dimensions(indices_output_1, 1, "indices_output_1", "sparse_accumulation_scatter_add_with_weights");
-    check_number_of_dimensions(indices_output_2, 1, "indices_output_2", "sparse_accumulation_scatter_add_with_weights");
-    // Shape consistency checks are performed inside mops::sparse_accumulation_scatter_add_with_weights
+    check_integer_dtype({indices_A, indices_W_1, indices_W_2, indices_output_1,
+                         indices_output_2});
+    check_number_of_dimensions(A, 2, "A",
+                               "sparse_accumulation_scatter_add_with_weights");
+    check_number_of_dimensions(B, 2, "B",
+                               "sparse_accumulation_scatter_add_with_weights");
+    check_number_of_dimensions(W, 3, "W",
+                               "sparse_accumulation_scatter_add_with_weights");
+    check_number_of_dimensions(indices_A, 1, "indices_A",
+                               "sparse_accumulation_scatter_add_with_weights");
+    check_number_of_dimensions(indices_W_1, 1, "indices_W_1",
+                               "sparse_accumulation_scatter_add_with_weights");
+    check_number_of_dimensions(indices_W_2, 1, "indices_W_2",
+                               "sparse_accumulation_scatter_add_with_weights");
+    check_number_of_dimensions(indices_output_1, 1, "indices_output_1",
+                               "sparse_accumulation_scatter_add_with_weights");
+    check_number_of_dimensions(indices_output_2, 1, "indices_output_2",
+                               "sparse_accumulation_scatter_add_with_weights");
+    // Shape consistency checks are performed inside
+    // mops::sparse_accumulation_scatter_add_with_weights
 
     torch::Tensor output;
     if (A.device().is_cpu()) {
