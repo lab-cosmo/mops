@@ -1,5 +1,5 @@
-#ifndef MOPS_TORCH_OPSA_H
-#define MOPS_TORCH_OPSA_H
+#ifndef MOPS_TORCH_SAP_H
+#define MOPS_TORCH_SAP_H
 
 #include <torch/script.h>
 
@@ -8,19 +8,25 @@
 namespace mops_torch {
 
 /// TODO
-torch::Tensor outer_product_scatter_add(
+torch::Tensor sparse_accumulation_of_products(
     torch::Tensor A,
     torch::Tensor B,
+    torch::Tensor C,
+    torch::Tensor indices_A,
+    torch::Tensor indices_B,
     torch::Tensor indices_output,
     int64_t output_size
 );
 
-class OuterProductScatterAdd: public torch::autograd::Function<mops_torch::OuterProductScatterAdd> {
+class SparseAccumulationOfProducts: public torch::autograd::Function<mops_torch::SparseAccumulationOfProducts> {
 public:
     static torch::Tensor forward(
         torch::autograd::AutogradContext *ctx,
         torch::Tensor A,
         torch::Tensor B,
+        torch::Tensor C,
+        torch::Tensor indices_A,
+        torch::Tensor indices_B,
         torch::Tensor indices_output,
         int64_t output_size
     );
