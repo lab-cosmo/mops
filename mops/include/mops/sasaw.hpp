@@ -64,7 +64,6 @@ void MOPS_EXPORT sparse_accumulation_scatter_add_with_weights(
     Tensor<int, 1> indices_W_1, Tensor<int, 1> indices_W_2,
     Tensor<int, 1> indices_output_1, Tensor<int, 1> indices_output_2);
 }
-}
 
 // these templates will be precompiled and provided in the mops library
 extern template void sparse_accumulation_scatter_add_with_weights_vjp(
