@@ -1,14 +1,12 @@
+import mops.torch
 import torch
 
-import mops.torch
 from mops import reference_implementations as ref
-
 
 torch.manual_seed(0xDEADBEEF)
 
 
 def test_opsa():
-
     A = torch.rand(100, 20)
     B = torch.rand(100, 5)
 

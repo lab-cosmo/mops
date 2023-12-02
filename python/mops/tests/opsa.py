@@ -13,8 +13,12 @@ def test_opsa():
 
     indices_output = np.sort(np.random.randint(10, size=(100,)))
 
-    reference = ref.outer_product_scatter_add(A, B, indices_output, np.max(indices_output) + 1)
-    actual = mops.outer_product_scatter_add(A, B, indices_output, np.max(indices_output) + 1)
+    reference = ref.outer_product_scatter_add(
+        A, B, indices_output, np.max(indices_output) + 1
+    )
+    actual = mops.outer_product_scatter_add(
+        A, B, indices_output, np.max(indices_output) + 1
+    )
     assert np.allclose(reference, actual)
 
 
@@ -26,8 +30,12 @@ def test_opsa_no_neighbors():
     # substitute all 1s by 2s so as to test the no-neighbor case
     indices_output[indices_output == 1] = 2
 
-    reference = ref.outer_product_scatter_add(A, B, indices_output, np.max(indices_output) + 1)
-    actual = mops.outer_product_scatter_add(A, B, indices_output, np.max(indices_output) + 1)
+    reference = ref.outer_product_scatter_add(
+        A, B, indices_output, np.max(indices_output) + 1
+    )
+    actual = mops.outer_product_scatter_add(
+        A, B, indices_output, np.max(indices_output) + 1
+    )
     assert np.allclose(reference, actual)
 
     # just checking that the jvp runs

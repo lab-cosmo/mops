@@ -7,15 +7,22 @@
 #include "mops/exports.h"
 
 namespace mops {
-    void store_error_message(std::string message);
-    MOPS_EXPORT const std::string& get_last_error_message();
-}
+void store_error_message(std::string message);
+MOPS_EXPORT const std::string &get_last_error_message();
+} // namespace mops
 
-#define MOPS_CATCH_EXCEPTIONS(__code__)                                                     \
-    do {                                                                                    \
-        try { __code__; return 0; }                                                         \
-        catch (const std::exception& e) { mops::store_error_message(e.what()); return 1; }  \
-        catch (...) { mops::store_error_message("unknown error"); return 2; }               \
+#define MOPS_CATCH_EXCEPTIONS(__code__)                                        \
+    do {                                                                       \
+        try {                                                                  \
+            __code__;                                                          \
+            return 0;                                                          \
+        } catch (const std::exception &e) {                                    \
+            mops::store_error_message(e.what());                               \
+            return 1;                                                          \
+        } catch (...) {                                                        \
+            mops::store_error_message("unknown error");                        \
+            return 2;                                                          \
+        }                                                                      \
     } while (false)
 
 #endif
