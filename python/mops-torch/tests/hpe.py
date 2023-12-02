@@ -1,5 +1,6 @@
-import mops.torch
 import torch
+
+import mops.torch
 from mops.reference_implementations import homogeneous_polynomial_evaluation as ref_hpe
 
 torch.manual_seed(0xDEADBEEF)
@@ -10,7 +11,11 @@ def test_hpe():
     C = torch.rand(200)
     indices_A = torch.randint(20, size=(200, 4), dtype=torch.int32)
 
-    reference = torch.tensor(ref_hpe(A.numpy(), C.numpy(), indices_A.numpy()))
+    reference = torch.tensor(
+        ref_hpe(
+            A.numpy(), C.numpy(), indices_A.numpy()
+        )
+    )
     actual = mops.torch.homogeneous_polynomial_evaluation(A, C, indices_A)
     assert torch.allclose(reference, actual)
 

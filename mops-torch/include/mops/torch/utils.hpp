@@ -16,8 +16,7 @@ static mops::Tensor<T, 2> torch_to_mops_2d(torch::Tensor tensor) {
     assert(tensor.sizes().size() == 2);
     return {
         tensor.data_ptr<T>(),
-        {static_cast<size_t>(tensor.size(0)),
-         static_cast<size_t>(tensor.size(1))},
+        {static_cast<size_t>(tensor.size(0)), static_cast<size_t>(tensor.size(1))},
     };
 }
 
@@ -26,9 +25,7 @@ static mops::Tensor<T, 3> torch_to_mops_3d(torch::Tensor tensor) {
     assert(tensor.sizes().size() == 3);
     return {
         tensor.data_ptr<T>(),
-        {static_cast<size_t>(tensor.size(0)),
-         static_cast<size_t>(tensor.size(1)),
-         static_cast<size_t>(tensor.size(2))},
+        {static_cast<size_t>(tensor.size(0)), static_cast<size_t>(tensor.size(1)), static_cast<size_t>(tensor.size(2))},
     };
 }
 
@@ -38,6 +35,4 @@ void check_floating_dtype(std::vector<torch::Tensor> tensors);
 
 void check_integer_dtype(std::vector<torch::Tensor> tensors);
 
-void check_number_of_dimensions(torch::Tensor tensor, int64_t expected,
-                                std::string tensor_name,
-                                std::string operation_name);
+void check_number_of_dimensions(torch::Tensor tensor, int64_t expected, std::string tensor_name, std::string operation_name);
