@@ -1,6 +1,5 @@
-import torch
-
 import mops.torch
+import torch
 from mops.reference_implementations import sparse_accumulation_of_products as ref_sap
 
 torch.manual_seed(0xDEADBEEF)
@@ -17,10 +16,18 @@ def test_sap():
 
     reference = torch.tensor(
         ref_sap(
-            A.numpy(), B.numpy(), C.numpy(), indices_A.numpy(), indices_B.numpy(), indices_output.numpy(), output_size
+            A.numpy(),
+            B.numpy(),
+            C.numpy(),
+            indices_A.numpy(),
+            indices_B.numpy(),
+            indices_output.numpy(),
+            output_size,
         )
     )
-    actual = mops.torch.sparse_accumulation_of_products(A, B, C, indices_A, indices_B, indices_output, output_size)
+    actual = mops.torch.sparse_accumulation_of_products(
+        A, B, C, indices_A, indices_B, indices_output, output_size
+    )
     assert torch.allclose(reference, actual)
 
 
