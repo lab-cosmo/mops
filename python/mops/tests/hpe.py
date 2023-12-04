@@ -1,11 +1,10 @@
 import numpy as np
-
-np.random.seed(0xDEADBEEF)
-
 import pytest
 from mops.reference_implementations import homogeneous_polynomial_evaluation as ref_hpe
 
 from mops import homogeneous_polynomial_evaluation as hpe
+
+np.random.seed(0xDEADBEEF)
 
 
 def test_hpe():
