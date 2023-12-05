@@ -1,43 +1,37 @@
 import numpy as np
 import pytest
+from mops.reference_implementations import outer_product_scatter_add as ref_opsa
 
 import mops
-from mops import reference_implementations as ref
+from mops import outer_product_scatter_add as opsa
 
 np.random.seed(0xDEADBEEF)
 
-np.random.seed(0xDEADBEEF)
 
-
-def test_opsa():
+@pytest.fixture
+def valid_arguments():
     A = np.random.rand(100, 20)
     B = np.random.rand(100, 5)
+    indices_output = np.random.randint(10, size=(100))
+    output_size = 20
+    return A, B, indices_output, output_size
 
-    indices_output = np.sort(np.random.randint(10, size=(100,)))
 
-    reference = ref.outer_product_scatter_add(
-        A, B, indices_output, np.max(indices_output) + 1
-    )
-    actual = mops.outer_product_scatter_add(
-        A, B, indices_output, np.max(indices_output) + 1
-    )
+def test_opsa(valid_arguments):
+    A, B, indices_output, output_size = valid_arguments
+
+    reference = ref_opsa(A, B, indices_output, output_size)
+    actual = opsa(A, B, indices_output, output_size)
     assert np.allclose(reference, actual)
 
 
-def test_opsa_no_neighbors():
-    A = np.random.rand(100, 20)
-    B = np.random.rand(100, 5)
-
-    indices_output = np.sort(np.random.randint(10, size=(100,)))
+def test_opsa_no_neighbors(valid_arguments):
+    A, B, indices_output, output_size = valid_arguments
     # substitute all 1s by 2s so as to test the no-neighbor case
     indices_output[indices_output == 1] = 2
 
-    reference = ref.outer_product_scatter_add(
-        A, B, indices_output, np.max(indices_output) + 1
-    )
-    actual = mops.outer_product_scatter_add(
-        A, B, indices_output, np.max(indices_output) + 1
-    )
+    reference = ref_opsa(A, B, indices_output, output_size)
+    actual = opsa(A, B, indices_output, output_size)
     assert np.allclose(reference, actual)
 
     # just checking that the jvp runs
@@ -64,9 +58,49 @@ def test_opsa_no_neighbors():
     assert grad_B.shape == B.shape
 
 
-def test_opsa_wrong_type():
-    message = (
-        "`A` must be a 2D array in outer_product_scatter_add, got a 1D array instead"
-    )
-    with pytest.raises(ValueError, match=message):
-        mops.outer_product_scatter_add(np.array([1]), 2, 3, 4)
+def test_opsa_wrong_type(valid_arguments):
+    A, B, indices_output, output_size = valid_arguments
+    A = A.astype(np.int32)
+
+    with pytest.raises(
+        TypeError, match="Wrong dtype for A in outer_product_scatter_add: got int32"
+    ):
+        opsa(A, B, indices_output, output_size)
+
+
+def test_opsa_wrong_number_of_dimensions(valid_arguments):
+    A, B, indices_output, output_size = valid_arguments
+    A = A[..., np.newaxis]
+
+    with pytest.raises(
+        ValueError,
+        match="`A` must be a 2D array in "
+        "outer_product_scatter_add, got a 3D array instead",
+    ):
+        opsa(A, B, indices_output, output_size)
+
+
+def test_opsa_size_mismatch(valid_arguments):
+    A, B, indices_output, output_size = valid_arguments
+    indices_output = indices_output[:5]
+
+    with pytest.raises(
+        mops.status.MopsError,
+        match="Dimension mismatch: the sizes of A along "
+        "dimension 0 and indices_output along dimension 0 must match in opsa",
+    ):
+        opsa(A, B, indices_output, output_size)
+
+
+def test_opsa_out_of_bounds(valid_arguments):
+    A, B, indices_output, output_size = valid_arguments
+    indices_output[0] = A.shape[1]
+
+    with pytest.raises(
+        mops.status.MopsError,
+        match="Index array indices_output in operation opsa "
+        "contains elements up to 20; "
+        "this would cause out-of-bounds accesses. With the provided "
+        "parameters, it can only contain elements up to 19",
+    ):
+        opsa(A, B, indices_output, output_size)

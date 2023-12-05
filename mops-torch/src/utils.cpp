@@ -49,7 +49,7 @@ void check_number_of_dimensions(torch::Tensor tensor, int64_t expected,
     if (tensor.dim() != expected)
         C10_THROW_ERROR(ValueError, "Expected " + tensor_name + " to have " +
                                         std::to_string(expected) +
-                                        " dimensions, in " + operation_name +
-                                        ", found" +
+                                        " dimensions in " + operation_name +
+                                        ", found " +
                                         std::to_string(tensor.dim()));
 }

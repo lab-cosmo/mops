@@ -12,18 +12,16 @@ def test_opsa():
 
     output_size = 10
 
-    indices = torch.sort(
-        torch.randint(output_size, size=(100,), dtype=torch.int32)
-    ).values
+    indices_output = torch.randint(output_size, size=(100,), dtype=torch.int32)
     # substitute all 1s by 2s so as to test the no-neighbor case
-    indices[indices == 1] = 2
+    indices_output[indices_output == 1] = 2
 
     reference = torch.tensor(
         ref.outer_product_scatter_add(
-            A.numpy(), B.numpy(), indices.numpy(), output_size
+            A.numpy(), B.numpy(), indices_output.numpy(), output_size
         )
     )
-    actual = mops.torch.outer_product_scatter_add(A, B, indices, output_size)
+    actual = mops.torch.outer_product_scatter_add(A, B, indices_output, output_size)
     assert torch.allclose(reference, actual)
 
 
@@ -32,12 +30,10 @@ def test_opsa_grad():
     B = torch.rand(100, 5, dtype=torch.float64, requires_grad=True)
 
     output_size = 10
-    indices = torch.sort(
-        torch.randint(output_size, size=(100,), dtype=torch.int32)
-    ).values
+    indices_output = torch.randint(output_size, size=(100,), dtype=torch.int32)
 
     assert torch.autograd.gradcheck(
         mops.torch.outer_product_scatter_add,
-        (A, B, indices, output_size),
+        (A, B, indices_output, output_size),
         fast_mode=True,
     )

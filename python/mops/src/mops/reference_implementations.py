@@ -42,12 +42,10 @@ def outer_product_scatter_add(A, B, indices_output, output_size):
     return output
 
 
-def outer_product_scatter_add_with_weights(
-    A, B, W, indices_W, indices_output, output_size
-):
-    _check_opsaw(A, B, W, indices_W, indices_output, output_size)
+def outer_product_scatter_add_with_weights(A, B, W, indices_W, indices_output):
+    _check_opsaw(A, B, W, indices_W, indices_output)
 
-    output = np.zeros((output_size, A.shape[1], B.shape[1]), dtype=A.dtype)
+    output = np.zeros((W.shape[0], A.shape[1], B.shape[1]), dtype=A.dtype)
     max_e = indices_output.shape[0]
     for e in range(max_e):
         output[indices_output[e], :, :] += (
@@ -67,8 +65,7 @@ def sparse_accumulation_scatter_add_with_weights(
     indices_W_2,
     indices_output_1,
     indices_output_2,
-    output_size_1,
-    output_size_2,
+    output_size,
 ):
     _check_sasaw(
         A,
@@ -80,11 +77,10 @@ def sparse_accumulation_scatter_add_with_weights(
         indices_W_2,
         indices_output_1,
         indices_output_2,
-        output_size_1,
-        output_size_2,
+        output_size,
     )
 
-    output = np.zeros((output_size_1, output_size_2, A.shape[1]), dtype=A.dtype)
+    output = np.zeros((W.shape[0], output_size, B.shape[1]), dtype=B.dtype)
     E = indices_output_1.shape[0]
     N = C.shape[0]
     for e in range(E):

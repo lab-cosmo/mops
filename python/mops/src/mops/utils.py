@@ -56,6 +56,7 @@ def numpy_to_mops_tensor(array):
             tensor.shape[0] = array.shape[0]
             tensor.shape[1] = array.shape[1]
             tensor.shape[2] = array.shape[2]
+            return tensor
         else:
             raise TypeError("we can only convert 1D, 2D and 3D arrays of float64")
     elif array.dtype == np.int32:

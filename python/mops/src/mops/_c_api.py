@@ -143,7 +143,7 @@ def setup_functions(lib):
 
     # outer_product_scatter_add
     lib.mops_outer_product_scatter_add_f32.argtypes = [
-        mops_tensor_2d_f32_t,
+        mops_tensor_3d_f32_t,
         mops_tensor_2d_f32_t,
         mops_tensor_2d_f32_t,
         mops_tensor_1d_i32_t,
@@ -151,7 +151,7 @@ def setup_functions(lib):
     lib.mops_outer_product_scatter_add_f32.restype = _check_status
 
     lib.mops_outer_product_scatter_add_f64.argtypes = [
-        mops_tensor_2d_f64_t,
+        mops_tensor_3d_f64_t,
         mops_tensor_2d_f64_t,
         mops_tensor_2d_f64_t,
         mops_tensor_1d_i32_t,
@@ -161,7 +161,7 @@ def setup_functions(lib):
     lib.mops_outer_product_scatter_add_vjp_f32.argtypes = [
         mops_tensor_2d_f32_t,
         mops_tensor_2d_f32_t,
-        mops_tensor_2d_f32_t,
+        mops_tensor_3d_f32_t,
         mops_tensor_2d_f32_t,
         mops_tensor_2d_f32_t,
         mops_tensor_1d_i32_t,
@@ -171,7 +171,7 @@ def setup_functions(lib):
     lib.mops_outer_product_scatter_add_vjp_f64.argtypes = [
         mops_tensor_2d_f64_t,
         mops_tensor_2d_f64_t,
-        mops_tensor_2d_f64_t,
+        mops_tensor_3d_f64_t,
         mops_tensor_2d_f64_t,
         mops_tensor_2d_f64_t,
         mops_tensor_1d_i32_t,
@@ -179,7 +179,7 @@ def setup_functions(lib):
     lib.mops_outer_product_scatter_add_vjp_f64.restype = _check_status
 
     lib.mops_cuda_outer_product_scatter_add_f32.argtypes = [
-        mops_tensor_2d_f32_t,
+        mops_tensor_3d_f32_t,
         mops_tensor_2d_f32_t,
         mops_tensor_2d_f32_t,
         mops_tensor_1d_i32_t,
@@ -187,7 +187,7 @@ def setup_functions(lib):
     lib.mops_cuda_outer_product_scatter_add_f32.restype = _check_status
 
     lib.mops_cuda_outer_product_scatter_add_f64.argtypes = [
-        mops_tensor_2d_f64_t,
+        mops_tensor_3d_f64_t,
         mops_tensor_2d_f64_t,
         mops_tensor_2d_f64_t,
         mops_tensor_1d_i32_t,
@@ -240,8 +240,8 @@ def setup_functions(lib):
         mops_tensor_3d_f32_t,
         mops_tensor_2d_f32_t,
         mops_tensor_2d_f32_t,
-        mops_tensor_3d_f32_t,
         mops_tensor_1d_f32_t,
+        mops_tensor_3d_f32_t,
         mops_tensor_1d_i32_t,
         mops_tensor_1d_i32_t,
         mops_tensor_1d_i32_t,
@@ -254,8 +254,8 @@ def setup_functions(lib):
         mops_tensor_3d_f64_t,
         mops_tensor_2d_f64_t,
         mops_tensor_2d_f64_t,
-        mops_tensor_3d_f64_t,
         mops_tensor_1d_f64_t,
+        mops_tensor_3d_f64_t,
         mops_tensor_1d_i32_t,
         mops_tensor_1d_i32_t,
         mops_tensor_1d_i32_t,
@@ -268,8 +268,8 @@ def setup_functions(lib):
         mops_tensor_3d_f32_t,
         mops_tensor_2d_f32_t,
         mops_tensor_2d_f32_t,
-        mops_tensor_3d_f32_t,
         mops_tensor_1d_f32_t,
+        mops_tensor_3d_f32_t,
         mops_tensor_1d_i32_t,
         mops_tensor_1d_i32_t,
         mops_tensor_1d_i32_t,
@@ -284,8 +284,8 @@ def setup_functions(lib):
         mops_tensor_3d_f64_t,
         mops_tensor_2d_f64_t,
         mops_tensor_2d_f64_t,
-        mops_tensor_3d_f64_t,
         mops_tensor_1d_f64_t,
+        mops_tensor_3d_f64_t,
         mops_tensor_1d_i32_t,
         mops_tensor_1d_i32_t,
         mops_tensor_1d_i32_t,

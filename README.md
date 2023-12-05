@@ -30,15 +30,15 @@ $$ O_i = \sum_{j=1}^J C_j \prod_{k=1}^K A_{iP_{jk}} $$
 
 #### Inputs
 
-- $A$ is a 2D tensor of floats, of size $I \times N_{A,2}$. It contains the factors in the monomials that make up the polynomial.
+- $A$ is a 2D array of floats, of size $I \times N_{A,2}$. It contains the individual factors in the monomials that make up the polynomial.
 
 - $C$ is a vector of float multipliers of size $J$. They represent the coefficients of each monomial in the polynomial, so that $J$ is the number of monomials in the polynomial.
 
-- $P$ is a 2D tensor of integers which represents the positions of the individual factors for each monomial in the second dimension of the $A$ tensor. In particular, the $k$-th factor of monomial $j$ will be found in the $P_{jk}$-th position of the second dimension of $A$.
+- $P$ is a 2D array of integers which represents the positions of the individual factors for each monomial in the second dimension of the $A$ array. In particular, the $k$-th factor of monomial $j$ will be found in the $P_{jk}$-th position of the second dimension of $A$.
 
 #### Output
 
-$O$ is a dense 1D tensor of floats, which only contains a batch dimension of size $I$.
+$O$ is a dense 1D array of floats, which only contains a batch dimension of size $I$.
 
 #### Calculation
 
@@ -55,7 +55,23 @@ for j in range(J):
 
 $$ O_{iP_k^O} = \sum_{k \in \{k'|P^O_{k'}=P^O_k\}} C_k A_{iP_k^A} B_{iP_k^B} $$
 
+#### Inputs
+
+- $A$ and $B$ are 2D arrays of floats whose first dimension is a batch dimension that has the same size for both. 
+
+- $C$ is a 1D array of floats which contains the weights of the products of elements of $A$ and $B$ to be accumulated.
+
+- $P^A$, $P^B$ are 1D arrays fo integers of the same size which contain the positions along the second dimensions of $A$ and $B$, respectively, of the factors that constitute the products.
+
+- $P^O$ is a 1D array of integers of the same length as $P^A$ and $P^B$ which contains the positions in the second dimension of the output tensor where the different products of $A$ and $B$ are accumulated.
+
+#### Output
+
+$O$ is a 2D array of floats where the first dimension is a batch dimension (the same as in $A$ and $B$) and the second dimension contains the scattered products of $A$ and $B$.
+
 #### Calculation
+
+The weighted products of $A$ and $B$ are accumulated into $O$ as follows:
 
 ```python
 for k in range(K):
@@ -82,7 +98,7 @@ $$ O_{ikl} = \sum_{j=1}^J A_{jk} B_{jl} \delta_{iP_j} \hspace{1cm} \mathrm{or} \
 
 #### Output
 
-$O$ is a 3D tensor of floats of dimensions $I \times K \times L$, which contains the accumulated products of the elements of $A$ and $B$.
+$O$ is a 3D array of floats of dimensions $I \times K \times L$, which contains the accumulated products of the elements of $A$ and $B$.
 
 #### Calculation
 
@@ -99,6 +115,18 @@ for j in range(J):
 
 $$ O_{ikl} = \sum_{j \in \{j'|P_{j'}=i\}} A_{jk} B_{jl} W_{{PW_j}l} $$
 
+#### Inputs
+
+- $A$ is a 2D array of floats
+- $R$ is a 2D array of floats
+- $X$ is a 2D array of floats
+- $I$ is a 1D array of integers 
+- $J$ is a 1D array of integers 
+
+#### Outputs
+
+- $O$ is a 3D array of floats
+
 #### Calculation
 
 ```python
@@ -111,6 +139,26 @@ for j in range(J):
 #### Math notation
 
 $$ O_{i{m_3}k} = \sum_{e \in \{e'|I_{e'}=i\}} R_{ek} \sum_{n \in \{n'|M^3_{n'}=m_3\}} C_n A_{e{M_n^1}} X_{{J_e}{M_n^2}k} $$
+
+#### Inputs
+
+#### Inputs
+
+- $A$ is a 2D array of floats
+- $R$ is a 2D array of floats
+- $X$ is a 3D array of floats
+- $C$ is a 1D array of floats
+- $I$ is a 1D array of integers 
+- $J$ is a 1D array of integers 
+- $M^1$ is a 1D array of integers 
+- $M^2$ is a 1D array of integers 
+- $M^3$ is a 1D array of integers 
+
+#### Outputs
+
+- $O$ is a 3D array of floats
+
+#### Outputs
 
 #### Calculation
 
