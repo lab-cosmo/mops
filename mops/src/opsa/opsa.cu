@@ -38,7 +38,7 @@ __device__ void outer_product_scatter_add_kernel(
     extern __shared__ char buffer[];
 
     const uint threadCol = threadIdx.x % WARP_SIZE;
-    const uint threadRow = thredIdx.x / WARP_SIZE;
+    const uint threadRow = threadIdx.x / WARP_SIZE;
     const uint nThreadRow = blockDim.x / WARP_SIZE;
 
     void *sptr = buffer;
@@ -131,7 +131,6 @@ __device__ void outer_product_scatter_add_kernel(
              * writeout the content of regOP to the output for this block of
              * [node, nfeatures_A, nfeatures_B]
              */
-
             for (int j = 0; j < TB; j++) {
                 for (int i = 0; i < TA; i++) {
                     if ((iter_A * TA * WARP_SIZE) + i * WARP_SIZE + threadCol <
