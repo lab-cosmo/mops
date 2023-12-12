@@ -19,18 +19,19 @@ __host__ __device__ T *shared_array(std::size_t n_elements, void *&ptr,
 
 template <typename scalar_t, const int TA, const int TB>
 __device__ void outer_product_scatter_add_kernel(
-    const scalar_t *__restrict__ A, const scalar_t *__restrict__ B,
+    const scalar_t *__restrict__ A, // [nedges, nfeatures_A]
+    const scalar_t *__restrict__ B, // [nedges, nfeatures_B]
     const int nnodes,      // number of nodes we're summing into
     const int nedges,      // number of edges -> batch size of A and B
-    const int nfeatures_A, // number of features of A [nedges, nfeatures_A]
-    const int nfeatures_B, // number of features of B [nedges, nfeatures_B]
+    const int nfeatures_A, // number of features of A
+    const int nfeatures_B, // number of features of B
     const int32_t
         *__restrict__ first_occurences, // indices in indices_output where the
                                         // values change [nnodes]
     const int32_t *__restrict__ indices_output, // sorted list of indices to sum
                                                 // into [nedges]
     scalar_t *__restrict__ output // shape: [nnodes, nfeatures_B, nfeatures_A]
-                                  // -> this ordering because threadCol % 32
+                                  // -> this ordering because contiguity of threadCol
 ) {
 
     extern __shared__ char buffer[];
