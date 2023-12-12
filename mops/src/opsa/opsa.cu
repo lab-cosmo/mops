@@ -21,17 +21,18 @@ template <typename scalar_t, const int TA, const int TB>
 __device__ void outer_product_scatter_add_kernel(
     const scalar_t *__restrict__ A, // [nedges, nfeatures_A]
     const scalar_t *__restrict__ B, // [nedges, nfeatures_B]
-    const int nnodes,      // number of nodes we're summing into
-    const int nedges,      // number of edges -> batch size of A and B
-    const int nfeatures_A, // number of features of A
-    const int nfeatures_B, // number of features of B
+    const int nnodes,               // number of nodes we're summing into
+    const int nedges,               // number of edges -> batch size of A and B
+    const int nfeatures_A,          // number of features of A
+    const int nfeatures_B,          // number of features of B
     const int32_t
         *__restrict__ first_occurences, // indices in indices_output where the
                                         // values change [nnodes]
     const int32_t *__restrict__ indices_output, // sorted list of indices to sum
                                                 // into [nedges]
-    scalar_t *__restrict__ output // shape: [nnodes, nfeatures_B, nfeatures_A]
-                                  // -> this ordering because contiguity of threadCol
+    scalar_t
+        *__restrict__ output // shape: [nnodes, nfeatures_B, nfeatures_A]
+                             // -> this ordering because contiguity of threadCol
 ) {
 
     extern __shared__ char buffer[];
@@ -130,8 +131,9 @@ __device__ void outer_product_scatter_add_kernel(
              * writeout the content of regOP to the output for this block of
              * [node, nfeatures_A, nfeatures_B]
              */
-            for (int i = 0; i < TA; i++) {
-                for (int j = 0; j < TB; j++) {
+
+            for (int j = 0; j < TB; j++) {
+                for (int i = 0; i < TA; i++) {
                     if ((iter_A * TA * WARP_SIZE) + i * WARP_SIZE + threadCol <
                             nfeatures_A &&
                         (iter_B * TB * nThreadRow) + i * nThreadRow +
@@ -142,7 +144,7 @@ __device__ void outer_product_scatter_add_kernel(
                                 threadRow) *
                                    nfeatures_A +
                                (iter_A * TA * WARP_SIZE) + i * WARP_SIZE +
-                               threadCol] = regOP[i * TB + j];
+                               threadCol] = regOP[j * TA + i];
                     }
                 }
             }
