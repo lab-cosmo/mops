@@ -76,7 +76,6 @@ __device__ void outer_product_scatter_add_kernel(
 
     for (uint iter_B = 0; iter_B < niter_B; iter_B++) {
         for (uint iter_A = 0; iter_A < niter_A; iter_A++) {
-
             /*
              *  clear registers
              */
@@ -132,18 +131,19 @@ __device__ void outer_product_scatter_add_kernel(
              * [node, nfeatures_A, nfeatures_B]
              */
             for (int j = 0; j < TB; j++) {
-                for (int i = 0; i < TA; i++) {
-                    if ((iter_A * TA * WARP_SIZE) + i * WARP_SIZE + threadCol <
-                            nfeatures_A &&
-                        (iter_B * TB * nThreadRow) + i * nThreadRow +
-                                threadRow <
-                            nfeatures_B) {
-                        output[node_index * nfeatures_B * nfeatures_A +
-                               ((iter_B * TB * nThreadRow) + i * nThreadRow +
-                                threadRow) *
-                                   nfeatures_A +
-                               (iter_A * TA * WARP_SIZE) + i * WARP_SIZE +
-                               threadCol] = regOP[j * TA + i];
+                if ((iter_B * TB * nThreadRow) + j * nThreadRow + threadRow <
+                    nfeatures_B) {
+                    for (int i = 0; i < TA; i++) {
+                        if ((iter_A * TA * WARP_SIZE) + i * WARP_SIZE +
+                                threadCol <
+                            nfeatures_A) {
+                            output[node_index * nfeatures_B * nfeatures_A +
+                                   ((iter_B * TB * nThreadRow) +
+                                    j * nThreadRow + threadRow) *
+                                       nfeatures_A +
+                                   (iter_A * TA * WARP_SIZE) + i * WARP_SIZE +
+                                   threadCol] = regOP[j * TA + i];
+                        }
                     }
                 }
             }
