@@ -75,7 +75,11 @@ __device__ void outer_product_scatter_add_kernel(
     int niter_B = find_integer_divisor(nfeatures_B, TB * nThreadRow);
 
     for (uint iter_B = 0; iter_B < niter_B; iter_B++) {
+        uint global_B = iter_B * TB * nThreadRow;
+
         for (uint iter_A = 0; iter_A < niter_A; iter_A++) {
+            uint global_A = iter_A * TA * WARP_SIZE;
+
             /*
              *  clear registers
              */
@@ -97,23 +101,18 @@ __device__ void outer_product_scatter_add_kernel(
                  */
                 for (uint i = 0; i < TA; i++) {
 
-                    if ((iter_A * TA * WARP_SIZE) + i * WARP_SIZE + threadCol <
-                        nfeatures_A)
+                    if (global_A + i * WARP_SIZE + threadCol < nfeatures_A)
                         regA[i] = A[(edge_start + edge) * nfeatures_A +
-                                    (iter_A * TA * WARP_SIZE) + i * WARP_SIZE +
-                                    threadCol];
+                                    global_A + i * WARP_SIZE + threadCol];
                 }
 
                 /*
                  *  load B from GMEM into local registers
                  */
                 for (uint i = 0; i < TB; i++) {
-                    if ((iter_B * TB * nThreadRow) + i * nThreadRow +
-                            threadRow <
-                        nfeatures_B)
+                    if (global_B + i * nThreadRow + threadRow < nfeatures_B)
                         regB[i] = B[(edge_start + edge) * nfeatures_B +
-                                    (iter_B * TB * nThreadRow) +
-                                    i * nThreadRow + threadRow];
+                                    global_B + i * nThreadRow + threadRow];
                 }
 
                 /*
@@ -131,18 +130,15 @@ __device__ void outer_product_scatter_add_kernel(
              * [node, nfeatures_A, nfeatures_B]
              */
             for (int j = 0; j < TB; j++) {
-                if ((iter_B * TB * nThreadRow) + j * nThreadRow + threadRow <
-                    nfeatures_B) {
+                if (global_B + j * nThreadRow + threadRow < nfeatures_B) {
                     for (int i = 0; i < TA; i++) {
-                        if ((iter_A * TA * WARP_SIZE) + i * WARP_SIZE +
-                                threadCol <
+                        if (global_A + i * WARP_SIZE + threadCol <
                             nfeatures_A) {
                             output[node_index * nfeatures_B * nfeatures_A +
-                                   ((iter_B * TB * nThreadRow) +
-                                    j * nThreadRow + threadRow) *
+                                   (global_B + j * nThreadRow + threadRow) *
                                        nfeatures_A +
-                                   (iter_A * TA * WARP_SIZE) + i * WARP_SIZE +
-                                   threadCol] = regOP[j * TA + i];
+                                   global_A + i * WARP_SIZE + threadCol] =
+                                regOP[j * TA + i];
                         }
                     }
                 }
