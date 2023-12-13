@@ -5,6 +5,19 @@ if (POLICY CMP0077)
     cmake_policy(SET CMP0077 NEW)
 endif()
 
+if (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+    set(MOPS_TORCH_MAIN_PROJECT ON)
+else()
+    set(MOPS_TORCH_MAIN_PROJECT OFF)
+endif()
+
+if(${MOPS_TORCH_MAIN_PROJECT} AND NOT "${CACHED_LAST_CMAKE_VERSION}" VERSION_EQUAL ${CMAKE_VERSION})
+    # We use CACHED_LAST_CMAKE_VERSION to only print the cmake version
+    # once in the configuration log
+    set(CACHED_LAST_CMAKE_VERSION ${CMAKE_VERSION} CACHE INTERNAL "Last version of cmake used to configure")
+    message(STATUS "Running CMake version ${CMAKE_VERSION}")
+endif()
+
 
 file(READ ${CMAKE_CURRENT_SOURCE_DIR}/VERSION MOPS_TORCH_VERSION)
 string(STRIP ${MOPS_TORCH_VERSION} MOPS_TORCH_VERSION)
