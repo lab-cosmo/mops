@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include "mops/capi.hpp"
 
 #include "mops/opsaw.h"
@@ -16,7 +18,7 @@ extern "C" int mops_outer_product_scatter_add_with_weights_f32(
     mops_tensor_3d_f32_t output, mops_tensor_2d_f32_t A, mops_tensor_2d_f32_t B,
     mops_tensor_2d_f32_t W, mops_tensor_1d_i32_t indices_W,
     mops_tensor_1d_i32_t indices_output) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::outer_product_scatter_add_with_weights<float>(
             {output.data,
              {checked_cast(output.shape[0]), checked_cast(output.shape[1]),
@@ -25,14 +27,15 @@ extern "C" int mops_outer_product_scatter_add_with_weights_f32(
             {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
             {W.data, {checked_cast(W.shape[0]), checked_cast(W.shape[1])}},
             {indices_W.data, {checked_cast(indices_W.shape[0])}},
-            {indices_output.data, {checked_cast(indices_output.shape[0])}}););
+            {indices_output.data, {checked_cast(indices_output.shape[0])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_outer_product_scatter_add_with_weights_f64(
     mops_tensor_3d_f64_t output, mops_tensor_2d_f64_t A, mops_tensor_2d_f64_t B,
     mops_tensor_2d_f64_t W, mops_tensor_1d_i32_t indices_W,
     mops_tensor_1d_i32_t indices_output) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::outer_product_scatter_add_with_weights<double>(
             {output.data,
              {checked_cast(output.shape[0]), checked_cast(output.shape[1]),
@@ -41,7 +44,8 @@ extern "C" int mops_outer_product_scatter_add_with_weights_f64(
             {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
             {W.data, {checked_cast(W.shape[0]), checked_cast(W.shape[1])}},
             {indices_W.data, {checked_cast(indices_W.shape[0])}},
-            {indices_output.data, {checked_cast(indices_output.shape[0])}}););
+            {indices_output.data, {checked_cast(indices_output.shape[0])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_outer_product_scatter_add_with_weights_vjp_f32(
@@ -49,7 +53,7 @@ extern "C" int mops_outer_product_scatter_add_with_weights_vjp_f32(
     mops_tensor_2d_f32_t grad_W, mops_tensor_3d_f32_t grad_output,
     mops_tensor_2d_f32_t A, mops_tensor_2d_f32_t B, mops_tensor_2d_f32_t W,
     mops_tensor_1d_i32_t indices_W, mops_tensor_1d_i32_t indices_output) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::outer_product_scatter_add_with_weights_vjp<float>(
             {grad_A.data,
              {checked_cast(grad_A.shape[0]), checked_cast(grad_A.shape[1])}},
@@ -65,7 +69,8 @@ extern "C" int mops_outer_product_scatter_add_with_weights_vjp_f32(
             {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
             {W.data, {checked_cast(W.shape[0]), checked_cast(W.shape[1])}},
             {indices_W.data, {checked_cast(indices_W.shape[0])}},
-            {indices_output.data, {checked_cast(indices_output.shape[0])}}););
+            {indices_output.data, {checked_cast(indices_output.shape[0])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_outer_product_scatter_add_with_weights_vjp_f64(
@@ -73,7 +78,7 @@ extern "C" int mops_outer_product_scatter_add_with_weights_vjp_f64(
     mops_tensor_2d_f64_t grad_W, mops_tensor_3d_f64_t grad_output,
     mops_tensor_2d_f64_t A, mops_tensor_2d_f64_t B, mops_tensor_2d_f64_t W,
     mops_tensor_1d_i32_t indices_W, mops_tensor_1d_i32_t indices_output) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::outer_product_scatter_add_with_weights_vjp<double>(
             {grad_A.data,
              {checked_cast(grad_A.shape[0]), checked_cast(grad_A.shape[1])}},
@@ -89,14 +94,15 @@ extern "C" int mops_outer_product_scatter_add_with_weights_vjp_f64(
             {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
             {W.data, {checked_cast(W.shape[0]), checked_cast(W.shape[1])}},
             {indices_W.data, {checked_cast(indices_W.shape[0])}},
-            {indices_output.data, {checked_cast(indices_output.shape[0])}}););
+            {indices_output.data, {checked_cast(indices_output.shape[0])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_cuda_outer_product_scatter_add_with_weights_f32(
     mops_tensor_3d_f32_t output, mops_tensor_2d_f32_t A, mops_tensor_2d_f32_t B,
     mops_tensor_2d_f32_t W, mops_tensor_1d_i32_t indices_W,
     mops_tensor_1d_i32_t indices_output) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::outer_product_scatter_add_with_weights<float>(
             {output.data,
              {checked_cast(output.shape[0]), checked_cast(output.shape[1]),
@@ -105,14 +111,15 @@ extern "C" int mops_cuda_outer_product_scatter_add_with_weights_f32(
             {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
             {W.data, {checked_cast(W.shape[0]), checked_cast(W.shape[1])}},
             {indices_W.data, {checked_cast(indices_W.shape[0])}},
-            {indices_output.data, {checked_cast(indices_output.shape[0])}}););
+            {indices_output.data, {checked_cast(indices_output.shape[0])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_cuda_outer_product_scatter_add_with_weights_f64(
     mops_tensor_3d_f64_t output, mops_tensor_2d_f64_t A, mops_tensor_2d_f64_t B,
     mops_tensor_2d_f64_t W, mops_tensor_1d_i32_t indices_W,
     mops_tensor_1d_i32_t indices_output) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::outer_product_scatter_add_with_weights<double>(
             {output.data,
              {checked_cast(output.shape[0]), checked_cast(output.shape[1]),
@@ -121,5 +128,6 @@ extern "C" int mops_cuda_outer_product_scatter_add_with_weights_f64(
             {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
             {W.data, {checked_cast(W.shape[0]), checked_cast(W.shape[1])}},
             {indices_W.data, {checked_cast(indices_W.shape[0])}},
-            {indices_output.data, {checked_cast(indices_output.shape[0])}}););
+            {indices_output.data, {checked_cast(indices_output.shape[0])}});
+MOPS_CATCH_EXCEPTIONS_END
 }

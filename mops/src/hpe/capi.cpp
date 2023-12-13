@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include "mops/capi.hpp"
 
 #include "mops/hpe.h"
@@ -15,34 +17,36 @@ static size_t checked_cast(int64_t value) {
 extern "C" int mops_homogeneous_polynomial_evaluation_f32(
     mops_tensor_1d_f32_t output, mops_tensor_2d_f32_t A, mops_tensor_1d_f32_t C,
     mops_tensor_2d_i32_t indices_A) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::homogeneous_polynomial_evaluation<float>(
             {output.data, {checked_cast(output.shape[0])}},
             {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
             {C.data, {checked_cast(C.shape[0])}},
             {indices_A.data,
              {checked_cast(indices_A.shape[0]),
-              checked_cast(indices_A.shape[1])}}););
+              checked_cast(indices_A.shape[1])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_homogeneous_polynomial_evaluation_f64(
     mops_tensor_1d_f64_t output, mops_tensor_2d_f64_t A, mops_tensor_1d_f64_t C,
     mops_tensor_2d_i32_t indices_A) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::homogeneous_polynomial_evaluation<double>(
             {output.data, {checked_cast(output.shape[0])}},
             {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
             {C.data, {checked_cast(C.shape[0])}},
             {indices_A.data,
              {checked_cast(indices_A.shape[0]),
-              checked_cast(indices_A.shape[1])}}););
+              checked_cast(indices_A.shape[1])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_homogeneous_polynomial_evaluation_vjp_f32(
     mops_tensor_2d_f32_t grad_A, mops_tensor_1d_f32_t grad_output,
     mops_tensor_2d_f32_t A, mops_tensor_1d_f32_t C,
     mops_tensor_2d_i32_t indices_A) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::homogeneous_polynomial_evaluation_vjp<float>(
             {grad_A.data,
              {checked_cast(grad_A.shape[0]), checked_cast(grad_A.shape[1])}},
@@ -51,14 +55,15 @@ extern "C" int mops_homogeneous_polynomial_evaluation_vjp_f32(
             {C.data, {checked_cast(C.shape[0])}},
             {indices_A.data,
              {checked_cast(indices_A.shape[0]),
-              checked_cast(indices_A.shape[1])}}););
+              checked_cast(indices_A.shape[1])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_homogeneous_polynomial_evaluation_vjp_f64(
     mops_tensor_2d_f64_t grad_A, mops_tensor_1d_f64_t grad_output,
     mops_tensor_2d_f64_t A, mops_tensor_1d_f64_t C,
     mops_tensor_2d_i32_t indices_A) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::homogeneous_polynomial_evaluation_vjp<double>(
             {grad_A.data,
              {checked_cast(grad_A.shape[0]), checked_cast(grad_A.shape[1])}},
@@ -67,31 +72,34 @@ extern "C" int mops_homogeneous_polynomial_evaluation_vjp_f64(
             {C.data, {checked_cast(C.shape[0])}},
             {indices_A.data,
              {checked_cast(indices_A.shape[0]),
-              checked_cast(indices_A.shape[1])}}););
+              checked_cast(indices_A.shape[1])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_cuda_homogeneous_polynomial_evaluation_f32(
     mops_tensor_1d_f32_t output, mops_tensor_2d_f32_t A, mops_tensor_1d_f32_t C,
     mops_tensor_2d_i32_t indices_A) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::homogeneous_polynomial_evaluation<float>(
             {output.data, {checked_cast(output.shape[0])}},
             {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
             {C.data, {checked_cast(C.shape[0])}},
             {indices_A.data,
              {checked_cast(indices_A.shape[0]),
-              checked_cast(indices_A.shape[1])}}););
+              checked_cast(indices_A.shape[1])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_cuda_homogeneous_polynomial_evaluation_f64(
     mops_tensor_1d_f64_t output, mops_tensor_2d_f64_t A, mops_tensor_1d_f64_t C,
     mops_tensor_2d_i32_t indices_A) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::homogeneous_polynomial_evaluation<double>(
             {output.data, {checked_cast(output.shape[0])}},
             {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
             {C.data, {checked_cast(C.shape[0])}},
             {indices_A.data,
              {checked_cast(indices_A.shape[0]),
-              checked_cast(indices_A.shape[1])}}););
+              checked_cast(indices_A.shape[1])}});
+MOPS_CATCH_EXCEPTIONS_END
 }

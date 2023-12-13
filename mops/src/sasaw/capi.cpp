@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include "mops/capi.hpp"
 
 #include "mops/sasaw.h"
@@ -18,7 +20,7 @@ extern "C" int mops_sparse_accumulation_scatter_add_with_weights_f32(
     mops_tensor_1d_i32_t indices_A, mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2, mops_tensor_1d_i32_t indices_output_1,
     mops_tensor_1d_i32_t indices_output_2) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::sparse_accumulation_scatter_add_with_weights<float>(
             {output.data,
              {checked_cast(output.shape[0]), checked_cast(output.shape[1]),
@@ -34,7 +36,8 @@ extern "C" int mops_sparse_accumulation_scatter_add_with_weights_f32(
             {indices_W_2.data, {checked_cast(indices_W_2.shape[0])}},
             {indices_output_1.data, {checked_cast(indices_output_1.shape[0])}},
             {indices_output_2.data,
-             {checked_cast(indices_output_2.shape[0])}}););
+             {checked_cast(indices_output_2.shape[0])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_sparse_accumulation_scatter_add_with_weights_f64(
@@ -43,7 +46,7 @@ extern "C" int mops_sparse_accumulation_scatter_add_with_weights_f64(
     mops_tensor_1d_i32_t indices_A, mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2, mops_tensor_1d_i32_t indices_output_1,
     mops_tensor_1d_i32_t indices_output_2) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::sparse_accumulation_scatter_add_with_weights<double>(
             {output.data,
              {checked_cast(output.shape[0]), checked_cast(output.shape[1]),
@@ -59,7 +62,8 @@ extern "C" int mops_sparse_accumulation_scatter_add_with_weights_f64(
             {indices_W_2.data, {checked_cast(indices_W_2.shape[0])}},
             {indices_output_1.data, {checked_cast(indices_output_1.shape[0])}},
             {indices_output_2.data,
-             {checked_cast(indices_output_2.shape[0])}}););
+             {checked_cast(indices_output_2.shape[0])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_sparse_accumulation_scatter_add_with_weights_vjp_f32(
@@ -70,7 +74,7 @@ extern "C" int mops_sparse_accumulation_scatter_add_with_weights_vjp_f32(
     mops_tensor_1d_i32_t indices_W_1, mops_tensor_1d_i32_t indices_W_2,
     mops_tensor_1d_i32_t indices_output_1,
     mops_tensor_1d_i32_t indices_output_2) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::sparse_accumulation_scatter_add_with_weights_vjp<float>(
             {grad_A.data,
              {checked_cast(grad_A.shape[0]), checked_cast(grad_A.shape[1])}},
@@ -94,7 +98,8 @@ extern "C" int mops_sparse_accumulation_scatter_add_with_weights_vjp_f32(
             {indices_W_2.data, {checked_cast(indices_W_2.shape[0])}},
             {indices_output_1.data, {checked_cast(indices_output_1.shape[0])}},
             {indices_output_2.data,
-             {checked_cast(indices_output_2.shape[0])}}););
+             {checked_cast(indices_output_2.shape[0])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_sparse_accumulation_scatter_add_with_weights_vjp_f64(
@@ -105,7 +110,7 @@ extern "C" int mops_sparse_accumulation_scatter_add_with_weights_vjp_f64(
     mops_tensor_1d_i32_t indices_W_1, mops_tensor_1d_i32_t indices_W_2,
     mops_tensor_1d_i32_t indices_output_1,
     mops_tensor_1d_i32_t indices_output_2) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::sparse_accumulation_scatter_add_with_weights_vjp<double>(
             {grad_A.data,
              {checked_cast(grad_A.shape[0]), checked_cast(grad_A.shape[1])}},
@@ -129,7 +134,8 @@ extern "C" int mops_sparse_accumulation_scatter_add_with_weights_vjp_f64(
             {indices_W_2.data, {checked_cast(indices_W_2.shape[0])}},
             {indices_output_1.data, {checked_cast(indices_output_1.shape[0])}},
             {indices_output_2.data,
-             {checked_cast(indices_output_2.shape[0])}}););
+             {checked_cast(indices_output_2.shape[0])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_f32(
@@ -138,7 +144,7 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_f32(
     mops_tensor_1d_i32_t indices_A, mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2, mops_tensor_1d_i32_t indices_output_1,
     mops_tensor_1d_i32_t indices_output_2) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::sparse_accumulation_scatter_add_with_weights<float>(
             {output.data,
              {checked_cast(output.shape[0]), checked_cast(output.shape[1]),
@@ -154,7 +160,8 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_f32(
             {indices_W_2.data, {checked_cast(indices_W_2.shape[0])}},
             {indices_output_1.data, {checked_cast(indices_output_1.shape[0])}},
             {indices_output_2.data,
-             {checked_cast(indices_output_2.shape[0])}}););
+             {checked_cast(indices_output_2.shape[0])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
 
 extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_f64(
@@ -163,7 +170,7 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_f64(
     mops_tensor_1d_i32_t indices_A, mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2, mops_tensor_1d_i32_t indices_output_1,
     mops_tensor_1d_i32_t indices_output_2) {
-    MOPS_CATCH_EXCEPTIONS(
+    MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::sparse_accumulation_scatter_add_with_weights<double>(
             {output.data,
              {checked_cast(output.shape[0]), checked_cast(output.shape[1]),
@@ -179,5 +186,6 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_f64(
             {indices_W_2.data, {checked_cast(indices_W_2.shape[0])}},
             {indices_output_1.data, {checked_cast(indices_output_1.shape[0])}},
             {indices_output_2.data,
-             {checked_cast(indices_output_2.shape[0])}}););
+             {checked_cast(indices_output_2.shape[0])}});
+MOPS_CATCH_EXCEPTIONS_END
 }
