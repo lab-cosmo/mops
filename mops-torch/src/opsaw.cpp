@@ -13,18 +13,18 @@ torch::Tensor mops_torch::outer_product_scatter_add_with_weights(
 torch::Tensor OuterProductScatterAddWithWeights::forward(
     torch::autograd::AutogradContext *ctx, torch::Tensor A, torch::Tensor B,
     torch::Tensor W, torch::Tensor indices_W, torch::Tensor indices_output) {
-    check_all_same_device({A, B, W, indices_W, indices_output});
-    check_floating_dtype({A, B, W});
-    check_integer_dtype({indices_W, indices_output});
-    check_number_of_dimensions(A, 2, "A",
+    details::check_all_same_device({A, B, W, indices_W, indices_output});
+    details::check_floating_dtype({A, B, W});
+    details::check_integer_dtype({indices_W, indices_output});
+    details::check_number_of_dimensions(A, 2, "A",
                                "outer_product_scatter_add_with_weights");
-    check_number_of_dimensions(B, 2, "B",
+    details::check_number_of_dimensions(B, 2, "B",
                                "outer_product_scatter_add_with_weights");
-    check_number_of_dimensions(W, 3, "W",
+    details::check_number_of_dimensions(W, 3, "W",
                                "outer_product_scatter_add_with_weights");
-    check_number_of_dimensions(indices_W, 1, "indices_W",
+    details::check_number_of_dimensions(indices_W, 1, "indices_W",
                                "outer_product_scatter_add_with_weights");
-    check_number_of_dimensions(indices_output, 1, "indices_output",
+    details::check_number_of_dimensions(indices_output, 1, "indices_output",
                                "outer_product_scatter_add_with_weights");
     // Shape consistency checks are performed inside
     // mops::outer_product_scatter_add_with_weights
@@ -39,12 +39,12 @@ torch::Tensor OuterProductScatterAddWithWeights::forward(
         AT_DISPATCH_FLOATING_TYPES(
             A.scalar_type(), "outer_product_scatter_add_with_weights", [&]() {
                 mops::outer_product_scatter_add_with_weights<scalar_t>(
-                    torch_to_mops_3d<scalar_t>(output),
-                    torch_to_mops_2d<scalar_t>(A),
-                    torch_to_mops_2d<scalar_t>(B),
-                    torch_to_mops_2d<scalar_t>(W),
-                    torch_to_mops_1d<int32_t>(indices_W),
-                    torch_to_mops_1d<int32_t>(indices_output));
+                    details::torch_to_mops_3d<scalar_t>(output),
+                    details::torch_to_mops_2d<scalar_t>(A),
+                    details::torch_to_mops_2d<scalar_t>(B),
+                    details::torch_to_mops_2d<scalar_t>(W),
+                    details::torch_to_mops_1d<int32_t>(indices_W),
+                    details::torch_to_mops_1d<int32_t>(indices_output));
             });
     } else {
         C10_THROW_ERROR(ValueError, "outer_product_scatter_add_with_weights is "
@@ -85,29 +85,29 @@ std::vector<torch::Tensor> OuterProductScatterAddWithWeights::backward(
                 auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (A.requires_grad()) {
                     grad_A = torch::zeros_like(A);
-                    mops_grad_A = torch_to_mops_2d<scalar_t>(grad_A);
+                    mops_grad_A = details::torch_to_mops_2d<scalar_t>(grad_A);
                 }
 
                 auto mops_grad_B = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (B.requires_grad()) {
                     grad_B = torch::zeros_like(B);
-                    mops_grad_B = torch_to_mops_2d<scalar_t>(grad_B);
+                    mops_grad_B = details::torch_to_mops_2d<scalar_t>(grad_B);
                 }
 
                 auto mops_grad_W = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (W.requires_grad()) {
                     grad_W = torch::zeros_like(W);
-                    mops_grad_W = torch_to_mops_2d<scalar_t>(grad_W);
+                    mops_grad_W = details::torch_to_mops_2d<scalar_t>(grad_W);
                 }
 
                 mops::outer_product_scatter_add_with_weights_vjp<scalar_t>(
                     mops_grad_A, mops_grad_B, mops_grad_W,
-                    torch_to_mops_3d<scalar_t>(grad_output),
-                    torch_to_mops_2d<scalar_t>(A),
-                    torch_to_mops_2d<scalar_t>(B),
-                    torch_to_mops_2d<scalar_t>(W),
-                    torch_to_mops_1d<int32_t>(indices_W),
-                    torch_to_mops_1d<int32_t>(indices_output));
+                    details::torch_to_mops_3d<scalar_t>(grad_output),
+                    details::torch_to_mops_2d<scalar_t>(A),
+                    details::torch_to_mops_2d<scalar_t>(B),
+                    details::torch_to_mops_2d<scalar_t>(W),
+                    details::torch_to_mops_1d<int32_t>(indices_W),
+                    details::torch_to_mops_1d<int32_t>(indices_output));
             });
     } else {
         C10_THROW_ERROR(ValueError, "outer_product_scatter_add_with_weights is "
