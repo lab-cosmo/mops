@@ -3,9 +3,7 @@
 
 thread_local std::string LAST_ERROR_MESSAGE;
 
-void mops::store_error_message(std::string message) {
-    LAST_ERROR_MESSAGE = std::move(message);
-}
+void mops::store_error_message(std::string message) { LAST_ERROR_MESSAGE = std::move(message); }
 
 const std::string &mops::get_last_error_message() { return LAST_ERROR_MESSAGE; }
 
