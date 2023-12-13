@@ -1,7 +1,6 @@
 #ifndef MOPS_SAP_HPP
 #define MOPS_SAP_HPP
 
-#include <cstddef>
 #include <cstdint>
 
 #include "mops/exports.h"
