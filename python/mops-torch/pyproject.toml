@@ -43,7 +43,7 @@ repository = "https://github.com/lab-cosmo/mops"
 [build-system]
 requires = [
     "setuptools >=68",
-    "cmake",
+    "cmake <3.28",  # this should be changed once cmake 3.28.1 is on PyPI
     "torch >= 1.11",
 ]
 build-backend = "setuptools.build_meta"
