@@ -9,23 +9,32 @@ namespace mops_torch {
 
 /// TODO
 torch::Tensor sparse_accumulation_of_products(
-    torch::Tensor A, torch::Tensor B, torch::Tensor C, torch::Tensor indices_A,
-    torch::Tensor indices_B, torch::Tensor indices_output, int64_t output_size);
+    torch::Tensor A,
+    torch::Tensor B,
+    torch::Tensor C,
+    torch::Tensor indices_A,
+    torch::Tensor indices_B,
+    torch::Tensor indices_output,
+    int64_t output_size
+);
 
 class SparseAccumulationOfProducts
-    : public torch::autograd::Function<
-          mops_torch::SparseAccumulationOfProducts> {
+    : public torch::autograd::Function<mops_torch::SparseAccumulationOfProducts> {
   public:
-    static torch::Tensor forward(torch::autograd::AutogradContext *ctx,
-                                 torch::Tensor A, torch::Tensor B,
-                                 torch::Tensor C, torch::Tensor indices_A,
-                                 torch::Tensor indices_B,
-                                 torch::Tensor indices_output,
-                                 int64_t output_size);
+    static torch::Tensor forward(
+        torch::autograd::AutogradContext *ctx,
+        torch::Tensor A,
+        torch::Tensor B,
+        torch::Tensor C,
+        torch::Tensor indices_A,
+        torch::Tensor indices_B,
+        torch::Tensor indices_output,
+        int64_t output_size
+    );
 
-    static std::vector<torch::Tensor>
-    backward(torch::autograd::AutogradContext *ctx,
-             std::vector<torch::Tensor> grad_outputs);
+    static std::vector<torch::Tensor> backward(
+        torch::autograd::AutogradContext *ctx, std::vector<torch::Tensor> grad_outputs
+    );
 };
 
 } // namespace mops_torch
