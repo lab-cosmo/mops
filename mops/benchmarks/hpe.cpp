@@ -18,8 +18,11 @@ int main() {
 
     for (int i = 0; i < 1000; i++) {
         mops::homogeneous_polynomial_evaluation<double>(
-            {output.data(), {1000}}, {A.data(), {1000, 2000}},
-            {C.data(), {100000}}, {indices_A.data(), {100000, 4}});
+            {output.data(), {1000}},
+            {A.data(), {1000, 2000}},
+            {C.data(), {100000}},
+            {indices_A.data(), {100000, 4}}
+        );
     }
 
     return 0;

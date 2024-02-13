@@ -7,8 +7,7 @@
 
 #include "mops/tensor.hpp"
 
-std::vector<std::vector<size_t>>
-get_write_list(mops::Tensor<int32_t, 1> write_coordinates);
+std::vector<std::vector<size_t>> get_write_list(mops::Tensor<int32_t, 1> write_coordinates);
 
 template <typename scalar_t> constexpr size_t get_simd_element_count();
 // Assume 256-bit vector registers. A conservative choice.
@@ -21,16 +20,19 @@ template <> constexpr size_t get_simd_element_count<float>() {
 }
 
 template <typename scalar_t, size_t simd_element_count>
-void interleave_tensor(mops::Tensor<scalar_t, 2> initial_data,
-                       scalar_t *interleft_data, scalar_t *remainder_data);
+void interleave_tensor(
+    mops::Tensor<scalar_t, 2> initial_data, scalar_t *interleft_data, scalar_t *remainder_data
+);
 
 template <typename scalar_t, size_t simd_element_count>
-void un_interleave_tensor(mops::Tensor<scalar_t, 2> output_data,
-                          scalar_t *interleft_data, scalar_t *remainder_data);
+void un_interleave_tensor(
+    mops::Tensor<scalar_t, 2> output_data, scalar_t *interleft_data, scalar_t *remainder_data
+);
 
 template <typename scalar_t, size_t simd_element_count>
-void interleave_tensor(mops::Tensor<scalar_t, 2> initial_data,
-                       scalar_t *interleft_data, scalar_t *remainder_data) {
+void interleave_tensor(
+    mops::Tensor<scalar_t, 2> initial_data, scalar_t *interleft_data, scalar_t *remainder_data
+) {
 
     size_t batch_dim = initial_data.shape[0];
     size_t remainder = batch_dim % simd_element_count;
@@ -42,27 +44,24 @@ void interleave_tensor(mops::Tensor<scalar_t, 2> initial_data,
     for (size_t i = 0; i < quotient; i++) {
         for (size_t j = 0; j < calculation_dim; j++) {
             for (size_t k = 0; k < simd_element_count; k++) {
-                interleft_data[i * calculation_dim * simd_element_count +
-                               j * simd_element_count + k] =
-                    initial_data_ptr[i * simd_element_count * calculation_dim +
-                                     k * calculation_dim + j];
+                interleft_data[i * calculation_dim * simd_element_count + j * simd_element_count + k] =
+                    initial_data_ptr[i * simd_element_count * calculation_dim + k * calculation_dim + j];
             }
         }
     }
 
     for (size_t j = 0; j < calculation_dim; j++) {
         for (size_t k = 0; k < remainder; k++) {
-            remainder_data[j * remainder + k] =
-                initial_data_ptr[quotient * simd_element_count *
-                                     calculation_dim +
-                                 k * calculation_dim + j];
+            remainder_data[j * remainder + k] = initial_data_ptr
+                [quotient * simd_element_count * calculation_dim + k * calculation_dim + j];
         }
     }
 }
 
 template <typename scalar_t, size_t simd_element_count>
-void un_interleave_tensor(mops::Tensor<scalar_t, 2> output_data,
-                          scalar_t *interleft_data, scalar_t *remainder_data) {
+void un_interleave_tensor(
+    mops::Tensor<scalar_t, 2> output_data, scalar_t *interleft_data, scalar_t *remainder_data
+) {
 
     size_t batch_dim = output_data.shape[0];
     size_t remainder = batch_dim % simd_element_count;
@@ -74,10 +73,8 @@ void un_interleave_tensor(mops::Tensor<scalar_t, 2> output_data,
     for (size_t i = 0; i < quotient; i++) {
         for (size_t j = 0; j < calculation_dim; j++) {
             for (size_t k = 0; k < simd_element_count; k++) {
-                output_data_ptr[i * simd_element_count * calculation_dim +
-                                k * calculation_dim + j] =
-                    interleft_data[i * calculation_dim * simd_element_count +
-                                   j * simd_element_count + k];
+                output_data_ptr[i * simd_element_count * calculation_dim + k * calculation_dim + j] =
+                    interleft_data[i * calculation_dim * simd_element_count + j * simd_element_count + k];
             }
         }
     }
@@ -85,8 +82,7 @@ void un_interleave_tensor(mops::Tensor<scalar_t, 2> output_data,
     // Fill remainder_data
     for (size_t j = 0; j < calculation_dim; j++) {
         for (size_t k = 0; k < remainder; k++) {
-            output_data_ptr[quotient * simd_element_count * calculation_dim +
-                            k * calculation_dim + j] =
+            output_data_ptr[quotient * simd_element_count * calculation_dim + k * calculation_dim + j] =
                 remainder_data[j * remainder + k];
         }
     }

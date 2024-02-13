@@ -13,8 +13,7 @@ void fill_vector_random_integers(std::vector<int> &vector, size_t n) {
     }
 }
 
-template <typename scalar_t>
-void fill_vector_random_floats(std::vector<scalar_t> &vector) {
+template <typename scalar_t> void fill_vector_random_floats(std::vector<scalar_t> &vector) {
     // Random engine seeded with current time
     std::mt19937 engine(time(nullptr));
 
