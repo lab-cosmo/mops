@@ -7,8 +7,7 @@ int main() {
     // consists a data pointer and a shape in the form of a std::array.
     //
     // All mops operations take mops::Tensor objects as their
-    // inputs, and these can be initialized implicitly during
-    // the call in the following way:
+    // inputs, and these can be initialized in the following way:
 
     auto A = std::vector<double>(100 * 100);
     auto C = std::vector<double>(100);
