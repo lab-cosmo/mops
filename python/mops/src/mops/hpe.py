@@ -13,7 +13,7 @@ def homogeneous_polynomial_evaluation(A, C, indices_A):
     indices_A = np.ascontiguousarray(indices_A)
     indices_A = indices_A.astype(np.int32)
 
-    O = np.zeros((A.shape[0],), dtype=A.dtype)
+    O = np.empty((A.shape[0],), dtype=A.dtype)
 
     lib = _get_library()
 

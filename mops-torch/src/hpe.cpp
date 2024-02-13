@@ -25,7 +25,7 @@ torch::Tensor HomogeneousPolynomialEvaluation::forward(
 
     torch::Tensor output;
     if (A.device().is_cpu()) {
-        output = torch::zeros(
+        output = torch::empty(
             {A.size(0)}, torch::TensorOptions().dtype(A.scalar_type()).device(A.device())
         );
         assert(output.is_contiguous());
@@ -60,10 +60,7 @@ std::vector<torch::Tensor> HomogeneousPolynomialEvaluation::backward(
     auto C = saved_variables[1];
     auto indices_A = saved_variables[2];
 
-    auto grad_output = grad_outputs[0];
-    if (!grad_output.is_contiguous()) {
-        throw std::runtime_error("expected contiguous grad_output");
-    }
+    auto grad_output = grad_outputs[0].contiguous();
 
     if (C.requires_grad()) {
         C10_THROW_ERROR(
@@ -78,7 +75,7 @@ std::vector<torch::Tensor> HomogeneousPolynomialEvaluation::backward(
         AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "homogeneous_polynomial_evaluation_vjp", [&]() {
             auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
             if (A.requires_grad()) {
-                grad_A = torch::zeros_like(A);
+                grad_A = torch::empty_like(A);
                 mops_grad_A = details::torch_to_mops_2d<scalar_t>(grad_A);
             }
 

@@ -38,6 +38,10 @@ else()
 endif()
 
 option(BUILD_SHARED_LIBS "Build shared libraries instead of static ones" OFF)
+
+OPTION(MOPS_OPENMP "Try to use OpenMP when compiling Sphericart" ON)
+OPTION(MOPS_ARCH_NATIVE "Try to use -march=native when compiling Sphericart" ON)
+
 set(LIB_INSTALL_DIR "lib" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install libraries")
 set(BIN_INSTALL_DIR "bin" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install DLL/binaries")
 set(INCLUDE_INSTALL_DIR "include" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install headers")
@@ -48,13 +52,15 @@ else()
     set(MOPS_MAIN_PROJECT OFF)
 endif()
 option(MOPS_TESTS "build and run mops unit tests" ${MOPS_MAIN_PROJECT})
+option(MOPS_EXAMPLES "build and run mops examples" ${MOPS_MAIN_PROJECT})
+option(MOPS_BENCHMARKS "build and run mops examples" ${MOPS_MAIN_PROJECT})
 
 # Set a default build type if none was specified
 if (${MOPS_MAIN_PROJECT})
     if("${CMAKE_BUILD_TYPE}" STREQUAL "" AND "${CMAKE_CONFIGURATION_TYPES}" STREQUAL "")
-        message(STATUS "Setting build type to 'relwithdebinfo' as none was specified.")
+        message(STATUS "Setting build type to 'release' as none was specified.")
         set(
-            CMAKE_BUILD_TYPE "relwithdebinfo"
+            CMAKE_BUILD_TYPE "release"
             CACHE STRING
             "Choose the type of build, options are: none(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) debug release relwithdebinfo minsizerel."
             FORCE
@@ -76,10 +82,13 @@ add_library(mops
     "src/opsaw/capi.cpp"
     "src/sasaw/sasaw.cpp"
     "src/sasaw/capi.cpp"
+    "src/utils.cpp"
 
     "include/mops.hpp"
     "include/mops.h"
     "include/mops/capi.hpp"
+    "include/mops/checks.hpp"
+    "include/mops/utils.hpp"
     "include/mops/opsa.hpp"
     "include/mops/opsa.h"
     "include/mops/sap.hpp"
@@ -90,6 +99,8 @@ add_library(mops
     "include/mops/opsaw.h"
     "include/mops/sasaw.hpp"
     "include/mops/sasaw.h"
+    "include/mops/checks.hpp"
+    "include/mops/utils.hpp"
 )
 
 if(CMAKE_CUDA_COMPILER)
@@ -122,9 +133,67 @@ target_include_directories(mops PUBLIC
 )
 
 
+# Handle optimization and OpenMP flags
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-Wunknown-pragmas" COMPILER_SUPPORTS_WPRAGMAS)
+if (MOPS_OPENMP)
+    find_package(OpenMP)
+    if(OpenMP_CXX_FOUND)
+        message(STATUS "OpenMP is enabled")
+        target_link_libraries(mops PUBLIC OpenMP::OpenMP_CXX)
+    else()
+        message(WARNING "Could not find OpenMP")
+        if(COMPILER_SUPPORTS_WPRAGMAS)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
+        endif()
+    endif()
+else()
+    if(COMPILER_SUPPORTS_WPRAGMAS)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
+    endif()
+endif()
+
+if (MOPS_ARCH_NATIVE)
+    check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+    # for some reason COMPILER_SUPPORTS_MARCH_NATIVE is true with Apple clang,
+    # but then fails with `the clang compiler does not support '-march=native'`
+    if(COMPILER_SUPPORTS_MARCH_NATIVE AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        message(STATUS "march=native is enabled")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+    else()
+        message(STATUS "march=native is not supported by this compiler")
+    endif()
+endif()
+
+
+# handle warning flags
+check_cxx_compiler_flag("-Wall" COMPILER_SUPPORTS_WALL)
+if(COMPILER_SUPPORTS_WALL)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+endif()
+
+check_cxx_compiler_flag("-Wextra" COMPILER_SUPPORTS_WEXTRA)
+if(COMPILER_SUPPORTS_WEXTRA)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+endif()
+
+check_cxx_compiler_flag("-funroll-loops" COMPILER_SUPPORTS_FUNROLL_LOOPS)
+if(COMPILER_SUPPORTS_FUNROLL_LOOPS)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funroll-loops")
+endif()
+
+
 if (MOPS_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if (MOPS_BENCHMARKS)
+    add_subdirectory(benchmarks)
+endif()
+
+if (MOPS_EXAMPLES)
+    add_subdirectory(examples)
 endif()
 
 
