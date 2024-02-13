@@ -3,8 +3,6 @@ from benchmark import benchmark, format_mean_std
 
 from mops import homogeneous_polynomial_evaluation as hpe
 
-# from mops.reference_implementations import
-# homogeneous_polynomial_evaluation as ref_hpe
 
 
 np.random.seed(0xDEADBEEF)
