@@ -8,6 +8,14 @@
 #include <stdexcept>
 #include <string>
 
+/// Check that the sizes of two tensors (along a given dimension for each)
+/// are equal. The template parameters T_1 and T_2 are the types of the
+/// elements of the two tensors, and N_DIMS_1 and N_DIMS_2 are the number of
+/// dimensions of the two tensors, respectively.
+/// ``tensor_1`` and ``tensor_2`` are the two tensors being compared;
+/// ``dim_1`` and ``dim_2`` are the dimensions along which the sizes are
+/// being compared. Additionally, names are provided for the two tensors
+/// and the operation being performed to make the error message more informative.
 template <typename T_1, size_t N_DIMS_1, typename T_2, size_t N_DIMS_2>
 void check_sizes(
     mops::Tensor<T_1, N_DIMS_1> tensor_1,
@@ -27,6 +35,12 @@ void check_sizes(
     }
 }
 
+/// Checks that an index tensor does not contain out-of-bounds indices.
+/// The template parameter N_DIMS is the number of dimensions of the tensor.
+/// ``tensor`` is the tensor being checked, ``name`` is the name of the tensor,
+/// ``max_value`` is the maximum value that the indices can take, and
+/// ``operation`` is the operation being performed. If the tensor contains
+/// out-of-bounds indices, a runtime error is thrown.
 template <size_t N_DIMS>
 void check_index_tensor(
     mops::Tensor<int32_t, N_DIMS> tensor, std::string name, size_t max_value, std::string operation
@@ -57,6 +71,12 @@ void check_index_tensor(
     }
 }
 
+/// Checks that the shapes of two tensors are the same. The template parameter
+/// T is the type of the elements of the tensors, and N_DIMS is the number of
+/// dimensions of the tensors. ``tensor_1`` and ``tensor_2`` are the two tensors
+/// being compared, and ``name_1`` and ``name_2`` are the names of the two
+/// tensors. Additionally, the name of the operation being performed is provided
+/// to make the error message more informative.
 template <typename T, size_t N_DIMS>
 void check_same_shape(
     mops::Tensor<T, N_DIMS> tensor_1,

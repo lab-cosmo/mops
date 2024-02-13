@@ -3,8 +3,6 @@ from benchmark import benchmark, format_mean_std
 
 from mops import homogeneous_polynomial_evaluation as hpe
 
-
-
 np.random.seed(0xDEADBEEF)
 
 A = np.random.rand(1000, 2000)
