@@ -234,8 +234,6 @@ void mops::homogeneous_polynomial_evaluation_vjp(
     Tensor<scalar_t, 1> C,
     Tensor<int32_t, 2> indices_A
 ) {
-    // TODO: checks
-
     size_t polynomial_order = indices_A.shape[1];
 
     if (polynomial_order <= 10) {

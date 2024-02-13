@@ -22,16 +22,6 @@ template <> constexpr size_t get_simd_element_count<float>() {
 template <typename scalar_t, size_t simd_element_count>
 void interleave_tensor(
     mops::Tensor<scalar_t, 2> initial_data, scalar_t *interleft_data, scalar_t *remainder_data
-);
-
-template <typename scalar_t, size_t simd_element_count>
-void un_interleave_tensor(
-    mops::Tensor<scalar_t, 2> output_data, scalar_t *interleft_data, scalar_t *remainder_data
-);
-
-template <typename scalar_t, size_t simd_element_count>
-void interleave_tensor(
-    mops::Tensor<scalar_t, 2> initial_data, scalar_t *interleft_data, scalar_t *remainder_data
 ) {
 
     size_t batch_dim = initial_data.shape[0];
