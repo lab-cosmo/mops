@@ -31,8 +31,10 @@ void _homogeneous_polynomial_evaluation_templated_polynomial_order(
     size_t size_first_dimension_interleft = size_first_dimension / simd_element_count;
     size_t size_remainder = size_first_dimension % simd_element_count;
 
-    scalar_t* interleft_a_ptr = std::vector<scalar_t>(size_first_dimension_interleft*n_possible_factors*simd_element_count).data();
-    scalar_t* remainder_a_ptr = std::vector<scalar_t>(size_remainder*n_possible_factors).data();
+    std::vector<scalar_t> interleft_a(size_first_dimension_interleft*n_possible_factors*simd_element_count);
+    std::vector<scalar_t> remainder_a(size_remainder*n_possible_factors);
+    scalar_t* interleft_a_ptr = interleft_a.data();
+    scalar_t* remainder_a_ptr = remainder_a.data();
     interleave_tensor<scalar_t, simd_element_count>(A, interleft_a_ptr, remainder_a_ptr);
 
     // For this operation, it's possible to trivially initialize the output to 0 inside the loop.
@@ -159,12 +161,16 @@ void _homogeneous_polynomial_evaluation_vjp_templated_polynomial_order(
         size_t size_first_dimension_interleft = size_batch_dimension / simd_element_count;
         size_t size_remainder = size_batch_dimension % simd_element_count;
 
-        scalar_t* interleft_a_ptr = std::vector<scalar_t>(size_first_dimension_interleft*n_possible_factors*simd_element_count).data();
-        scalar_t* remainder_a_ptr = std::vector<scalar_t>(size_remainder*n_possible_factors).data();
+        std::vector<scalar_t> interleft_a(size_first_dimension_interleft*n_possible_factors*simd_element_count);
+        std::vector<scalar_t> remainder_a(size_remainder*n_possible_factors);
+        scalar_t* interleft_a_ptr = interleft_a.data();
+        scalar_t* remainder_a_ptr = remainder_a.data();
         interleave_tensor<scalar_t, simd_element_count>(A, interleft_a_ptr, remainder_a_ptr);
 
-        scalar_t* interleft_grad_a_ptr = std::vector<scalar_t>(size_first_dimension_interleft*n_possible_factors*simd_element_count).data();
-        scalar_t* remainder_grad_a_ptr = std::vector<scalar_t>(size_remainder*n_possible_factors).data();
+        std::vector<scalar_t> interleft_grad_a(size_first_dimension_interleft*n_possible_factors*simd_element_count);
+        std::vector<scalar_t> remainder_grad_a(size_remainder*n_possible_factors);
+        scalar_t* interleft_grad_a_ptr = interleft_grad_a.data();
+        scalar_t* remainder_grad_a_ptr = remainder_grad_a.data();
         std::fill(interleft_grad_a_ptr, interleft_grad_a_ptr+size_first_dimension_interleft*n_possible_factors*simd_element_count, static_cast<scalar_t>(0.0));
         std::fill(remainder_grad_a_ptr, remainder_grad_a_ptr+size_remainder*n_possible_factors, static_cast<scalar_t>(0.0));
 
