@@ -16,6 +16,8 @@
 /// ``dim_1`` and ``dim_2`` are the dimensions along which the sizes are
 /// being compared. Additionally, names are provided for the two tensors
 /// and the operation being performed to make the error message more informative.
+/// Note that T_1 and T_2 can be different types, such as when comparing
+/// an index tensor (int32_t) with a data tensor (float/double).
 template <typename T_1, size_t N_DIMS_1, typename T_2, size_t N_DIMS_2>
 void check_sizes(
     mops::Tensor<T_1, N_DIMS_1> tensor_1,
