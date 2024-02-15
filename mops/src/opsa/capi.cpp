@@ -23,9 +23,10 @@ extern "C" int mops_outer_product_scatter_add_f32(
 
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::outer_product_scatter_add<float>(
-            {output.data, {checked_cast(output.shape[0]),
-                                checked_cast(output.shape[1]),
-                                checked_cast(output.shape[2])}},
+            {output.data,
+             {checked_cast(output.shape[0]),
+              checked_cast(output.shape[1]),
+              checked_cast(output.shape[2])}},
             {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
             {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
             {indices_output.data, {checked_cast(indices_output.shape[0])}}
@@ -41,9 +42,10 @@ extern "C" int mops_outer_product_scatter_add_f64(
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::outer_product_scatter_add<double>(
-            {output.data, {checked_cast(output.shape[0]),
-                                checked_cast(output.shape[1]),
-                                checked_cast(output.shape[2])}},
+            {output.data,
+             {checked_cast(output.shape[0]),
+              checked_cast(output.shape[1]),
+              checked_cast(output.shape[2])}},
             {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
             {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
             {indices_output.data, {checked_cast(indices_output.shape[0])}}
@@ -106,9 +108,10 @@ extern "C" int mops_cuda_outer_product_scatter_add_f32(
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::outer_product_scatter_add<float>(
-            {output.data, {checked_cast(output.shape[0]),
-                                checked_cast(output.shape[1]),
-                                checked_cast(output.shape[2])}},
+            {output.data,
+             {checked_cast(output.shape[0]),
+              checked_cast(output.shape[1]),
+              checked_cast(output.shape[2])}},
             {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
             {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
             {indices_output.data, {checked_cast(indices_output.shape[0])}}
@@ -124,9 +127,10 @@ extern "C" int mops_cuda_outer_product_scatter_add_f64(
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::outer_product_scatter_add<double>(
-            {output.data, {checked_cast(output.shape[0]),
-                                checked_cast(output.shape[1]),
-                                checked_cast(output.shape[2])}},
+            {output.data,
+             {checked_cast(output.shape[0]),
+              checked_cast(output.shape[1]),
+              checked_cast(output.shape[2])}},
             {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
             {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
             {indices_output.data, {checked_cast(indices_output.shape[0])}}

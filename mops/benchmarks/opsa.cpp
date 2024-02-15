@@ -19,8 +19,11 @@ int main() {
 
     for (int i = 0; i < 1000; i++) {
         mops::outer_product_scatter_add<double>(
-            {output.data(), {1000, 13, 20}}, {A.data(), {60000, 13}},
-            {B.data(), {60000, 20}}, {indices_output.data(), {60000}});
+            {output.data(), {1000, 13, 20}},
+            {A.data(), {60000, 13}},
+            {B.data(), {60000, 20}},
+            {indices_output.data(), {60000}}
+        );
     }
 
     return 0;
