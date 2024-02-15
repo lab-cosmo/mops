@@ -22,7 +22,7 @@ torch::Tensor OuterProductScatterAddWithWeights::forward(
     details::check_integer_dtype({indices_W, indices_output});
     details::check_number_of_dimensions(A, 2, "A", "outer_product_scatter_add_with_weights");
     details::check_number_of_dimensions(B, 2, "B", "outer_product_scatter_add_with_weights");
-    details::check_number_of_dimensions(W, 3, "W", "outer_product_scatter_add_with_weights");
+    details::check_number_of_dimensions(W, 2, "W", "outer_product_scatter_add_with_weights");
     details::check_number_of_dimensions(
         indices_W, 1, "indices_W", "outer_product_scatter_add_with_weights"
     );
@@ -34,7 +34,7 @@ torch::Tensor OuterProductScatterAddWithWeights::forward(
 
     torch::Tensor output;
     if (A.device().is_cpu()) {
-        output = torch::zeros(
+        output = torch::empty(
             {W.size(0), A.size(1), B.size(1)},
             torch::TensorOptions().dtype(A.scalar_type()).device(A.device())
         );
@@ -76,10 +76,7 @@ std::vector<torch::Tensor> OuterProductScatterAddWithWeights::backward(
     auto indices_W = saved_variables[3];
     auto indices_output = saved_variables[4];
 
-    auto grad_output = grad_outputs[0];
-    if (!grad_output.is_contiguous()) {
-        throw std::runtime_error("expected contiguous grad_output");
-    }
+    auto grad_output = grad_outputs[0].contiguous();
 
     auto grad_A = torch::Tensor();
     auto grad_B = torch::Tensor();
@@ -92,19 +89,19 @@ std::vector<torch::Tensor> OuterProductScatterAddWithWeights::backward(
             [&]() {
                 auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (A.requires_grad()) {
-                    grad_A = torch::zeros_like(A);
+                    grad_A = torch::empty_like(A);
                     mops_grad_A = details::torch_to_mops_2d<scalar_t>(grad_A);
                 }
 
                 auto mops_grad_B = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (B.requires_grad()) {
-                    grad_B = torch::zeros_like(B);
+                    grad_B = torch::empty_like(B);
                     mops_grad_B = details::torch_to_mops_2d<scalar_t>(grad_B);
                 }
 
                 auto mops_grad_W = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (W.requires_grad()) {
-                    grad_W = torch::zeros_like(W);
+                    grad_W = torch::empty_like(W);
                     mops_grad_W = details::torch_to_mops_2d<scalar_t>(grad_W);
                 }
 
