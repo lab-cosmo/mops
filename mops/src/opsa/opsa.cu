@@ -1,38 +1,28 @@
-// todo: cuda device code
+
+#include "mops/cuda_utils.cuh"
+#include "mops/opsa_cuda.hpp"
+
+using namespace mops::cuda;
+
 #define WARP_SIZE 32
-
-/* these two functions should go in a utility code.*/
-__host__ __device__ int32_t find_integer_divisor(int32_t x, int32_t bdim) {
-    return (x + bdim - 1) / bdim;
-}
-
-template <class T>
-__host__ __device__ T *shared_array(std::size_t n_elements, void *&ptr,
-                                    std::size_t *space = nullptr) noexcept {
-    const std::int32_tptr_t inptr = reinterpret_cast<int32_tptr_t>(ptr);
-    const std::int32_tptr_t end = inptr + n_elements * sizeof(T);
-    if (space)
-        *space += static_cast<std::size_t>(end - inptr);
-    ptr = reinterpret_cast<void *>(end);
-    return reinterpret_cast<T *>(inptr);
-}
+#define NWARPS_PER_BLOCK 4
 
 template <typename scalar_t, const int32_t TA, const int32_t TB>
 __device__ void outer_product_scatter_add_kernel(
     const scalar_t *__restrict__ A, // [nedges, nfeatures_A]
     const scalar_t *__restrict__ B, // [nedges, nfeatures_B]
-    const int32_t nnodes,               // number of nodes we're summing into
-    const int32_t nedges,               // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,          // number of features of A
-    const int32_t nfeatures_B,          // number of features of B
+    const int32_t nnodes,           // number of nodes we're summing into
+    const int32_t nedges_total,     // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,      // number of features of A
+    const int32_t nfeatures_B,      // number of features of B
     const int32_t
         *__restrict__ first_occurences, // indices in indices_output where the
                                         // values change [nnodes]
     const int32_t *__restrict__ indices_output, // sorted list of indices to sum
                                                 // into [nedges]
     scalar_t
-        *__restrict__ output // shape: [nnodes, nfeatures_B, nfeatures_A]
-                             // -> this ordering because contiguity of threadCol
+        *__restrict__ output // shape: [nnodes, nfeatures_B, nfeatures_A] ->
+                             // this ordering because contiguity of threadCol
 ) {
 
     extern __shared__ char buffer[];
@@ -40,19 +30,6 @@ __device__ void outer_product_scatter_add_kernel(
     const int32_t threadCol = threadIdx.x % WARP_SIZE;
     const int32_t threadRow = threadIdx.x / WARP_SIZE;
     const int32_t nThreadRow = blockDim.x / WARP_SIZE;
-
-    void *sptr = buffer;
-    size_t space = 0;
-
-    /*
-     * Shared memory buffers to alleviate MIO stalls -> implement double buffering + async memcopies for Ampere +?
-     * pipeline could be GMEM -> SMEM -> registers -> compute
-
-    scalar_t *buffer_A = shared_array<scalar_t>(TA * WARP_SIZE, sptr,
-    &space); scalar_t *buffer_B = shared_array<scalar_t>(TB * nThreadRow,
-    sptr, &space);
-
-     */
 
     /* registers to hold components of A, B and output - used to increase
      * arithmetic intensity.
@@ -62,8 +39,9 @@ __device__ void outer_product_scatter_add_kernel(
     scalar_t regOP[TA * TB] = {0.0};
 
     const int32_t edge_start = first_occurences[blockIdx.x];
-    const int32_t edge_end =
-        (blockIdx.x == nnodes - 1) ? nedges : first_occurences[blockIdx.x + 1];
+    const int32_t edge_end = (blockIdx.x == nnodes - 1)
+                                 ? nedges_total
+                                 : first_occurences[blockIdx.x + 1];
     const int32_t node_index = indices_output[edge_start];
     const int32_t nedges = edge_end - edge_start;
 
@@ -95,15 +73,18 @@ __device__ void outer_product_scatter_add_kernel(
                 regOP[i] = 0.0;
             }
 
-            for (int32_t edge = 0; edge < nedges; edge++) {
+            for (int32_t edge_idx = 0; edge_idx < nedges; edge_idx++) {
+
+                int32_t edge = edge_idx + edge_start;
+
                 /*
                  *  load A from GMEM into local registers
                  */
                 for (int32_t i = 0; i < TA; i++) {
 
                     if (global_A + i * WARP_SIZE + threadCol < nfeatures_A)
-                        regA[i] = A[(edge_start + edge) * nfeatures_A +
-                                    global_A + i * WARP_SIZE + threadCol];
+                        regA[i] = A[edge * nfeatures_A + global_A +
+                                    i * WARP_SIZE + threadCol];
                 }
 
                 /*
@@ -111,8 +92,8 @@ __device__ void outer_product_scatter_add_kernel(
                  */
                 for (int32_t i = 0; i < TB; i++) {
                     if (global_B + i * nThreadRow + threadRow < nfeatures_B)
-                        regB[i] = B[(edge_start + edge) * nfeatures_B +
-                                    global_B + i * nThreadRow + threadRow];
+                        regB[i] = B[edge * nfeatures_B + global_B +
+                                    i * nThreadRow + threadRow];
                 }
 
                 /*
@@ -146,3 +127,35 @@ __device__ void outer_product_scatter_add_kernel(
         }
     }
 }
+namespace mops::cuda {
+template <typename scalar_t>
+void outer_product_scatter_add_cuda(
+    const scalar_t *__restrict__ A, // [nedges, nfeatures_A]
+    const scalar_t *__restrict__ B, // [nedges, nfeatures_B]
+    const int32_t nnodes,           // number of nodes we're summing into
+    const int32_t nedges,           // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,      // number of features of A
+    const int32_t nfeatures_B,      // number of features of B
+    const int32_t
+        *__restrict__ first_occurences, // indices in indices_output where the
+                                        // values change [nnodes]
+    const int32_t *__restrict__ indices_output, // sorted list of indices to sum
+                                                // into [nedges]
+    scalar_t
+        *__restrict__ output // shape: [nnodes, nfeatures_B, nfeatures_A]
+                             // -> this ordering because contiguity of threadCol
+
+) {
+
+    dim3 gridDim(nnodes, 1, 1);
+
+    dim3 blockDim(NWARPS_PER_BLOCK * WARP_SIZE, 1, 1);
+
+    outer_product_scatter_add_kernel<scalar_t, 4, 4><<<gridDim, blockDim, 0>>>(
+        A, B, nnodes, nedges, nfeatures_A, nfeatures_B, first_occurences,
+        indices_output, output);
+
+    cudaDeviceSynchronize();
+}
+
+} // namespace mops::cuda

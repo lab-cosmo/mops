@@ -51,6 +51,8 @@ if (${MOPS_MAIN_PROJECT})
 endif()
 
 
+
+
 add_library(mops
     "src/capi.cpp"
     "src/opsa/opsa.cpp"
@@ -83,7 +85,11 @@ if(CMAKE_CUDA_COMPILER)
     target_compile_definitions(mops PUBLIC MOPS_CUDA_ENABLED)
     target_sources(mops
         PRIVATE
-            src/opsa/opsa.cu
+            "src/utils/cuda_utils.cu"
+            "include/mops/cuda_utils.cuh"
+
+            "src/opsa/opsa.cu"
+            "include/mops/opsa_cuda.hpp"
     )
 endif()
 
