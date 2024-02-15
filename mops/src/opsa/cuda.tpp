@@ -1,6 +1,6 @@
 #include <stdexcept>
 
-#include "mops/opsa_cuda.hpp"
+#include "mops/opsa_cuda.cuh"
 #include "mops/opsa.hpp"
 
 using namespace mops::cuda;

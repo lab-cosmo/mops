@@ -1,6 +1,6 @@
 
 #include "mops/cuda_utils.cuh"
-#include "mops/opsa_cuda.hpp"
+#include "mops/opsa_cuda.cuh"
 
 using namespace mops::cuda;
 
