@@ -26,12 +26,17 @@ int main() {
 
     auto O = std::vector<double>(32000 * 100);
 
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < 1000; i++) {
         mops::sparse_accumulation_of_products<double>(
-            {O.data(), {32000, 100}}, {A.data(), {32000, 13}},
-            {B.data(), {32000, 7}}, {C.data(), {900}},
-            {indices_A.data(), {900}}, {indices_B.data(), {900}},
-            {indices_output.data(), {900}});
+            {O.data(), {32000, 100}},
+            {A.data(), {32000, 13}},
+            {B.data(), {32000, 7}},
+            {C.data(), {900}},
+            {indices_A.data(), {900}},
+            {indices_B.data(), {900}},
+            {indices_output.data(), {900}}
+        );
+    }
 
     return 0;
 }
