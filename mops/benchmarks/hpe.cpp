@@ -11,7 +11,7 @@ int main() {
     auto C = std::vector<double>(100000);
     fill_vector_random_floats(C);
 
-    auto indices_A = std::vector<int>(100000 * 4);
+    auto indices_A = std::vector<int32_t>(100000 * 4);
     fill_vector_random_integers(indices_A, 2000);
 
     auto output = std::vector<double>(1000);
