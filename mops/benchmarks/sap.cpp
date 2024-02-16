@@ -15,13 +15,13 @@ int main() {
     auto C = std::vector<double>(900);
     fill_vector_random_floats(C);
 
-    auto indices_A = std::vector<int>(900);
+    auto indices_A = std::vector<int32_t>(900);
     fill_vector_random_integers(indices_A, 13);
 
-    auto indices_B = std::vector<int>(900);
+    auto indices_B = std::vector<int32_t>(900);
     fill_vector_random_integers(indices_B, 7);
 
-    auto indices_output = std::vector<int>(900);
+    auto indices_output = std::vector<int32_t>(900);
     fill_vector_random_integers(indices_output, 100);
 
     auto O = std::vector<double>(32000 * 100);
