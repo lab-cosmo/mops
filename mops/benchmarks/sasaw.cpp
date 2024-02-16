@@ -39,12 +39,17 @@ int main() {
 
     for (int i = 0; i < 100; i++) {
         mops::sparse_accumulation_scatter_add_with_weights<double>(
-            {output.data(), {1000, 100, 32}}, {A.data(), {60000, 13}},
-            {B.data(), {60000, 32}}, {C.data(), {900}},
-            {W.data(), {1000, 7, 32}}, {indices_A.data(), {900}},
-            {indices_W_1.data(), {60000}}, {indices_W_2.data(), {900}},
+            {output.data(), {1000, 100, 32}},
+            {A.data(), {60000, 13}},
+            {B.data(), {60000, 32}},
+            {C.data(), {900}},
+            {W.data(), {1000, 7, 32}},
+            {indices_A.data(), {900}},
+            {indices_W_1.data(), {60000}},
+            {indices_W_2.data(), {900}},
             {indices_output_1.data(), {60000}},
-            {indices_output_2.data(), {900}});
+            {indices_output_2.data(), {900}}
+        );
     }
 
     return 0;
