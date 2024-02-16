@@ -31,7 +31,7 @@ void mops::outer_product_scatter_add_with_weights(
     scalar_t* a_ptr = A.data;
     scalar_t* b_ptr = B.data;
     scalar_t* w_ptr = W.data;
-    int* j_ptr = indices_W.data;
+    const int32_t* j_ptr = indices_W.data;
 
     size_t size_output_first_dimension = output.shape[0];
     size_t size_a = A.shape[1];
@@ -112,7 +112,7 @@ void mops::outer_product_scatter_add_with_weights_vjp(
         scalar_t* a_ptr = A.data;
         scalar_t* b_ptr = B.data;
         scalar_t* w_ptr = W.data;
-        int* i_ptr = indices_output.data;
+        const int32_t* i_ptr = indices_output.data;
 
         size_t size_output_first_dimension = grad_output.shape[0];
         size_t size_a = A.shape[1];

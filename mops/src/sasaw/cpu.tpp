@@ -38,11 +38,11 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     scalar_t* b_ptr = B.data;
     scalar_t* w_ptr = W.data;
     scalar_t* c_ptr = C.data;
-    int* i_ptr = indices_output_1.data;
-    int* j_ptr = indices_W_1.data;
-    int* m_1_ptr = indices_A.data;
-    int* m_2_ptr = indices_W_2.data;
-    int* m_3_ptr = indices_output_2.data;
+    const int32_t* i_ptr = indices_output_1.data;
+    const int32_t* j_ptr = indices_W_1.data;
+    const int32_t* m_1_ptr = indices_A.data;
+    const int32_t* m_2_ptr = indices_W_2.data;
+    const int32_t* m_3_ptr = indices_output_2.data;
 
     size_t N = C.shape[0];
     size_t size_a = A.shape[1];
@@ -138,10 +138,10 @@ void mops::sparse_accumulation_scatter_add_with_weights_vjp(
         scalar_t* b_ptr = B.data;
         scalar_t* w_ptr = W.data;
         scalar_t* c_ptr = C.data;
-        int* i_ptr = indices_output_1.data;
-        int* m_1_ptr = indices_A.data;
-        int* m_2_ptr = indices_W_2.data;
-        int* m_3_ptr = indices_output_2.data;
+        const int32_t* i_ptr = indices_output_1.data;
+        const int32_t* m_1_ptr = indices_A.data;
+        const int32_t* m_2_ptr = indices_W_2.data;
+        const int32_t* m_3_ptr = indices_output_2.data;
 
         size_t N = C.shape[0];
         size_t size_a = A.shape[1];
