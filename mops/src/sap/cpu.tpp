@@ -156,29 +156,39 @@ void mops::sparse_accumulation_of_products_vjp(
         scalar_t* interleft_grad_b_ptr = nullptr;
         scalar_t* remainder_grad_a_ptr = nullptr;
         scalar_t* remainder_grad_b_ptr = nullptr;
+
+        std::vector<scalar_t> interleft_b;
+        std::vector<scalar_t> remainder_b;
+        std::vector<scalar_t> interleft_grad_a;
+        std::vector<scalar_t> remainder_grad_a;
         if (calculate_grad_A) {
-            std::vector<scalar_t> interleft_b(size_first_dimension_interleft*size_second_dimension_b*simd_element_count);
-            std::vector<scalar_t> remainder_b(size_remainder*size_second_dimension_b);
+            interleft_b.resize(size_first_dimension_interleft*size_second_dimension_b*simd_element_count, static_cast<scalar_t>(0.0));
+            remainder_b.resize(size_remainder*size_second_dimension_b, static_cast<scalar_t>(0.0));
             interleft_b_ptr = interleft_b.data();
             remainder_b_ptr = remainder_b.data();
             interleave_tensor<scalar_t, simd_element_count>(B, interleft_b_ptr, remainder_b_ptr);
 
-            std::vector<scalar_t> interleft_grad_a(size_first_dimension_interleft*size_second_dimension_a*simd_element_count);
-            std::vector<scalar_t> remainder_grad_a(size_remainder*size_second_dimension_a);
+            interleft_grad_a.resize(size_first_dimension_interleft*size_second_dimension_a*simd_element_count, static_cast<scalar_t>(0.0));
+            remainder_grad_a.resize(size_remainder*size_second_dimension_a, static_cast<scalar_t>(0.0));
             interleft_grad_a_ptr = interleft_grad_a.data();
             remainder_grad_a_ptr = remainder_grad_a.data();
             std::fill(interleft_grad_a_ptr, interleft_grad_a_ptr+size_first_dimension_interleft*size_second_dimension_a*simd_element_count, static_cast<scalar_t>(0.0));
             std::fill(remainder_grad_a_ptr, remainder_grad_a_ptr+size_remainder*size_second_dimension_a, static_cast<scalar_t>(0.0));
         }
+
+        std::vector<scalar_t> interleft_a;
+        std::vector<scalar_t> remainder_a;
+        std::vector<scalar_t> interleft_grad_b;
+        std::vector<scalar_t> remainder_grad_b;
         if (calculate_grad_B) {
-            std::vector<scalar_t> interleft_a(size_first_dimension_interleft*size_second_dimension_a*simd_element_count);
-            std::vector<scalar_t> remainder_a(size_remainder*size_second_dimension_a);
+            interleft_a.resize(size_first_dimension_interleft*size_second_dimension_a*simd_element_count, static_cast<scalar_t>(0.0));
+            remainder_a.resize(size_remainder*size_second_dimension_a, static_cast<scalar_t>(0.0));
             interleft_a_ptr = interleft_a.data();
             remainder_a_ptr = remainder_a.data();
             interleave_tensor<scalar_t, simd_element_count>(A, interleft_a_ptr, remainder_a_ptr);
 
-            std::vector<scalar_t> interleft_grad_b(size_first_dimension_interleft*size_second_dimension_b*simd_element_count);
-            std::vector<scalar_t> remainder_grad_b(size_remainder*size_second_dimension_b);
+            interleft_grad_b.resize(size_first_dimension_interleft*size_second_dimension_b*simd_element_count, static_cast<scalar_t>(0.0));
+            remainder_grad_b.resize(size_remainder*size_second_dimension_b, static_cast<scalar_t>(0.0));
             interleft_grad_b_ptr = interleft_grad_b.data();
             remainder_grad_b_ptr = remainder_grad_b.data();
             std::fill(interleft_grad_b_ptr, interleft_grad_b_ptr+size_first_dimension_interleft*size_second_dimension_b*simd_element_count, static_cast<scalar_t>(0.0));
