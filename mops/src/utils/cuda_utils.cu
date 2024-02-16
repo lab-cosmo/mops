@@ -132,6 +132,8 @@ __host__ int32_t *calculate_first_occurences_cuda(
 
     if (first_occurences == nullptr) {
         // cudamalloc it, return pointer reference.
+        int32_t *d_data;
+        CUDA_CHECK_ERROR(cudaMalloc(&d_data, natoms * sizeof(int32_t)));
     }
 
     int32_t nbx = find_integer_divisor(nedges, NEIGHBOUR_NEDGES_PER_BLOCK);
