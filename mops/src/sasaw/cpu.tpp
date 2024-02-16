@@ -61,6 +61,7 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     #pragma omp parallel for
     for (size_t i = 0; i < size_output_first_dim; i++) {
         // iterate over input indices that will write to the output index i
+        // these are stored as entries (variable "e") in write_list[i]
         for (size_t e : write_list[i]) {
             scalar_t* o_ptr_e = o_ptr + i_ptr[e] * output_shift_first_dim;
             scalar_t* a_ptr_e = a_ptr + e * size_a;
@@ -159,6 +160,7 @@ void mops::sparse_accumulation_scatter_add_with_weights_vjp(
         #pragma omp parallel for
         for (size_t j = 0; j < size_output_first_dim; j++) {
             // iterate over grad_output indices that will write to the output index j
+            // these are stored as entries (variable "e") in write_list[j] 
             scalar_t* w_ptr_e = w_ptr + j * w_shift_first_dim;;
             for (size_t e : write_list[j]) {
                 scalar_t* grad_o_ptr_e = grad_o_ptr + i_ptr[e] * output_shift_first_dim;
