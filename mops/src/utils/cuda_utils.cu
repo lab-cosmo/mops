@@ -126,14 +126,15 @@ the same reciever index.
 if first_occurences is nullptr on entry, it will allocate the memory required
 and return the alloc'd pointer. */
 
-__host__ int32_t *calculate_first_occurences_cuda(
-    const int32_t *__restrict__ receiver_list, int32_t nedges, int32_t natoms,
-    int32_t *__restrict__ first_occurences = nullptr) {
+__host__ int32_t *
+calculate_first_occurences_cuda(const int32_t *__restrict__ receiver_list,
+                                int32_t nedges, int32_t natoms,
+                                int32_t *first_occurences = nullptr) {
 
     if (first_occurences == nullptr) {
         // cudamalloc it, return pointer reference.
-        int32_t *d_data;
-        CUDA_CHECK_ERROR(cudaMalloc(&d_data, natoms * sizeof(int32_t)));
+        CUDA_CHECK_ERROR(
+            cudaMalloc(&first_occurences, natoms * sizeof(int32_t)));
     }
 
     int32_t nbx = find_integer_divisor(nedges, NEIGHBOUR_NEDGES_PER_BLOCK);
