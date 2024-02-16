@@ -132,7 +132,7 @@ calculate_first_occurences_cuda(const int32_t *__restrict__ receiver_list,
                                 int32_t *first_occurences = nullptr) {
 
     if (first_occurences == nullptr) {
-        // cudamalloc it, return pointer reference.
+        // cudamalloc it, return pointer reference later.
         CUDA_CHECK_ERROR(
             cudaMalloc(&first_occurences, natoms * sizeof(int32_t)));
     }
