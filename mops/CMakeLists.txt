@@ -89,7 +89,7 @@ if(CMAKE_CUDA_COMPILER)
             "include/mops/cuda_utils.cuh"
 
             "src/opsa/opsa.cu"
-            "include/mops/opsa_cuda.hpp"
+            "include/mops/opsa_cuda.cuh"
     )
 endif()
 
