@@ -12,9 +12,7 @@ def outer_product_scatter_add(A, B, indices_output, output_size):
     indices_output = np.ascontiguousarray(indices_output)
     indices_output = indices_output.astype(np.int32)
 
-    output = np.empty(
-        (output_size, A.shape[1], B.shape[1]), dtype=A.dtype
-    )  # TODO: 3D arrays
+    output = np.empty((output_size, A.shape[1], B.shape[1]), dtype=A.dtype)
 
     lib = _get_library()
 

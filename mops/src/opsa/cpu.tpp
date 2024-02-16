@@ -6,8 +6,6 @@
 #include "mops/checks.hpp"
 #include "mops/utils.hpp"
 
-#include <iostream>
-
 
 template<typename scalar_t>
 void mops::outer_product_scatter_add(
