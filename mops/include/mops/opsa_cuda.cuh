@@ -30,6 +30,27 @@ void outer_product_scatter_add_cuda(
 
 );
 
+template <typename scalar_t>
+void outer_product_scatter_add_vjp_cuda(
+    const scalar_t *__restrict__ A, // [nedges, nfeatures_A]
+    const scalar_t *__restrict__ B, // [nedges, nfeatures_B]
+    const int32_t nnodes,           // number of nodes we're summing into
+    const int32_t nedges,           // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,      // number of features of A
+    const int32_t nfeatures_B,      // number of features of B
+    const int32_t
+        *__restrict__ first_occurences, // indices in indices_output where
+                                        // the values change [nnodes]
+    const int32_t *__restrict__ indices_output, // sorted list of indices to
+                                                // sum into [nedges]
+    bool compute_grad_A,                        // whether to compute gradA
+    bool compute_grad_B,                        // whether to compute gradA
+    scalar_t *__restrict__ grad_in, // grad_input: [nnodes, nfeatures_B,
+                                    // nfeatures_A]
+    scalar_t *__restrict__ grad_A,  // [nedges, nfeatures_A],
+    scalar_t *__restrict__ grad_B   // [nedges, nfeatures_B]
+);
+
 } // namespace cuda
 } // namespace mops
 

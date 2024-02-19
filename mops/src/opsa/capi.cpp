@@ -99,3 +99,43 @@ extern "C" int mops_cuda_outer_product_scatter_add_f64(
             {first_occurences.data, {checked_cast(first_occurences.shape[0])}},
             {indices_output.data, {checked_cast(indices_output.shape[0])}}););
 }
+
+extern "C" int mops_cuda_outer_product_scatter_add_vjp_f32(
+    mops_tensor_2d_f32_t grad_A, mops_tensor_2d_f32_t grad_B,
+    mops_tensor_2d_f32_t grad_output, mops_tensor_2d_f32_t A,
+    mops_tensor_2d_f32_t B, mops_tensor_1d_i32_t first_occurences,
+    mops_tensor_1d_i32_t indices_output) {
+    MOPS_CATCH_EXCEPTIONS(
+        mops::cuda::outer_product_scatter_add_vjp<float>(
+            {grad_A.data,
+             {checked_cast(grad_A.shape[0]), checked_cast(grad_A.shape[1])}},
+            {grad_B.data,
+             {checked_cast(grad_B.shape[0]), checked_cast(grad_B.shape[1])}},
+            {grad_output.data,
+             {checked_cast(grad_output.shape[0]),
+              checked_cast(grad_output.shape[1])}},
+            {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
+            {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
+            {first_occurences.data, {checked_cast(first_occurences.shape[0])}},
+            {indices_output.data, {checked_cast(indices_output.shape[0])}}););
+}
+
+extern "C" int mops_cuda_outer_product_scatter_add_vjp_f64(
+    mops_tensor_2d_f64_t grad_A, mops_tensor_2d_f64_t grad_B,
+    mops_tensor_2d_f64_t grad_output, mops_tensor_2d_f64_t A,
+    mops_tensor_2d_f64_t B, mops_tensor_1d_i32_t first_occurences,
+    mops_tensor_1d_i32_t indices_output) {
+    MOPS_CATCH_EXCEPTIONS(
+        mops::cuda::outer_product_scatter_add_vjp<double>(
+            {grad_A.data,
+             {checked_cast(grad_A.shape[0]), checked_cast(grad_A.shape[1])}},
+            {grad_B.data,
+             {checked_cast(grad_B.shape[0]), checked_cast(grad_B.shape[1])}},
+            {grad_output.data,
+             {checked_cast(grad_output.shape[0]),
+              checked_cast(grad_output.shape[1])}},
+            {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
+            {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
+            {first_occurences.data, {checked_cast(first_occurences.shape[0])}},
+            {indices_output.data, {checked_cast(indices_output.shape[0])}}););
+}

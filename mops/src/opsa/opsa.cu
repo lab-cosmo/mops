@@ -131,7 +131,7 @@ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_ke
 
 template <typename scalar_t, const int TA, const int TB>
 __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
-    outer_product_scatter_add_jvp_kernel(
+    outer_product_scatter_add_vjp_kernel(
         const scalar_t *__restrict__ A, // [nedges, nfeatures_A]
         const scalar_t *__restrict__ B, // [nedges, nfeatures_B]
         const int32_t nnodes,           // number of nodes we're summing into
@@ -310,7 +310,7 @@ void outer_product_scatter_add_cuda(
 }
 
 template <typename scalar_t>
-void outer_product_scatter_add_jvp_cuda(
+void outer_product_scatter_add_vjp_cuda(
     const scalar_t *__restrict__ A, // [nedges, nfeatures_A]
     const scalar_t *__restrict__ B, // [nedges, nfeatures_B]
     const int32_t nnodes,           // number of nodes we're summing into
@@ -334,7 +334,7 @@ void outer_product_scatter_add_jvp_cuda(
 
     dim3 blockDim(NWARPS_PER_BLOCK * WARP_SIZE, 1, 1);
 
-    outer_product_scatter_add_jvp_kernel<scalar_t, 4, 4>
+    outer_product_scatter_add_vjp_kernel<scalar_t, 4, 4>
         <<<gridDim, blockDim, 0>>>(A, B, nnodes, nedges, nfeatures_A,
                                    nfeatures_B, first_occurences,
                                    indices_output, compute_grad_A,
