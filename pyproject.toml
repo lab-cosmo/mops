@@ -43,7 +43,7 @@ repository = "https://github.com/lab-cosmo/mops"
 [build-system]
 requires = [
     "setuptools >=68",
-    "cmake <3.28",  # this should be changed once cmake 3.28.1 is on PyPI
+    "cmake",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -51,7 +51,7 @@ build-backend = "setuptools.build_meta"
 zip-safe = false
 
 [tool.setuptools.packages.find]
-where = ["python/mops/src/"]
+where = ["python/mops/src"]
 
 ### ======================================================================== ###
 [tool.pytest.ini_options]
