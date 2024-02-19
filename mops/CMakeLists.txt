@@ -159,6 +159,20 @@ else()
     endif()
 endif()
 
+check_cxx_source_compiles("struct s {int *restrict x;}; int main() {return 0;}" HAVE_RESTRICT)
+check_cxx_source_compiles("struct s {int *__restrict__ x;}; int main() {return 0;}" HAVE___RESTRICT__)
+check_cxx_source_compiles("struct s {int *__restrict x;}; int main() {return 0;}" HAVE___RESTRICT)
+
+if (HAVE_RESTRICT)
+    target_compile_definitions(mops PUBLIC "MOPS_RESTRICT=restrict")
+elseif (HAVE___RESTRICT__)
+    target_compile_definitions(mops PUBLIC "MOPS_RESTRICT=__restrict__")
+elseif (HAVE___RESTRICT)
+    target_compile_definitions(mops PUBLIC "MOPS_RESTRICT=__restrict")
+else()
+    target_compile_definitions(mops PUBLIC "MOPS_RESTRICT=")
+endif()
+
 if (MOPS_ARCH_NATIVE)
     check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
     # for some reason COMPILER_SUPPORTS_MARCH_NATIVE is true with Apple clang,
