@@ -41,10 +41,33 @@ torch::Tensor OuterProductScatterAdd::forward(
                     torch_to_mops_1d<int32_t>(indices_output));
             });
     } else {
+
+#ifndef MOPS_CUDA_ENABLED
         C10_THROW_ERROR(
             ValueError,
             "outer_product_scatter_add is not implemented for device " +
                 A.device().str());
+#else
+        first_occurences = torch::zeros(
+            {A.size(0)},
+            torch::TensorOptions().dtype(torch::kInt32).device(A.device()));
+
+        mops::cuda::cuda_first_occurences(
+            torch_to_mops_1d<int32_t>(indices_output), A.size(0),
+            output.size(0), torch_to_mops_1d<int32_t>(first_occurences));
+
+        AT_DISPATCH_FLOATING_TYPES(
+            A.scalar_type(), "outer_product_scatter_add", [&]() {
+                mops::cuda::outer_product_scatter_add<scalar_t>(
+                    torch_to_mops_2d<scalar_t>(
+                        output.reshape({-1, output.size(1) * output.size(2)})),
+                    torch_to_mops_2d<scalar_t>(A),
+                    torch_to_mops_2d<scalar_t>(B),
+                    torch_to_mops_1d<int32_t>(first_occurences),
+                    torch_to_mops_1d<int32_t>(indices_output));
+            });
+
+#endif
     }
 
     if (A.requires_grad() || B.requires_grad()) {
