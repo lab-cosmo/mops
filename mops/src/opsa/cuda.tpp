@@ -40,8 +40,6 @@ void mops::cuda::outer_product_scatter_add_vjp(
         B.shape[1],            // nfeatures_B
         first_occurences.data, // [nnodes]
         indices_output.data,   // [nedges]
-        true,                  //
-        true,                  //
         grad_output.data,      //[nnodes, nfeatures_B * nfeatures_A]
         grad_A.data,           //[nnodes, nfeatures_A]
         grad_B.data            //  //[nnodes, nfeatures_B]
