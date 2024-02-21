@@ -257,6 +257,8 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
              */
             for (int i = 0; i < nfeatures_A; i++) {
 
+                scalar_t dsumA = 0.0;
+
                 for (int j = 0; j < TB; j++) {
 
                     scalar_t grad_in_ij = 0.0;
@@ -271,19 +273,19 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
                         buffer_grad_B[threadRow * (TB * WARP_SIZE) +
                                       threadCol] += grad_in_ij * buffer_A[i];
 
-                    // need to warp shuffle reduce across the threads
-                    // accessing each B index.
-
-                    scalar_t sumA = grad_in_ij * regB[j];
-
-                    for (int offset = WARP_SIZE / 2; offset > 0; offset /= 2) {
-                        sumA += __shfl_down_sync(FULL_MASK, sumA, offset,
-                                                 WARP_SIZE);
-                    }
-
-                    if (threadCol == 0)
-                        buffer_grad_A[i * nfeatures_A + threadRow] += sumA;
+                    dsumA += grad_in_ij * regB[j];
                 }
+
+                // need to warp shuffle reduce across the threads
+                // accessing each B index.
+                for (int offset = WARP_SIZE / 2; offset > 0; offset /= 2) {
+                    dsumA +=
+                        __shfl_down_sync(FULL_MASK, dsumA, offset, WARP_SIZE);
+                }
+
+                // thread 0 contains the gradient for this subset of features_B.
+                if (threadCol == 0)
+                    buffer_grad_A[i * nfeatures_A + threadRow] += dsumA;
             }
 
             __syncwarp();
