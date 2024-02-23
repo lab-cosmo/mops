@@ -19,6 +19,7 @@ check_language(CUDA)
 
 if(CMAKE_CUDA_COMPILER)
     enable_language(CUDA)
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -rdc=true")
     set(CUDA_USE_STATIC_CUDA_RUNTIME OFF CACHE BOOL "" FORCE)
 else()
     message(STATUS "Could not find a CUDA compiler")
@@ -85,6 +86,12 @@ set_target_properties(mops PROPERTIES
     # hide non-exported symbols by default
     CXX_VISIBILITY_PRESET hidden
 )
+
+if (CMAKE_CUDA_COMPILER)
+set_target_properties(mops_torch PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(mops_torch PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+endif()
+
 
 target_include_directories(mops_torch PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

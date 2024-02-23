@@ -10,7 +10,7 @@ __host__ __device__ int32_t find_integer_divisor(int32_t x, int32_t bdim) {
     return (x + bdim - 1) / bdim;
 }
 
-template <class T>
+template <typename T>
 __host__ __device__ T *shared_array(std::size_t n_elements, void *&ptr,
                                     std::size_t *space) noexcept {
     const std::uintptr_t inptr = reinterpret_cast<uintptr_t>(ptr);
@@ -31,7 +31,7 @@ template int *shared_array<int>(std::size_t n_elements, void *&ptr,
 template short *shared_array<short>(std::size_t n_elements, void *&ptr,
                                     std::size_t *space) noexcept;
 
-template <class T>
+template <typename T>
 __host__ __device__ T *align_array(std::size_t n_elements, void *&ptr,
                                    const std::size_t alignment,
                                    std::size_t *space) noexcept {
