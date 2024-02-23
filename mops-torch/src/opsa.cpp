@@ -139,7 +139,6 @@ OuterProductScatterAdd::backward(torch::autograd::AutogradContext *ctx,
             "outer_product_scatter_add is not implemented for device " +
                 A.device().str());
 #else
-
         AT_DISPATCH_FLOATING_TYPES(
             A.scalar_type(), "outer_product_scatter_add", [&]() {
                 auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
