@@ -25,4 +25,17 @@ MOPS_EXPORT const std::string &get_last_error_message();
         }                                                                      \
     } while (false)
 
+#define MOPS_CATCH_EXCEPTIONS_WITH_RETURN(__code__)                            \
+    do {                                                                       \
+        try {                                                                  \
+            return __code__;                                                   \
+        } catch (const std::exception &e) {                                    \
+            mops::store_error_message(e.what());                               \
+            return nullptr;                                                    \
+        } catch (...) {                                                        \
+            mops::store_error_message("unknown error");                        \
+            return nullptr;                                                    \
+        }                                                                      \
+    } while (false)
+
 #endif

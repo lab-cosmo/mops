@@ -80,9 +80,9 @@ the same reciever index.
 if first_occurences is nullptr on entry, it will allocate the memory required
 and return the alloc'd pointer. */
 
-int32_t * mops::cuda::calculate_first_occurences_cuda(const int32_t *__restrict__ receiver_list,
-                                int32_t nedges, int32_t natoms,
-                                int32_t *first_occurences = nullptr) {
+int32_t *mops::cuda::calculate_first_occurences_cuda(
+    int32_t *receiver_list, int32_t nedges, int32_t natoms,
+    int32_t *first_occurences = nullptr) {
 
     if (first_occurences == nullptr) {
         // cudamalloc it, return pointer reference later.
