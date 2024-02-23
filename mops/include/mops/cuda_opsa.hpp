@@ -43,8 +43,6 @@ void outer_product_scatter_add_vjp_cuda(
                                         // the values change [nnodes]
     const int32_t *__restrict__ indices_output, // sorted list of indices to
                                                 // sum into [nedges]
-    bool compute_grad_A,                        // whether to compute gradA
-    bool compute_grad_B,                        // whether to compute gradA
     scalar_t *__restrict__ grad_in, // grad_input: [nnodes, nfeatures_B,
                                     // nfeatures_A]
     scalar_t *__restrict__ grad_A,  // [nedges, nfeatures_A],

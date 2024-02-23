@@ -332,7 +332,7 @@ void outer_product_scatter_add_cuda(
 
     dim3 blockDim(NWARPS_PER_BLOCK * WARP_SIZE, 1, 1);
 
-    outer_product_scatter_add_kernel<scalar_t, 4, 4><<<gridDim, blockDim, 0>>>(
+    outer_product_scatter_add_kernel<scalar_t, 2, 2><<<gridDim, blockDim, 0>>>(
         A, B, nnodes, nedges, nfeatures_A, nfeatures_B, first_occurences,
         indices_output, output);
 
