@@ -2,6 +2,7 @@
 #define FIRST_OCCURENCES_HPP
 
 #include <cstdint>
+#include "mops/tensor.hpp"
 
 namespace mops {
 

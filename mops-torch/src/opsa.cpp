@@ -41,7 +41,6 @@ torch::Tensor OuterProductScatterAdd::forward(
                     torch_to_mops_1d<int32_t>(indices_output));
             });
     } else {
-
 #ifndef MOPS_CUDA_ENABLED
         C10_THROW_ERROR(
             ValueError,
@@ -52,9 +51,9 @@ torch::Tensor OuterProductScatterAdd::forward(
             {A.size(0)},
             torch::TensorOptions().dtype(torch::kInt32).device(A.device()));
 
-        mops::cuda::cuda_first_occurences(
-            torch_to_mops_1d<int32_t>(indices_output), A.size(0),
-            output.size(0), torch_to_mops_1d<int32_t>(first_occurences));
+        mops::cuda::cuda_first_occurences(indices_output.data_ptr<int32_t>(),
+                                          A.size(0), output.size(0),
+                                          first_occurences.data_ptr<int32_t>());
 
         AT_DISPATCH_FLOATING_TYPES(
             A.scalar_type(), "outer_product_scatter_add", [&]() {
@@ -70,8 +69,13 @@ torch::Tensor OuterProductScatterAdd::forward(
 #endif
     }
 
+#ifndef MOPS_CUDA_ENABLED
     if (A.requires_grad() || B.requires_grad()) {
         ctx->save_for_backward({A, B, indices_output});
+    }
+#else
+    if (A.requires_grad() || B.requires_grad()) {
+        ctx->save_for_backward({A, B, indices_output, first_occurences});
     }
 
     return {output};
@@ -84,6 +88,12 @@ OuterProductScatterAdd::backward(torch::autograd::AutogradContext *ctx,
     auto A = saved_variables[0];
     auto B = saved_variables[1];
     auto indices_output = saved_variables[2];
+
+    auto first_occurences = torch::Tensor();
+
+#ifdef MOPS_CUDA_ENABLED
+    first_occurences = saved_variables[3];
+#endif
 
     auto grad_output = grad_outputs[0];
     if (!grad_output.is_contiguous()) {
@@ -117,10 +127,40 @@ OuterProductScatterAdd::backward(torch::autograd::AutogradContext *ctx,
                     torch_to_mops_1d<int32_t>(indices_output));
             });
     } else {
+
+#ifndef MOPS_CUDA_ENABLED
         C10_THROW_ERROR(
             ValueError,
             "outer_product_scatter_add is not implemented for device " +
                 A.device().str());
+#else
+
+        AT_DISPATCH_FLOATING_TYPES(
+            A.scalar_type(), "outer_product_scatter_add", [&]() {
+                auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+                if (A.requires_grad()) {
+                    grad_A = torch::zeros_like(A);
+                    mops_grad_A = torch_to_mops_2d<scalar_t>(grad_A);
+                }
+
+                auto mops_grad_B = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+                if (B.requires_grad()) {
+                    grad_B = torch::zeros_like(B);
+                    mops_grad_B = torch_to_mops_2d<scalar_t>(grad_B);
+                }
+
+                mops::cuda::outer_product_scatter_add_vjp<scalar_t>(
+                    mops_grad_A, mops_grad_B,
+                    torch_to_mops_2d<scalar_t>(grad_output.view(
+                        {-1, grad_output.size(1) * grad_output.size(2)})),
+                    torch_to_mops_2d<scalar_t>(A),
+                    torch_to_mops_2d<scalar_t>(B),
+                    torch_to_mops_1d<int32_t>(first_occurences),
+                    torch_to_mops_1d<int32_t>(indices_output)
+
+                );
+            });
+#endif
     }
 
     return {grad_A, grad_B, torch::Tensor(), torch::Tensor()};
