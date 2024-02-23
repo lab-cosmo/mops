@@ -23,6 +23,8 @@ torch::Tensor OuterProductScatterAdd::forward(
     // Shape consistency checks are performed inside
     // mops::outer_product_scatter_add
 
+    auto first_occurences = torch::Tensor();
+
     torch::Tensor output;
     if (A.device().is_cpu()) {
         output = torch::zeros(
@@ -41,19 +43,20 @@ torch::Tensor OuterProductScatterAdd::forward(
                     torch_to_mops_1d<int32_t>(indices_output));
             });
     } else {
+
 #ifndef MOPS_CUDA_ENABLED
         C10_THROW_ERROR(
             ValueError,
             "outer_product_scatter_add is not implemented for device " +
                 A.device().str());
 #else
-        first_occurences = torch::zeros(
+        auto first_occurences = torch::empty(
             {A.size(0)},
             torch::TensorOptions().dtype(torch::kInt32).device(A.device()));
 
-        mops::cuda::cuda_first_occurences(indices_output.data_ptr<int32_t>(),
-                                          A.size(0), output.size(0),
-                                          first_occurences.data_ptr<int32_t>());
+        mops::cuda::calculate_first_occurences_cuda(
+            indices_output.data_ptr<int32_t>(), A.size(0), output.size(0),
+            first_occurences.data_ptr<int32_t>());
 
         AT_DISPATCH_FLOATING_TYPES(
             A.scalar_type(), "outer_product_scatter_add", [&]() {
@@ -77,6 +80,8 @@ torch::Tensor OuterProductScatterAdd::forward(
     if (A.requires_grad() || B.requires_grad()) {
         ctx->save_for_backward({A, B, indices_output, first_occurences});
     }
+
+#endif
 
     return {output};
 }
