@@ -11,8 +11,8 @@ using namespace mops::cuda;
 template <typename scalar_t, const int32_t TA, const int32_t TB>
 __global__
 __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_kernel(
-    const scalar_t *__restrict__ A, // [nedges, nfeatures_A]
-    const scalar_t *__restrict__ B, // [nedges, nfeatures_B]
+    const scalar_t *__restrict__ A, // [nedges, nfeatures_A] - edge angular features
+    const scalar_t *__restrict__ B, // [nedges, nfeatures_B] - radial/edge features
     const int32_t nnodes,           // number of nodes we're summing into
     const int32_t nedges_total,     // number of edges -> batch size of A and B
     const int32_t nfeatures_A,      // number of features of A
@@ -23,7 +23,7 @@ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_ke
     const int32_t *__restrict__ indices_output, // sorted list of indices to sum
                                                 // into [nedges]
     scalar_t
-        *__restrict__ output // shape: [nnodes, nfeatures_B, nfeatures_A] ->
+        *__restrict__ output // shape: [nnodes, nfeatures_A, nfeatures_B] ->
                              // this ordering because contiguity of threadCol
 ) {
 
@@ -51,14 +51,14 @@ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_ke
      * we need to loop find_integer_divisor(nfeatures_A, TA*WARP_SIZE) times
      */
 
-    int32_t niter_A = find_integer_divisor(nfeatures_A, TA * WARP_SIZE);
-    int32_t niter_B = find_integer_divisor(nfeatures_B, TB * nThreadRow);
+    int32_t niter_A = find_integer_divisor(nfeatures_A, TA * nThreadRow);
+    int32_t niter_B = find_integer_divisor(nfeatures_B, TB * WARP_SIZE);
 
     for (int32_t iter_B = 0; iter_B < niter_B; iter_B++) {
-        int32_t global_B = iter_B * TB * nThreadRow;
+        int32_t global_B = iter_B * TB * WARP_SIZE;
 
         for (int32_t iter_A = 0; iter_A < niter_A; iter_A++) {
-            int32_t global_A = iter_A * TA * WARP_SIZE;
+            int32_t global_A = iter_A * TA * nThreadRow;
 
             /*
              *  clear registers
@@ -84,44 +84,44 @@ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_ke
                  */
                 for (int32_t i = 0; i < TA; i++) {
 
-                    if (global_A + i * WARP_SIZE + threadCol < nfeatures_A)
+                    if (global_A + i * nThreadRow + threadRow < nfeatures_A)
                         regA[i] = A[edge * nfeatures_A + global_A +
-                                    i * WARP_SIZE + threadCol];
+                                    i * nThreadRow + threadRow];
                 }
 
                 /*
                  *  load B from GMEM into local registers
                  */
                 for (int32_t i = 0; i < TB; i++) {
-                    if (global_B + i * nThreadRow + threadRow < nfeatures_B)
+                    if (global_B + i * WARP_SIZE + threadCol < nfeatures_B)
                         regB[i] = B[edge * nfeatures_B + global_B +
-                                    i * nThreadRow + threadRow];
+                                    i * WARP_SIZE + threadCol];
                 }
 
                 /*
                  * perform outer product in registers
                  */
-                for (int32_t j = 0; j < TB; j++) {
-                    for (int32_t i = 0; i < TA; i++) {
-                        regOP[j * TA + i] += regA[i] * regB[j];
+                for (int32_t i = 0; i < TA; i++) {
+                    for (int32_t j = 0; j < TB; j++) {
+                        regOP[i * TB + j] += regA[i] * regB[j];
                     }
                 }
             }
 
             /*
              * writeout the content of regOP to the output for this block of
-             * [node, nfeatures_B, nfeatures_A]
+             * [node, nfeatures_A, nfeatures_B]
              */
             for (int32_t j = 0; j < TB; j++) {
-                if (global_B + j * nThreadRow + threadRow < nfeatures_B) {
+                if (global_B + j * WARP_SIZE + threadCol < nfeatures_B) {
                     for (int32_t i = 0; i < TA; i++) {
-                        if (global_A + i * WARP_SIZE + threadCol <
+                        if (global_A + i * nThreadRow + threadRow <
                             nfeatures_A) {
                             output[node_index * nfeatures_B * nfeatures_A +
-                                   (global_B + j * nThreadRow + threadRow) *
-                                       nfeatures_A +
-                                   global_A + i * WARP_SIZE + threadCol] =
-                                regOP[j * TA + i];
+                                   (global_B + i * nThreadRow + threadRow) *
+                                       nfeatures_B +
+                                   global_A + j * WARP_SIZE + threadCol] =
+                                regOP[i * TB + j];
                         }
                     }
                 }
@@ -337,7 +337,7 @@ void mops::cuda::outer_product_scatter_add_cuda(
     cudaDeviceSynchronize();
 }
 
-template <>
+template 
 void mops::cuda::outer_product_scatter_add_cuda<float>(
     const float *A,                  // [nedges, nfeatures_A]
     const float *B,                  // [nedges, nfeatures_B]
@@ -354,7 +354,7 @@ void mops::cuda::outer_product_scatter_add_cuda<float>(
                   // threadCol
 );
 
-template <>
+template 
 void mops::cuda::outer_product_scatter_add_cuda<double>(
     const double * A, // [nedges, nfeatures_A]
     const double * B, // [nedges, nfeatures_B]

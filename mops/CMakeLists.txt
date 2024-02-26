@@ -124,8 +124,6 @@ target_include_directories(mops PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-
-
 if (MOPS_TESTS)
     enable_testing()
     add_subdirectory(tests)

@@ -1,5 +1,6 @@
 import mops.torch
 import torch
+import pytest
 
 from mops import reference_implementations as ref
 
