@@ -86,15 +86,15 @@ if(CMAKE_CUDA_COMPILER)
     target_compile_definitions(mops PUBLIC MOPS_CUDA_ENABLED)
     target_sources(mops
         PRIVATE
-            "src/utils/cuda_utils.cu"
-            "include/mops/cuda_utils.cuh"
+        "src/utils/cuda_utils.cu"
+        "include/mops/cuda_utils.cuh"
 
-            "src/opsa/opsa.cu"
-            "include/mops/cuda_opsa.hpp"
+        "src/opsa/opsa.cu"
+        "include/mops/cuda_opsa.hpp"
 
-            "src/utils/first_occurences.cu"
-            "include/mops/cuda_first_occurences.hpp"
-            "src/utils/capi.cpp"
+        "src/utils/first_occurences.cu"
+        "include/mops/cuda_first_occurences.hpp"
+        "src/utils/capi.cpp"
     )
 endif()
 
@@ -107,6 +107,8 @@ set_target_properties(mops PROPERTIES
 )
 
 if (CMAKE_CUDA_COMPILER)
+set(CUDA_SEPARABLE_COMPILATION ON)
+set(CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 set_target_properties(mops PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 set_target_properties(mops PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 endif()

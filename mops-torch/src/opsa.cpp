@@ -153,9 +153,17 @@ OuterProductScatterAdd::backward(torch::autograd::AutogradContext *ctx,
                     mops_grad_B = torch_to_mops_2d<scalar_t>(grad_B);
                 }
 
+                                /*
+                void mops::cuda::outer_product_scatter_add_vjp(
+    Tensor<scalar_t, 2> grad_A, Tensor<scalar_t, 2> grad_B,
+    Tensor<scalar_t, 2> grad_output, Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B, Tensor<int32_t, 1> first_occurences,
+    Tensor<int32_t, 1> indices_output) {
+                */
+
                 mops::cuda::outer_product_scatter_add_vjp<scalar_t>(
                     mops_grad_A, mops_grad_B,
-                    torch_to_mops_2d<scalar_t>(grad_output.view(
+                    torch_to_mops_2d<scalar_t>(grad_output.reshape(
                         {-1, grad_output.size(1) * grad_output.size(2)})),
                     torch_to_mops_2d<scalar_t>(A),
                     torch_to_mops_2d<scalar_t>(B),
