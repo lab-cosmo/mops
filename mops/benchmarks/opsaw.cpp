@@ -15,10 +15,10 @@ int main() {
     auto W = std::vector<double>(1000 * 20);
     fill_vector_random_floats(W);
 
-    auto indices_W = std::vector<int>(60000);
+    auto indices_W = std::vector<int32_t>(60000);
     fill_vector_random_integers(indices_W, 1000);
 
-    auto indices_output = std::vector<int>(60000);
+    auto indices_output = std::vector<int32_t>(60000);
     fill_vector_random_integers(indices_output, 1000);
 
     auto O = std::vector<double>(1000 * 13 * 20);
