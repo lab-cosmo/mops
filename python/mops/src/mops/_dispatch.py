@@ -41,3 +41,22 @@ def make_contiguous(array):
         raise TypeError(
             f"Only numpy and cupy arrays are supported, found {type(array)}"
         )
+
+
+def is_array(variable):
+    return isinstance(variable, np.ndarray) or isinstance(variable, cupy_ndarray)
+
+
+def is_scalar(variable):
+    return not is_array(variable)
+
+
+def get_device(array):
+    if isinstance(array, np.ndarray):
+        return "cpu"
+    elif isinstance(array, cupy_ndarray):
+        return "cuda"
+    else:
+        raise TypeError(
+            f"Only numpy and cupy arrays are supported, found {type(array)}"
+        )

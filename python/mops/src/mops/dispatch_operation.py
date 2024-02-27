@@ -1,17 +1,7 @@
 import numpy as np
 
+from . import _dispatch
 from ._c_lib import _get_library
-
-try:
-    from cupy import ndarray as cupy_ndarray
-
-except ImportError:
-
-    class cupy_ndarray:
-        pass
-
-    # note: the cupy dtypes are defined as their numpy
-    # counterparts in the cupy module, so we don't need to redefine them here
 
 
 def dispatch_operation(op_name, array) -> callable:
@@ -27,14 +17,7 @@ def dispatch_operation(op_name, array) -> callable:
             "Unsupported dtype detected. Only float32 and float64 are supported"
         )
 
-    if isinstance(array, np.ndarray):
-        device = "cpu"
-    elif isinstance(array, cupy_ndarray):
-        device = "cuda"
-    else:
-        raise TypeError(
-            f"Only numpy and cupy arrays are supported, found {type(array)}"
-        )
+    device = _dispatch.get_device(array)
 
     lib = _get_library()
 
