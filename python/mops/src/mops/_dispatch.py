@@ -1,4 +1,5 @@
 import numpy as np
+
 try:
     import cupy as cp
     from cupy import ndarray as cupy_ndarray
@@ -15,8 +16,10 @@ def zeros_like(shape, array):
     elif isinstance(array, cupy_ndarray):
         return cp.zeros(shape, dtype=array.dtype)
     else:
-        raise TypeError(f"Only numpy and cupy arrays are supported, found {type(array)}")
-    
+        raise TypeError(
+            f"Only numpy and cupy arrays are supported, found {type(array)}"
+        )
+
 
 def empty_like(shape, array):
     if isinstance(array, np.ndarray):
@@ -24,8 +27,10 @@ def empty_like(shape, array):
     elif isinstance(array, cupy_ndarray):
         return cp.empty(shape, dtype=array.dtype)
     else:
-        raise TypeError(f"Only numpy and cupy arrays are supported, found {type(array)}")
-    
+        raise TypeError(
+            f"Only numpy and cupy arrays are supported, found {type(array)}"
+        )
+
 
 def make_contiguous(array):
     if isinstance(array, np.ndarray):
@@ -33,4 +38,6 @@ def make_contiguous(array):
     elif isinstance(array, cupy_ndarray):
         return cp.ascontiguousarray(array)
     else:
-        raise TypeError(f"Only numpy and cupy arrays are supported, found {type(array)}")
+        raise TypeError(
+            f"Only numpy and cupy arrays are supported, found {type(array)}"
+        )

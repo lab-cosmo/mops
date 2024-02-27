@@ -1,7 +1,8 @@
 import numpy as np
+
 from . import _dispatch
-from .dispatch_operation import dispatch_operation
 from .checks import _check_opsa
+from .dispatch_operation import dispatch_operation
 from .utils import null_mops_tensor_like, numpy_to_mops_tensor
 
 
@@ -15,8 +16,8 @@ def outer_product_scatter_add(A, B, indices_output, output_size):
     output = _dispatch.empty_like((output_size, A.shape[1], B.shape[1]), A)
 
     function = dispatch_operation(
-        A,
         "outer_product_scatter_add",
+        A,
     )
 
     function(
@@ -66,22 +67,22 @@ def outer_product_scatter_add_vjp(
         )
 
     if compute_grad_A:
-        grad_A = np.empty_like(A)
+        grad_A = _dispatch.empty_like(A.shape, A)
         mops_grad_A = numpy_to_mops_tensor(grad_A)
     else:
         grad_A = None
         mops_grad_A = null_mops_tensor_like(A)
 
     if compute_grad_B:
-        grad_B = np.empty_like(B)
+        grad_B = _dispatch.empty_like(B.shape, B)
         mops_grad_B = numpy_to_mops_tensor(grad_B)
     else:
         grad_B = None
         mops_grad_B = null_mops_tensor_like(B)
 
     function = dispatch_operation(
-        A,
         "outer_product_scatter_add_vjp",
+        A,
     )
 
     function(

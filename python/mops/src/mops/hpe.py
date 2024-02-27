@@ -1,10 +1,9 @@
 import numpy as np
 
-
-from .checks import _check_hpe
-from .utils import numpy_to_mops_tensor
 from . import _dispatch
+from .checks import _check_hpe
 from .dispatch_operation import dispatch_operation
+from .utils import numpy_to_mops_tensor
 
 
 def homogeneous_polynomial_evaluation(A, C, indices_A):
@@ -18,8 +17,8 @@ def homogeneous_polynomial_evaluation(A, C, indices_A):
     O = _dispatch.empty_like((A.shape[0],), A)
 
     function = dispatch_operation(
-        A,
         "homogeneous_polynomial_evaluation",
+        A,
     )
 
     function(

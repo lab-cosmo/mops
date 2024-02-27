@@ -1,7 +1,8 @@
 import numpy as np
 
-from .dispatch_operation import dispatch_operation
+from . import _dispatch
 from .checks import _check_sasaw
+from .dispatch_operation import dispatch_operation
 from .utils import numpy_to_mops_tensor
 
 
@@ -45,11 +46,11 @@ def sparse_accumulation_scatter_add_with_weights(
     indices_output_1 = indices_output_1.astype(np.int32)
     indices_output_2 = indices_output_2.astype(np.int32)
 
-    output = np.empty((W.shape[0], output_size, B.shape[1]), dtype=A.dtype)
+    output = _dispatch.empty_like((W.shape[0], output_size, B.shape[1]), A)
 
     function = dispatch_operation(
-        A,
         "sparse_accumulation_scatter_add_with_weights",
+        A,
     )
 
     function(

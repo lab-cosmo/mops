@@ -1,4 +1,5 @@
 import numpy as np
+
 try:
     from cupy import ndarray as cupy_ndarray
 
@@ -27,7 +28,9 @@ def _check_number_of_dimensions(array, expected, operation, name):
 
 def _check_scalar(variable, operation, name):
     if isinstance(variable, np.ndarray) or isinstance(variable, cupy_ndarray):
-        raise TypeError(f"{name} must be a scalar in {operation}, found an array instead")
+        raise TypeError(
+            f"{name} must be a scalar in {operation}, found an array instead"
+        )
 
 
 def _check_array_dtype(array, expected_dtype, operation, name):

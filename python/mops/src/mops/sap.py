@@ -1,19 +1,20 @@
 import numpy as np
 
-from .dispatch_operation import dispatch_operation
+from . import _dispatch
 from .checks import _check_sap
+from .dispatch_operation import dispatch_operation
 from .utils import numpy_to_mops_tensor
 
 
 def sparse_accumulation_of_products(
     A, B, C, indices_A, indices_B, indices_output, output_size
 ):
-    A = np.ascontiguousarray(A)
-    B = np.ascontiguousarray(B)
-    C = np.ascontiguousarray(C)
-    indices_A = np.ascontiguousarray(indices_A)
-    indices_B = np.ascontiguousarray(indices_B)
-    indices_output = np.ascontiguousarray(indices_output)
+    A = _dispatch.make_contiguous(A)
+    B = _dispatch.make_contiguous(B)
+    C = _dispatch.make_contiguous(C)
+    indices_A = _dispatch.make_contiguous(indices_A)
+    indices_B = _dispatch.make_contiguous(indices_B)
+    indices_output = _dispatch.make_contiguous(indices_output)
 
     _check_sap(A, B, C, indices_A, indices_B, indices_output, output_size)
 
@@ -21,11 +22,11 @@ def sparse_accumulation_of_products(
     indices_B = indices_B.astype(np.int32)
     indices_output = indices_output.astype(np.int32)
 
-    output = np.empty((A.shape[0], output_size), dtype=A.dtype)
+    output = _dispatch.empty_like((A.shape[0], output_size), A)
 
     function = dispatch_operation(
-        A,
         "sparse_accumulation_of_products",
+        A,
     )
 
     function(

@@ -1,5 +1,7 @@
-from ._c_lib import _get_library
 import numpy as np
+
+from ._c_lib import _get_library
+
 try:
     from cupy import ndarray as cupy_ndarray
 
@@ -24,21 +26,22 @@ def dispatch_operation(op_name, array) -> callable:
         raise TypeError(
             "Unsupported dtype detected. Only float32 and float64 are supported"
         )
-    
+
     if isinstance(array, np.ndarray):
         device = "cpu"
     elif isinstance(array, cupy_ndarray):
         device = "cuda"
     else:
-        raise TypeError(f"Only numpy and cupy arrays are supported, found {type(array)}")
+        raise TypeError(
+            f"Only numpy and cupy arrays are supported, found {type(array)}"
+        )
 
     lib = _get_library()
 
-    function_name = f"mops_"
+    function_name = "mops_"
     if device == "cuda":
         function_name += "cuda_"
     function_name += f"{op_name}_{dtype}"
     function = getattr(lib, function_name)
 
     return function
-
