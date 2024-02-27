@@ -21,7 +21,7 @@ def sparse_accumulation_of_products(
     indices_B = indices_B.astype(np.int32)
     indices_output = indices_output.astype(np.int32)
 
-    output = np.zeros((A.shape[0], output_size), dtype=A.dtype)
+    output = np.empty((A.shape[0], output_size), dtype=A.dtype)
 
     lib = _get_library()
 
