@@ -1,11 +1,21 @@
 import numpy as np
+try:
+    from cupy import ndarray as cupy_ndarray
+
+except ImportError:
+
+    class cupy_ndarray:
+        pass
+
+    # note: cp.integer, cp.floating, cp.issubdtype are defined as their numpy
+    # counterparts in the cupy module, so we don't need to redefine them here
 
 # For each operation, we only check the correctness of types and number of dimensions.
 # Size consistency checks will be performed in the C++ backend.
 
 
 def _check_number_of_dimensions(array, expected, operation, name):
-    if not isinstance(array, np.ndarray):
+    if not isinstance(array, np.ndarray) and not isinstance(array, cupy_ndarray):
         raise TypeError(f"`{name}` must be an array in {operation}, got {type(array)}")
 
     if len(array.shape) != expected:
@@ -16,8 +26,8 @@ def _check_number_of_dimensions(array, expected, operation, name):
 
 
 def _check_scalar(variable, operation, name):
-    if isinstance(variable, np.ndarray):
-        raise TypeError(f"{name} must be a scalar in {operation}, found a `np.ndarray`")
+    if isinstance(variable, np.ndarray) or isinstance(variable, cupy_ndarray):
+        raise TypeError(f"{name} must be a scalar in {operation}, found an array instead")
 
 
 def _check_array_dtype(array, expected_dtype, operation, name):

@@ -1,6 +1,6 @@
 import numpy as np
 
-from ._c_lib import _get_library
+from .dispatch_operation import dispatch_operation
 from .checks import _check_sasaw
 from .utils import numpy_to_mops_tensor
 
@@ -47,16 +47,10 @@ def sparse_accumulation_scatter_add_with_weights(
 
     output = np.empty((W.shape[0], output_size, B.shape[1]), dtype=A.dtype)
 
-    lib = _get_library()
-
-    if A.dtype == np.float32:
-        function = lib.mops_sparse_accumulation_scatter_add_with_weights_f32
-    elif A.dtype == np.float64:
-        function = lib.mops_sparse_accumulation_scatter_add_with_weights_f64
-    else:
-        raise TypeError(
-            "Unsupported dtype detected. outputnly float32 and float64 are supported"
-        )
+    function = dispatch_operation(
+        A,
+        "sparse_accumulation_scatter_add_with_weights",
+    )
 
     function(
         numpy_to_mops_tensor(output),

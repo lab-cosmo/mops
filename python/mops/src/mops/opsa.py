@@ -1,29 +1,23 @@
 import numpy as np
-
-from ._c_lib import _get_library
+from . import _dispatch
+from .dispatch_operation import dispatch_operation
 from .checks import _check_opsa
 from .utils import null_mops_tensor_like, numpy_to_mops_tensor
 
 
 def outer_product_scatter_add(A, B, indices_output, output_size):
     _check_opsa(A, B, indices_output, output_size)
-    A = np.ascontiguousarray(A)
-    B = np.ascontiguousarray(B)
-    indices_output = np.ascontiguousarray(indices_output)
+    A = _dispatch.make_contiguous(A)
+    B = _dispatch.make_contiguous(B)
+    indices_output = _dispatch.make_contiguous(indices_output)
     indices_output = indices_output.astype(np.int32)
 
-    output = np.empty((output_size, A.shape[1], B.shape[1]), dtype=A.dtype)
+    output = _dispatch.empty_like((output_size, A.shape[1], B.shape[1]), A)
 
-    lib = _get_library()
-
-    if A.dtype == np.float32:
-        function = lib.mops_outer_product_scatter_add_f32
-    elif A.dtype == np.float64:
-        function = lib.mops_outer_product_scatter_add_f64
-    else:
-        raise TypeError(
-            "Unsupported dtype detected. Only float32 and float64 are supported"
-        )
+    function = dispatch_operation(
+        A,
+        "outer_product_scatter_add",
+    )
 
     function(
         numpy_to_mops_tensor(output),
@@ -32,7 +26,7 @@ def outer_product_scatter_add(A, B, indices_output, output_size):
         numpy_to_mops_tensor(indices_output),
     )
 
-    return output.reshape((output_size, A.shape[1], B.shape[1]))
+    return output
 
 
 def outer_product_scatter_add_vjp(
@@ -43,10 +37,10 @@ def outer_product_scatter_add_vjp(
     compute_grad_A=False,
     compute_grad_B=False,
 ):
-    grad_output = np.ascontiguousarray(grad_output)
-    A = np.ascontiguousarray(A)
-    B = np.ascontiguousarray(B)
-    indices_output = np.ascontiguousarray(indices_output)
+    grad_output = _dispatch.make_contiguous(grad_output)
+    A = _dispatch.make_contiguous(A)
+    B = _dispatch.make_contiguous(B)
+    indices_output = _dispatch.make_contiguous(indices_output)
 
     if A.dtype != B.dtype or A.dtype != grad_output.dtype:
         raise TypeError("A, B and grad_output must have the same dtype")
@@ -57,8 +51,8 @@ def outer_product_scatter_add_vjp(
     if len(grad_output.shape) != 3:
         raise TypeError("grad_output must be 3-dimensional arrays")
 
-    if not np.can_cast(indices_output, np.int32, "same_kind"):
-        raise TypeError("indices_output must be an array of integers")
+    # if not np.can_cast(indices_output, np.int32, "same_kind"):
+    #     raise TypeError("indices_output must be an array of integers")
 
     indices_output = indices_output.astype(np.int32)
 
@@ -85,16 +79,10 @@ def outer_product_scatter_add_vjp(
         grad_B = None
         mops_grad_B = null_mops_tensor_like(B)
 
-    lib = _get_library()
-
-    if A.dtype == np.float32:
-        function = lib.mops_outer_product_scatter_add_vjp_f32
-    elif A.dtype == np.float64:
-        function = lib.mops_outer_product_scatter_add_vjp_f64
-    else:
-        raise TypeError(
-            "Unsupported dtype detected. Only float32 and float64 are supported"
-        )
+    function = dispatch_operation(
+        A,
+        "outer_product_scatter_add_vjp",
+    )
 
     function(
         mops_grad_A,
