@@ -1,7 +1,7 @@
 import mops.torch
 import torch
 import pytest
-
+from time import time
 from mops import reference_implementations as ref
 
 torch.manual_seed(0xDEADBEEF)
@@ -62,15 +62,7 @@ def test_opsa_cuda():
         )
     )
 
-    print(A.shape, B.shape, indices.shape, output_size)
-
     actual = mops.torch.outer_product_scatter_add(
         A.cuda(), B.cuda(), indices.cuda(), output_size)
 
-    print(actual[0])
-    print(reference[0])
-
     assert torch.allclose(reference, actual.cpu())
-
-
-test_opsa_cuda()

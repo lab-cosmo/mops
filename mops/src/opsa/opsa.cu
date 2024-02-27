@@ -118,9 +118,9 @@ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_ke
                         if (global_A + i * nThreadRow + threadRow <
                             nfeatures_A) {
                             output[node_index * nfeatures_B * nfeatures_A +
-                                   (global_B + i * nThreadRow + threadRow) *
+                                   (global_A + i * nThreadRow + threadRow) *
                                        nfeatures_B +
-                                   global_A + j * WARP_SIZE + threadCol] =
+                                   global_B + j * WARP_SIZE + threadCol] =
                                 regOP[i * TB + j];
                         }
                     }

@@ -89,11 +89,9 @@ mops::cuda::calculate_first_occurences_cuda(const int32_t *receiver_list,
     static size_t cached_size = 0;
 
     if (cached_size < nnodes) {
-        printf("allocating...\n");
         cudaMalloc(&cached_first_occurences, nnodes * sizeof(int32_t));
         CUDA_CHECK_ERROR(cudaGetLastError());
         cached_size = nnodes;
-        printf("allocating...%ul\n", (size_t)cached_first_occurences);
     }
 
     int32_t *result = reinterpret_cast<int32_t *>(cached_first_occurences);
