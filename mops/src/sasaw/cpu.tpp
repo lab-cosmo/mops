@@ -38,11 +38,12 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     scalar_t* b_ptr = B.data;
     scalar_t* w_ptr = W.data;
     scalar_t* c_ptr = C.data;
-    const int32_t* i_ptr = indices_output_1.data;
-    const int32_t* j_ptr = indices_W_1.data;
-    const int32_t* m_1_ptr = indices_A.data;
-    const int32_t* m_2_ptr = indices_W_2.data;
-    const int32_t* m_3_ptr = indices_output_2.data;
+
+    const int32_t* idx_o1_ptr = indices_output_1.data;
+    const int32_t* idx_w1_ptr = indices_W_1.data;
+    const int32_t* idx_a_ptr = indices_A.data;
+    const int32_t* idx_w2_ptr = indices_W_2.data;
+    const int32_t* idx_o2_ptr = indices_output_2.data;
 
     size_t N = C.shape[0];
     size_t size_a = A.shape[1];
@@ -62,17 +63,19 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     for (size_t i = 0; i < size_output_first_dim; i++) {
         // iterate over input indices that will write to the output index i
         // these are stored as entries (variable "e") in write_list[i]
+        // for example, `o_ptr_e` is a pointer to the first element of 
+        // the row in the O tensor where the current contributions will be added
         for (size_t e : write_list[i]) {
-            scalar_t* o_ptr_e = o_ptr + i_ptr[e] * output_shift_first_dim;
+            scalar_t* o_ptr_e = o_ptr + idx_o1_ptr[e] * output_shift_first_dim;
             scalar_t* a_ptr_e = a_ptr + e * size_a;
             scalar_t* b_ptr_e = b_ptr + e * size_b;
-            scalar_t* w_ptr_e = w_ptr + j_ptr[e] * w_shift_first_dim;
+            scalar_t* w_ptr_e = w_ptr + idx_w1_ptr[e] * w_shift_first_dim;
             for (size_t n = 0; n < N; n++) {
                 scalar_t current_c = c_ptr[n];
-                scalar_t current_a = a_ptr_e[m_1_ptr[n]];
+                scalar_t current_a = a_ptr_e[idx_a_ptr[n]];
                 scalar_t current_ac = current_c * current_a;
-                scalar_t* o_ptr_e_n = o_ptr_e + m_3_ptr[n] * output_shift_second_dim;
-                scalar_t* w_ptr_e_n = w_ptr_e + m_2_ptr[n] * w_shift_second_dim;
+                scalar_t* o_ptr_e_n = o_ptr_e + idx_o2_ptr[n] * output_shift_second_dim;
+                scalar_t* w_ptr_e_n = w_ptr_e + idx_w2_ptr[n] * w_shift_second_dim;
                 for (size_t b_idx = 0; b_idx < size_b; b_idx++) {
                     o_ptr_e_n[b_idx] += current_ac * b_ptr_e[b_idx] * w_ptr_e_n[b_idx];
                 }
@@ -139,10 +142,10 @@ void mops::sparse_accumulation_scatter_add_with_weights_vjp(
         scalar_t* b_ptr = B.data;
         scalar_t* w_ptr = W.data;
         scalar_t* c_ptr = C.data;
-        const int32_t* i_ptr = indices_output_1.data;
-        const int32_t* m_1_ptr = indices_A.data;
-        const int32_t* m_2_ptr = indices_W_2.data;
-        const int32_t* m_3_ptr = indices_output_2.data;
+        const int32_t* idx_o1_ptr = indices_output_1.data;
+        const int32_t* idx_a_ptr = indices_A.data;
+        const int32_t* idx_w2_ptr = indices_W_2.data;
+        const int32_t* idx_o2_ptr = indices_output_2.data;
 
         size_t N = C.shape[0];
         size_t size_a = A.shape[1];
@@ -154,34 +157,35 @@ void mops::sparse_accumulation_scatter_add_with_weights_vjp(
         size_t w_shift_second_dim = W.shape[2];
 
         // For each index in the first dimension of grad_W,
-        // get what indices in the grad_output should write to it
+        // get what indices in grad_output should write to it
         std::vector<std::vector<size_t>> write_list = get_write_list(indices_W_1);
 
         #pragma omp parallel for
         for (size_t j = 0; j < size_output_first_dim; j++) {
-            // iterate over grad_output indices that will write to the output index j
-            // these are stored as entries (variable "e") in write_list[j] 
+            // iterate over grad_output indices that will write to index j in the
+            // first dimension of grad_W
+            // these are stored as entries (variable "e") in write_list[j]
             scalar_t* w_ptr_e = w_ptr + j * w_shift_first_dim;;
             for (size_t e : write_list[j]) {
-                scalar_t* grad_o_ptr_e = grad_o_ptr + i_ptr[e] * output_shift_first_dim;
+                scalar_t* grad_o_ptr_e = grad_o_ptr + idx_o1_ptr[e] * output_shift_first_dim;
                 scalar_t* a_ptr_e = a_ptr + e * size_a;
                 scalar_t* b_ptr_e = b_ptr + e * size_b;
                 for (size_t n = 0; n < N; n++) {
                     scalar_t current_c = c_ptr[n];
-                    scalar_t current_a = a_ptr_e[m_1_ptr[n]];
+                    scalar_t current_a = a_ptr_e[idx_a_ptr[n]];
                     scalar_t current_ac = current_c * current_a;
-                    scalar_t* grad_o_ptr_e_n = grad_o_ptr_e + m_3_ptr[n] * output_shift_second_dim;
-                    scalar_t* w_ptr_e_n = w_ptr_e + m_2_ptr[n] * w_shift_second_dim;
+                    scalar_t* grad_o_ptr_e_n = grad_o_ptr_e + idx_o2_ptr[n] * output_shift_second_dim;
+                    scalar_t* w_ptr_e_n = w_ptr_e + idx_w2_ptr[n] * w_shift_second_dim;
                     for (size_t b_idx = 0; b_idx < size_b; b_idx++) {
                         scalar_t current_grad_o = grad_o_ptr_e_n[b_idx];
                         if (calculate_grad_A) {
-                            grad_a_ptr[e * size_a + m_1_ptr[n]] += current_grad_o * current_c * b_ptr_e[b_idx] * w_ptr_e_n[b_idx];
+                            grad_a_ptr[e * size_a + idx_a_ptr[n]] += current_grad_o * current_c * b_ptr_e[b_idx] * w_ptr_e_n[b_idx];
                         }
                         if (calculate_grad_B) {
                             grad_b_ptr[e * size_b + b_idx] += current_grad_o * current_ac * w_ptr_e_n[b_idx];
                         }
                         if (calculate_grad_W) {
-                            grad_w_ptr[j * w_shift_first_dim + m_2_ptr[n] * w_shift_second_dim + b_idx] += current_grad_o * current_ac * b_ptr_e[b_idx];
+                            grad_w_ptr[j * w_shift_first_dim + idx_w2_ptr[n] * w_shift_second_dim + b_idx] += current_grad_o * current_ac * b_ptr_e[b_idx];
                         }
                     }
                 }

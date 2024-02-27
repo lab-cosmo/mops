@@ -31,7 +31,7 @@ void mops::outer_product_scatter_add_with_weights(
     scalar_t* a_ptr = A.data;
     scalar_t* b_ptr = B.data;
     scalar_t* w_ptr = W.data;
-    const int32_t* j_ptr = indices_W.data;
+    const int32_t* idx_w_ptr = indices_W.data;
 
     size_t size_output_first_dimension = output.shape[0];
     size_t size_a = A.shape[1];
@@ -51,7 +51,7 @@ void mops::outer_product_scatter_add_with_weights(
         for (size_t e : write_list[i]) {
             scalar_t* a_ptr_e = a_ptr + e * size_a;
             scalar_t* b_ptr_e = b_ptr + e * size_b;
-            scalar_t* w_ptr_e = w_ptr + j_ptr[e] * size_b;
+            scalar_t* w_ptr_e = w_ptr + idx_w_ptr[e] * size_b;
             for (size_t a_idx = 0; a_idx < size_a; a_idx++) {
                 scalar_t current_a = a_ptr_e[a_idx];
                 scalar_t* o_ptr_e_a = o_ptr_e + a_idx * size_b;
@@ -112,7 +112,7 @@ void mops::outer_product_scatter_add_with_weights_vjp(
         scalar_t* a_ptr = A.data;
         scalar_t* b_ptr = B.data;
         scalar_t* w_ptr = W.data;
-        const int32_t* i_ptr = indices_output.data;
+        const int32_t* idx_o_ptr = indices_output.data;
 
         size_t size_output_first_dimension = grad_output.shape[0];
         size_t size_a = A.shape[1];
@@ -127,7 +127,7 @@ void mops::outer_product_scatter_add_with_weights_vjp(
             scalar_t* w_ptr_e = w_ptr + j * size_b;
             // iterate over grad_output indices that will write to the grad_W index j
             for (size_t e : write_list[j]) {
-                scalar_t* grad_o_ptr_e = grad_o_ptr + i_ptr[e] * size_a * size_b;
+                scalar_t* grad_o_ptr_e = grad_o_ptr + idx_o_ptr[e] * size_a * size_b;
                 scalar_t* a_ptr_e = a_ptr + e * size_a;
                 scalar_t* b_ptr_e = b_ptr + e * size_b;
                 for (size_t a_idx = 0; a_idx < size_a; a_idx++) {
