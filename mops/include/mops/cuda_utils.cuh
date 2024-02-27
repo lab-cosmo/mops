@@ -2,6 +2,7 @@
 #define CUDA_UTILS_CUH
 
 #include <cstdint>
+#include <cstdio>
 #include <cuda.h>
 
 using namespace std;

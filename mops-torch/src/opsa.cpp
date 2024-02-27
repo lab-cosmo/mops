@@ -23,8 +23,6 @@ torch::Tensor OuterProductScatterAdd::forward(
     // Shape consistency checks are performed inside
     // mops::outer_product_scatter_add
 
-    auto first_occurences = torch::Tensor();
-
     torch::Tensor output;
     if (A.device().is_cpu()) {
         output = torch::zeros(
@@ -50,13 +48,9 @@ torch::Tensor OuterProductScatterAdd::forward(
             "outer_product_scatter_add is not implemented for device " +
                 A.device().str());
 #else
-        auto first_occurences = torch::empty(
-            {A.size(0)},
-            torch::TensorOptions().dtype(torch::kInt32).device(A.device()));
-
-        mops::cuda::calculate_first_occurences_cuda(
-            indices_output.data_ptr<int32_t>(), A.size(0), output.size(0),
-            first_occurences.data_ptr<int32_t>());
+        output = torch::empty(
+            {output_size, A.size(1), B.size(1)},
+            torch::TensorOptions().dtype(A.scalar_type()).device(A.device()));
 
         AT_DISPATCH_FLOATING_TYPES(
             A.scalar_type(), "outer_product_scatter_add", [&]() {
@@ -65,23 +59,15 @@ torch::Tensor OuterProductScatterAdd::forward(
                         output.reshape({-1, output.size(1) * output.size(2)})),
                     torch_to_mops_2d<scalar_t>(A),
                     torch_to_mops_2d<scalar_t>(B),
-                    torch_to_mops_1d<int32_t>(first_occurences),
                     torch_to_mops_1d<int32_t>(indices_output));
             });
 
 #endif
     }
 
-#ifndef MOPS_CUDA_ENABLED
     if (A.requires_grad() || B.requires_grad()) {
         ctx->save_for_backward({A, B, indices_output});
     }
-#else
-    if (A.requires_grad() || B.requires_grad()) {
-        ctx->save_for_backward({A, B, indices_output, first_occurences});
-    }
-
-#endif
 
     return {output};
 }
@@ -94,13 +80,8 @@ OuterProductScatterAdd::backward(torch::autograd::AutogradContext *ctx,
     auto B = saved_variables[1];
     auto indices_output = saved_variables[2];
 
-    auto first_occurences = torch::Tensor();
-
-#ifdef MOPS_CUDA_ENABLED
-    first_occurences = saved_variables[3];
-#endif
-
     auto grad_output = grad_outputs[0];
+
     if (!grad_output.is_contiguous()) {
         throw std::runtime_error("expected contiguous grad_output");
     }
@@ -153,23 +134,13 @@ OuterProductScatterAdd::backward(torch::autograd::AutogradContext *ctx,
                     mops_grad_B = torch_to_mops_2d<scalar_t>(grad_B);
                 }
 
-                                /*
-                void mops::cuda::outer_product_scatter_add_vjp(
-    Tensor<scalar_t, 2> grad_A, Tensor<scalar_t, 2> grad_B,
-    Tensor<scalar_t, 2> grad_output, Tensor<scalar_t, 2> A,
-    Tensor<scalar_t, 2> B, Tensor<int32_t, 1> first_occurences,
-    Tensor<int32_t, 1> indices_output) {
-                */
-
                 mops::cuda::outer_product_scatter_add_vjp<scalar_t>(
                     mops_grad_A, mops_grad_B,
                     torch_to_mops_2d<scalar_t>(grad_output.reshape(
                         {-1, grad_output.size(1) * grad_output.size(2)})),
                     torch_to_mops_2d<scalar_t>(A),
                     torch_to_mops_2d<scalar_t>(B),
-                    torch_to_mops_1d<int32_t>(first_occurences),
                     torch_to_mops_1d<int32_t>(indices_output)
-
                 );
             });
 #endif

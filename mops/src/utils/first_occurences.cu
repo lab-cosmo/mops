@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <memory>
 
 #define NEIGHBOUR_NEDGES_PER_BLOCK 512
 
@@ -80,15 +81,22 @@ the same reciever index.
 if first_occurences is nullptr on entry, it will allocate the memory required
 and return the alloc'd pointer. */
 
-int32_t *mops::cuda::calculate_first_occurences_cuda(
-    int32_t *receiver_list, int32_t nedges, int32_t natoms,
-    int32_t *first_occurences = nullptr) {
+int32_t *
+mops::cuda::calculate_first_occurences_cuda(const int32_t *receiver_list,
+                                            int32_t nedges, int32_t nnodes) {
 
-    if (first_occurences == nullptr) {
-        // cudamalloc it, return pointer reference later.
-        CUDA_CHECK_ERROR(
-            cudaMalloc(&first_occurences, natoms * sizeof(int32_t)));
+    static void *cached_first_occurences = nullptr;
+    static size_t cached_size = 0;
+
+    if (cached_size < nnodes) {
+        printf("allocating...\n");
+        cudaMalloc(&cached_first_occurences, nnodes * sizeof(int32_t));
+        CUDA_CHECK_ERROR(cudaGetLastError());
+        cached_size = nnodes;
+        printf("allocating...%ul\n", (size_t)cached_first_occurences);
     }
+
+    int32_t *result = reinterpret_cast<int32_t *>(cached_first_occurences);
 
     int32_t nbx = find_integer_divisor(nedges, NEIGHBOUR_NEDGES_PER_BLOCK);
 
@@ -99,11 +107,11 @@ int32_t *mops::cuda::calculate_first_occurences_cuda(
     size_t total_buff_size = (NEIGHBOUR_NEDGES_PER_BLOCK + 1) * sizeof(int32_t);
 
     calculate_first_occurences_kernel<<<block_dim, grid_dim, total_buff_size>>>(
-        receiver_list, nedges, nullptr, false, first_occurences);
+        receiver_list, nedges, nullptr, false, result);
 
     CUDA_CHECK_ERROR(cudaGetLastError());
 
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
 
-    return first_occurences;
+    return result;
 }

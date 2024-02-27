@@ -1,4 +1,5 @@
 
+#include "mops/cuda_first_occurences.hpp"
 #include "mops/cuda_opsa.hpp"
 #include "mops/cuda_utils.cuh"
 
@@ -11,15 +12,15 @@ using namespace mops::cuda;
 template <typename scalar_t, const int32_t TA, const int32_t TB>
 __global__
 __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_kernel(
-    const scalar_t *__restrict__ A, // [nedges, nfeatures_A] - edge angular features
-    const scalar_t *__restrict__ B, // [nedges, nfeatures_B] - radial/edge features
-    const int32_t nnodes,           // number of nodes we're summing into
-    const int32_t nedges_total,     // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,      // number of features of A
-    const int32_t nfeatures_B,      // number of features of B
-    const int32_t
-        *__restrict__ first_occurences, // indices in indices_output where the
-                                        // values change [nnodes]
+    const scalar_t
+        *__restrict__ A, // [nedges, nfeatures_A] - edge angular features
+    const scalar_t
+        *__restrict__ B,        // [nedges, nfeatures_B] - radial/edge features
+    const int32_t nnodes,       // number of nodes we're summing into
+    const int32_t nedges_total, // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,  // number of features of A
+    const int32_t nfeatures_B,  // number of features of B
+    const int32_t *first_occurences,
     const int32_t *__restrict__ indices_output, // sorted list of indices to sum
                                                 // into [nedges]
     scalar_t
@@ -83,7 +84,6 @@ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_ke
                  *  load A from GMEM into local registers
                  */
                 for (int32_t i = 0; i < TA; i++) {
-
                     if (global_A + i * nThreadRow + threadRow < nfeatures_A)
                         regA[i] = A[edge * nfeatures_A + global_A +
                                     i * nThreadRow + threadRow];
@@ -309,22 +309,22 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
 
 template <typename scalar_t>
 void mops::cuda::outer_product_scatter_add_cuda(
-    const scalar_t * A, // [nedges, nfeatures_A]
-    const scalar_t * B, // [nedges, nfeatures_B]
-    const int32_t nnodes,           // number of nodes we're summing into
-    const int32_t nedges,           // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,      // number of features of A
-    const int32_t nfeatures_B,      // number of features of B
-    const int32_t
-        * first_occurences, // indices in indices_output where
-                                        // the values change [nnodes]
-    const int32_t * indices_output, // sorted list of indices to
-                                                // sum into [nedges]
-    scalar_t * output // shape: [nnodes, nfeatures_B, nfeatures_A]
-                                  // -> this ordering because contiguity of
-                                  // threadCol
+    const scalar_t *A,             // [nedges, nfeatures_A]
+    const scalar_t *B,             // [nedges, nfeatures_B]
+    const int32_t nnodes,          // number of nodes we're summing into
+    const int32_t nedges,          // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,     // number of features of A
+    const int32_t nfeatures_B,     // number of features of B
+    const int32_t *indices_output, // sorted list of indices to
+                                   // sum into [nedges]
+    scalar_t *output               // shape: [nnodes, nfeatures_B, nfeatures_A]
+                                   // -> this ordering because contiguity of
+                                   // threadCol
 
 ) {
+
+    int32_t *first_occurences =
+        calculate_first_occurences_cuda(indices_output, nedges, nnodes);
 
     dim3 gridDim(nnodes, 1, 1);
 
@@ -334,62 +334,59 @@ void mops::cuda::outer_product_scatter_add_cuda(
         A, B, nnodes, nedges, nfeatures_A, nfeatures_B, first_occurences,
         indices_output, output);
 
+    CUDA_CHECK_ERROR(cudaGetLastError());
+
+    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+
     cudaDeviceSynchronize();
 }
 
-template 
-void mops::cuda::outer_product_scatter_add_cuda<float>(
-    const float *A,                  // [nedges, nfeatures_A]
-    const float *B,                  // [nedges, nfeatures_B]
-    const int32_t nnodes,            // number of nodes we're summing into
-    const int32_t nedges,            // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,       // number of features of A
-    const int32_t nfeatures_B,       // number of features of B
-    const int32_t *first_occurences, // indices in indices_output where
-                                     // the values change [nnodes]
-    const int32_t *indices_output,   // sorted list of indices to
-                                     // sum into [nedges]
-    float *output // shape: [nnodes, nfeatures_B, nfeatures_A]
-                  // -> this ordering because contiguity of
-                  // threadCol
+template void mops::cuda::outer_product_scatter_add_cuda<float>(
+    const float *A,                // [nedges, nfeatures_A]
+    const float *B,                // [nedges, nfeatures_B]
+    const int32_t nnodes,          // number of nodes we're summing into
+    const int32_t nedges,          // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,     // number of features of A
+    const int32_t nfeatures_B,     // number of features of B
+    const int32_t *indices_output, // sorted list of indices to
+                                   // sum into [nedges]
+    float *output                  // shape: [nnodes, nfeatures_B, nfeatures_A]
+                                   // -> this ordering because contiguity of
+                                   // threadCol
 );
 
-template 
-void mops::cuda::outer_product_scatter_add_cuda<double>(
-    const double * A, // [nedges, nfeatures_A]
-    const double * B, // [nedges, nfeatures_B]
-    const int32_t nnodes,         // number of nodes we're summing into
-    const int32_t nedges,         // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,    // number of features of A
-    const int32_t nfeatures_B,    // number of features of B
-    const int32_t
-        * first_occurences, // indices in indices_output where
-                                        // the values change [nnodes]
-    const int32_t * indices_output, // sorted list of indices to
-                                                // sum into [nedges]
-    double * output // shape: [nnodes, nfeatures_B, nfeatures_A]
-                                // -> this ordering because contiguity of
-                                // threadCol
+template void mops::cuda::outer_product_scatter_add_cuda<double>(
+    const double *A,               // [nedges, nfeatures_A]
+    const double *B,               // [nedges, nfeatures_B]
+    const int32_t nnodes,          // number of nodes we're summing into
+    const int32_t nedges,          // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,     // number of features of A
+    const int32_t nfeatures_B,     // number of features of B
+    const int32_t *indices_output, // sorted list of indices to
+                                   // sum into [nedges]
+    double *output                 // shape: [nnodes, nfeatures_B, nfeatures_A]
+                                   // -> this ordering because contiguity of
+                                   // threadCol
 );
 
 template <typename scalar_t>
 void mops::cuda::outer_product_scatter_add_vjp_cuda(
-    const scalar_t * A, // [nedges, nfeatures_A]
-    const scalar_t * B, // [nedges, nfeatures_B]
-    const int32_t nnodes,           // number of nodes we're summing into
-    const int32_t nedges,           // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,      // number of features of A
-    const int32_t nfeatures_B,      // number of features of B
-    const int32_t
-        * first_occurences, // indices in indices_output where
-                                        // the values change [nnodes]
-    const int32_t * indices_output, // sorted list of indices to
-                                                // sum into [nedges]
-    scalar_t * grad_in, // grad_input: [nnodes, nfeatures_B,
-                                    // nfeatures_A]
-    scalar_t * grad_A,  // [nedges, nfeatures_A],
-    scalar_t * grad_B   // [nedges, nfeatures_B]
+    const scalar_t *A,             // [nedges, nfeatures_A]
+    const scalar_t *B,             // [nedges, nfeatures_B]
+    const int32_t nnodes,          // number of nodes we're summing into
+    const int32_t nedges,          // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,     // number of features of A
+    const int32_t nfeatures_B,     // number of features of B
+    const int32_t *indices_output, // sorted list of indices to
+                                   // sum into [nedges]
+    scalar_t *grad_in,             // grad_input: [nnodes, nfeatures_B,
+                                   // nfeatures_A]
+    scalar_t *grad_A,              // [nedges, nfeatures_A],
+    scalar_t *grad_B               // [nedges, nfeatures_B]
 ) {
+
+    int32_t *first_occurences =
+        calculate_first_occurences_cuda(indices_output, nedges, nnodes);
 
     dim3 gridDim(nnodes, 1, 1);
 
@@ -404,45 +401,44 @@ void mops::cuda::outer_product_scatter_add_vjp_cuda(
     shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_A, sptr, &space);
     shared_array<scalar_t>(NWARPS_PER_BLOCK * WARP_SIZE * 2, sptr, &space);
 
-    outer_product_scatter_add_vjp_kernel<scalar_t, 2><<<gridDim, blockDim, space>>>(A, B, nnodes, nedges, nfeatures_A,
+    outer_product_scatter_add_vjp_kernel<scalar_t, 2>
+        <<<gridDim, blockDim, space>>>(A, B, nnodes, nedges, nfeatures_A,
                                        nfeatures_B, first_occurences,
                                        indices_output, grad_in, grad_A, grad_B);
+
+    CUDA_CHECK_ERROR(cudaGetLastError());
+
+    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
 
     cudaDeviceSynchronize();
 }
 
 template void mops::cuda::outer_product_scatter_add_vjp_cuda<float>(
-    const float * A, // [nedges, nfeatures_A]
-    const float * B, // [nedges, nfeatures_B]
-    const int32_t nnodes,        // number of nodes we're summing into
-    const int32_t nedges,        // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,   // number of features of A
-    const int32_t nfeatures_B,   // number of features of B
-    const int32_t
-        * first_occurences, // indices in indices_output where
-                                        // the values change [nnodes]
-    const int32_t * indices_output, // sorted list of indices to
-                                                // sum into [nedges]
-    float * grad_in, // grad_input: [nnodes, nfeatures_B,
-                                 // nfeatures_A]
-    float * grad_A,  // [nedges, nfeatures_A],
-    float * grad_B   // [nedges, nfeatures_B]
+    const float *A,                // [nedges, nfeatures_A]
+    const float *B,                // [nedges, nfeatures_B]
+    const int32_t nnodes,          // number of nodes we're summing into
+    const int32_t nedges,          // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,     // number of features of A
+    const int32_t nfeatures_B,     // number of features of B
+    const int32_t *indices_output, // sorted list of indices to
+                                   // sum into [nedges]
+    float *grad_in,                // grad_input: [nnodes, nfeatures_B,
+                                   // nfeatures_A]
+    float *grad_A,                 // [nedges, nfeatures_A],
+    float *grad_B                  // [nedges, nfeatures_B]
 );
 
 template void mops::cuda::outer_product_scatter_add_vjp_cuda<double>(
-    const double * A, // [nedges, nfeatures_A]
-    const double * B, // [nedges, nfeatures_B]
-    const int32_t nnodes,         // number of nodes we're summing into
-    const int32_t nedges,         // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,    // number of features of A
-    const int32_t nfeatures_B,    // number of features of B
-    const int32_t
-        * first_occurences, // indices in indices_output where
-                                        // the values change [nnodes]
-    const int32_t * indices_output, // sorted list of indices to
-                                                // sum into [nedges]
-    double * grad_in, // grad_input: [nnodes, nfeatures_B,
-                                  // nfeatures_A]
-    double * grad_A,  // [nedges, nfeatures_A],
-    double * grad_B   // [nedges, nfeatures_B]
+    const double *A,               // [nedges, nfeatures_A]
+    const double *B,               // [nedges, nfeatures_B]
+    const int32_t nnodes,          // number of nodes we're summing into
+    const int32_t nedges,          // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,     // number of features of A
+    const int32_t nfeatures_B,     // number of features of B
+    const int32_t *indices_output, // sorted list of indices to
+                                   // sum into [nedges]
+    double *grad_in,               // grad_input: [nnodes, nfeatures_B,
+                                   // nfeatures_A]
+    double *grad_A,                // [nedges, nfeatures_A],
+    double *grad_B                 // [nedges, nfeatures_B]
 );

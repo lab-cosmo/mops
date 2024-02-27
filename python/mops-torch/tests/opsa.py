@@ -42,3 +42,35 @@ def test_opsa_grad():
         (A, B, indices, output_size),
         fast_mode=True,
     )
+
+
+def test_opsa_cuda():
+    A = torch.rand(100, 20)
+    B = torch.rand(100, 5)
+
+    output_size = 10
+
+    indices = torch.sort(
+        torch.randint(output_size, size=(100,), dtype=torch.int32)
+    ).values
+    # substitute all 1s by 2s so as to test the no-neighbor case
+    indices[indices == 1] = 2
+
+    reference = torch.tensor(
+        ref.outer_product_scatter_add(
+            A.numpy(), B.numpy(), indices.numpy(), output_size
+        )
+    )
+
+    print(A.shape, B.shape, indices.shape, output_size)
+
+    actual = mops.torch.outer_product_scatter_add(
+        A.cuda(), B.cuda(), indices.cuda(), output_size)
+
+    print(actual[0])
+    print(reference[0])
+
+    assert torch.allclose(reference, actual.cpu())
+
+
+test_opsa_cuda()

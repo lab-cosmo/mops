@@ -10,8 +10,7 @@ extern "C" {
 
 /// CUDA version of mops::cuda::first_occurences
 MOPS_EXPORT int * mops_cuda_first_occurences(mops_tensor_1d_i32_t receiver_list,
-                                           int32_t nedges, int32_t natoms,
-                                           mops_tensor_1d_i32_t output);
+                                           int32_t nedges, int32_t natoms);
 
 #ifdef __cplusplus
 }
