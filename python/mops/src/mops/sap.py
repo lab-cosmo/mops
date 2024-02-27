@@ -3,7 +3,7 @@ import numpy as np
 from . import _dispatch
 from .checks import _check_sap
 from .dispatch_operation import dispatch_operation
-from .utils import numpy_to_mops_tensor
+from .utils import mops_tensor
 
 
 def sparse_accumulation_of_products(
@@ -30,13 +30,13 @@ def sparse_accumulation_of_products(
     )
 
     function(
-        numpy_to_mops_tensor(output),
-        numpy_to_mops_tensor(A),
-        numpy_to_mops_tensor(B),
-        numpy_to_mops_tensor(C),
-        numpy_to_mops_tensor(indices_A),
-        numpy_to_mops_tensor(indices_B),
-        numpy_to_mops_tensor(indices_output),
+        mops_tensor(output),
+        mops_tensor(A),
+        mops_tensor(B),
+        mops_tensor(C),
+        mops_tensor(indices_A),
+        mops_tensor(indices_B),
+        mops_tensor(indices_output),
     )
 
     return output

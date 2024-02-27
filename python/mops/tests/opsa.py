@@ -5,6 +5,14 @@ from mops.reference_implementations import outer_product_scatter_add as ref_opsa
 import mops
 from mops import outer_product_scatter_add as opsa
 
+try:
+    import cupy as cp
+
+    cp.random.seed(0xDEADBEEF)
+    HAS_CUPY = True
+except ImportError:
+    HAS_CUPY = False
+
 
 @pytest.fixture
 def valid_arguments():
@@ -102,3 +110,20 @@ def test_opsa_out_of_bounds(valid_arguments):
         "parameters, it can only contain elements up to 19",
     ):
         opsa(A, B, indices_output, output_size)
+
+
+@pytest.mark.skipif(not HAS_CUPY, reason="CuPy is not installed")
+def test_opsa_cupy(valid_arguments):
+    A, B, indices_output, output_size = valid_arguments
+    A = cp.array(A)
+    B = cp.array(B)
+    indices_output = cp.array(indices_output)
+
+    reference = ref_opsa(  # noqa: F841
+        A.get(), B.get(), indices_output.get(), output_size
+    )
+
+    with pytest.raises(
+        mops.status.MopsError, match="CUDA implementation does not exist yet"
+    ):
+        actual = opsa(A, B, indices_output, output_size)  # noqa: F841

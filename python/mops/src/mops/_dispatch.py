@@ -1,3 +1,5 @@
+import ctypes
+
 import numpy as np
 
 try:
@@ -59,4 +61,38 @@ def get_device(array):
     else:
         raise TypeError(
             f"Only numpy and cupy arrays are supported, found {type(array)}"
+        )
+
+
+def get_ctypes_pointer(array):
+    if array.dtype == np.float32:
+        if isinstance(array, np.ndarray):
+            return array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+        elif isinstance(array, cupy_ndarray):
+            return ctypes.cast(array.data.ptr, ctypes.POINTER(ctypes.c_float))
+        else:
+            raise TypeError(
+                f"Only numpy and cupy arrays are supported, found {type(array)}"
+            )
+    elif array.dtype == np.float64:
+        if isinstance(array, np.ndarray):
+            return array.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+        elif isinstance(array, cupy_ndarray):
+            return ctypes.cast(array.data.ptr, ctypes.POINTER(ctypes.c_double))
+        else:
+            raise TypeError(
+                f"Only numpy and cupy arrays are supported, found {type(array)}"
+            )
+    elif array.dtype == np.int32:
+        if isinstance(array, np.ndarray):
+            return array.ctypes.data_as(ctypes.POINTER(ctypes.c_int32))
+        elif isinstance(array, cupy_ndarray):
+            return ctypes.cast(array.data.ptr, ctypes.POINTER(ctypes.c_int32))
+        else:
+            raise TypeError(
+                f"Only numpy and cupy arrays are supported, found {type(array)}"
+            )
+    else:
+        raise TypeError(
+            f"Only int32, float32 and float64 dtypes are supported, found {array.dtype}"
         )

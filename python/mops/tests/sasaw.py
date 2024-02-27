@@ -10,6 +10,15 @@ from mops import sparse_accumulation_scatter_add_with_weights as sasaw
 np.random.seed(0xDEADBEEF)
 
 
+try:
+    import cupy as cp
+
+    cp.random.seed(0xDEADBEEF)
+    HAS_CUPY = True
+except ImportError:
+    HAS_CUPY = False
+
+
 @pytest.fixture
 def valid_arguments():
     A = np.random.rand(100, 20)
@@ -246,6 +255,59 @@ def test_sasaw_out_of_bounds(valid_arguments):
         "parameters, it can only contain elements up to 24",
     ):
         sasaw(
+            A,
+            B,
+            C,
+            W,
+            indices_A,
+            indices_W_1,
+            indices_W_2,
+            indices_output_1,
+            indices_output_2,
+            output_size,
+        )
+
+
+@pytest.mark.skipif(not HAS_CUPY, reason="CuPy is not installed")
+def test_sasaw_cupy(valid_arguments):
+    (
+        A,
+        B,
+        C,
+        W,
+        indices_A,
+        indices_W_1,
+        indices_W_2,
+        indices_output_1,
+        indices_output_2,
+        output_size,
+    ) = valid_arguments
+    A = cp.array(A)
+    B = cp.array(B)
+    C = cp.array(C)
+    W = cp.array(W)
+    indices_A = cp.array(indices_A)
+    indices_W_1 = cp.array(indices_W_1)
+    indices_W_2 = cp.array(indices_W_2)
+    indices_output_1 = cp.array(indices_output_1)
+    indices_output_2 = cp.array(indices_output_2)
+
+    reference = ref_sasaw(  # noqa: F841
+        A,
+        B,
+        C,
+        W,
+        indices_A,
+        indices_W_1,
+        indices_W_2,
+        indices_output_1,
+        indices_output_2,
+        output_size,
+    )
+    with pytest.raises(
+        mops.status.MopsError, match="CUDA implementation does not exist yet"
+    ):
+        actual = sasaw(  # noqa: F841
             A,
             B,
             C,

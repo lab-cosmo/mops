@@ -1,12 +1,11 @@
-import numpy as np
-
+from . import _dispatch
 from .checks import _check_hpe, _check_opsa, _check_opsaw, _check_sap, _check_sasaw
 
 
 def homogeneous_polynomial_evaluation(A, C, indices_A):
     _check_hpe(A, C, indices_A)
 
-    output = np.zeros((A.shape[0],), dtype=A.dtype)
+    output = _dispatch.zeros_like((A.shape[0],), A)
     max_j = indices_A.shape[0]
     max_k = indices_A.shape[1]
     for j in range(max_j):
@@ -23,7 +22,7 @@ def sparse_accumulation_of_products(
 ):
     _check_sap(A, B, C, indices_A, indices_B, indices_output, output_size)
 
-    output = np.zeros((A.shape[0], output_size), dtype=A.dtype)
+    output = _dispatch.zeros_like((A.shape[0], output_size), A)
     K = C.shape[0]
     for k in range(K):
         output[:, indices_output[k]] += C[k] * A[:, indices_A[k]] * B[:, indices_B[k]]
@@ -34,7 +33,7 @@ def sparse_accumulation_of_products(
 def outer_product_scatter_add(A, B, indices_output, output_size):
     _check_opsa(A, B, indices_output, output_size)
 
-    output = np.zeros((output_size, A.shape[1], B.shape[1]), dtype=A.dtype)
+    output = _dispatch.zeros_like((output_size, A.shape[1], B.shape[1]), A)
     J = indices_output.shape[0]
     for j in range(J):
         output[indices_output[j], :, :] += A[j, :, None] * B[j, None, :]
@@ -45,7 +44,7 @@ def outer_product_scatter_add(A, B, indices_output, output_size):
 def outer_product_scatter_add_with_weights(A, B, W, indices_W, indices_output):
     _check_opsaw(A, B, W, indices_W, indices_output)
 
-    output = np.zeros((W.shape[0], A.shape[1], B.shape[1]), dtype=A.dtype)
+    output = _dispatch.zeros_like((W.shape[0], A.shape[1], B.shape[1]), A)
     max_e = indices_output.shape[0]
     for e in range(max_e):
         output[indices_output[e], :, :] += (
@@ -80,7 +79,7 @@ def sparse_accumulation_scatter_add_with_weights(
         output_size,
     )
 
-    output = np.zeros((W.shape[0], output_size, B.shape[1]), dtype=B.dtype)
+    output = _dispatch.zeros_like((W.shape[0], output_size, B.shape[1]), B)
     E = indices_output_1.shape[0]
     N = C.shape[0]
     for e in range(E):

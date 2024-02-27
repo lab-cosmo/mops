@@ -3,7 +3,7 @@ import numpy as np
 from . import _dispatch
 from .checks import _check_hpe
 from .dispatch_operation import dispatch_operation
-from .utils import numpy_to_mops_tensor
+from .utils import mops_tensor
 
 
 def homogeneous_polynomial_evaluation(A, C, indices_A):
@@ -22,10 +22,10 @@ def homogeneous_polynomial_evaluation(A, C, indices_A):
     )
 
     function(
-        numpy_to_mops_tensor(O),
-        numpy_to_mops_tensor(A),
-        numpy_to_mops_tensor(C),
-        numpy_to_mops_tensor(indices_A),
+        mops_tensor(O),
+        mops_tensor(A),
+        mops_tensor(C),
+        mops_tensor(indices_A),
     )
 
     return O
