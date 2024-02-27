@@ -131,7 +131,9 @@ void mops::sparse_accumulation_of_products_vjp(
         if (calculate_grad_A) {
             check_same_shape(grad_A, "grad_A", A, "A", "sap_vjp");
         }
-        if (calculate_grad_B) check_same_shape(grad_B, "grad_B", B, "B", "sap_vjp");
+        if (calculate_grad_B) {
+            check_same_shape(grad_B, "grad_B", B, "B", "sap_vjp");
+        }
 
         scalar_t* c_ptr = C.data;
         int32_t* p_a_ptr = indices_A.data;
