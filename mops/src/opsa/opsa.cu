@@ -130,7 +130,53 @@ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_ke
     }
 }
 
-template <typename scalar_t, const int TB>
+template <typename scalar_t>
+void mops::cuda::outer_product_scatter_add_cuda(
+    const scalar_t *A,             // [nedges, nfeatures_A]
+    const scalar_t *B,             // [nedges, nfeatures_B]
+    const int32_t nnodes,          // number of nodes we're summing into
+    const int32_t nedges,          // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,     // number of features of A
+    const int32_t nfeatures_B,     // number of features of B
+    const int32_t *indices_output, // sorted list of indices to
+                                   // sum into [nedges]
+    scalar_t *output               // shape: [nnodes, nfeatures_B, nfeatures_A]
+                                   // -> this ordering because contiguity of
+                                   // threadCol
+
+) {
+
+    int32_t *first_occurences =
+        calculate_first_occurences_cuda(indices_output, nedges, nnodes);
+
+    dim3 gridDim(nnodes, 1, 1);
+
+    dim3 blockDim(NWARPS_PER_BLOCK * WARP_SIZE, 1, 1);
+
+    outer_product_scatter_add_kernel<scalar_t, 2, 2><<<gridDim, blockDim, 0>>>(
+        A, B, nnodes, nedges, nfeatures_A, nfeatures_B, first_occurences,
+        indices_output, output);
+
+    CUDA_CHECK_ERROR(cudaGetLastError());
+
+    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+}
+
+template void mops::cuda::outer_product_scatter_add_cuda<float>(
+    const float *A,                // [nedges, nfeatures_A]
+    const float *B,                // [nedges, nfeatures_B]
+    const int32_t nnodes,          // number of nodes we're summing into
+    const int32_t nedges,          // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,     // number of features of A
+    const int32_t nfeatures_B,     // number of features of B
+    const int32_t *indices_output, // sorted list of indices to
+                                   // sum into [nedges]
+    float *output                  // shape: [nnodes, nfeatures_B, nfeatures_A]
+                                   // -> this ordering because contiguity of
+                                   // threadCol
+);
+
+template <typename scalar_t>
 __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
     outer_product_scatter_add_vjp_kernel(
         const scalar_t
@@ -171,14 +217,7 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
     scalar_t *buffer_grad_A =
         shared_array<scalar_t>(nThreadRow * nfeatures_A, sptr, &space);
     scalar_t *buffer_grad_B =
-        shared_array<scalar_t>(nThreadRow * WARP_SIZE * TB, sptr, &space);
-
-    /* registers to hold components of A, B and grads - used to increase
-     * arithmetic intensity.
-     */
-
-    scalar_t regB[TB] = {0.0};
-    scalar_t gradB[TB] = {0.0};
+        shared_array<scalar_t>(nThreadRow * nfeatures_B, sptr, &space);
 
     const int32_t edge_start = first_occurences[blockIdx.x];
     const int32_t edge_end = (blockIdx.x == nnodes - 1)
@@ -191,14 +230,12 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
      * we need to loop find_integer_divisor(nfeatures_B, TB*WARP_SIZE) times
      */
 
-    int32_t niter_B = find_integer_divisor(nfeatures_B, TB * WARP_SIZE);
-
     /*
      * initialise buffer_grad_in for this sub block
      */
 
     for (int tid = threadIdx.x; tid < nfeatures_A * nfeatures_B;
-         tid += NWARPS_PER_BLOCK * WARP_SIZE) {
+         tid += blockDim.x) {
         buffer_grad_in[tid] =
             grad_in[node_index * nfeatures_A * nfeatures_B + tid];
     }
@@ -216,144 +253,73 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
     for (int32_t edge_idx = threadRow; edge_idx < nedges;
          edge_idx += nThreadRow) {
 
+        __syncwarp();
+
         int32_t edge = edge_idx + edge_start;
 
         /*
          * zero temporary buffers and load A, B into shared memory
          */
 
-        for (int tid = threadIdx.x; tid < nfeatures_A; tid += WARP_SIZE) {
+        for (int tid = threadCol; tid < nfeatures_A; tid += WARP_SIZE) {
             buffer_grad_A[threadRow * nfeatures_A + tid] = 0.0;
-            buffer_A[threadRow * nfeatures_B + tid] =
+            buffer_A[threadRow * nfeatures_A + tid] =
                 A[edge * nfeatures_A + tid];
         }
 
-        for (int tid = threadIdx.x; tid < nfeatures_B; tid += WARP_SIZE) {
+        for (int tid = threadCol; tid < nfeatures_B; tid += WARP_SIZE) {
+            buffer_grad_B[threadRow * nfeatures_B + tid] = 0.0;
             buffer_B[threadRow * nfeatures_B + tid] =
                 B[edge * nfeatures_B + tid];
         }
 
-        for (int tid = threadIdx.x; tid < TB * WARP_SIZE; tid += WARP_SIZE) {
-            buffer_grad_B[threadRow * (TB * WARP_SIZE) + tid] = 0.0;
-        }
-
         __syncwarp();
 
-        for (int32_t iter_B = 0; iter_B < niter_B; iter_B++) {
+        /*
+         * perform the reduction
+         */
+        for (int i = 0; i < nfeatures_A; i++) {
 
-            // process the next TB * WARP_SIZE chunk
-            int32_t global_B = iter_B * TB * WARP_SIZE;
+            scalar_t dsumA = 0.0;
 
-            /*
-             *  load B from SMEM into local registers
-             */
-            for (int32_t i = 0; i < TB; i++) {
-                if (global_B + i * WARP_SIZE + threadCol < nfeatures_A)
-                    regB[i] = buffer_B[global_B + i * WARP_SIZE + threadCol];
-            }
+            for (int j = threadCol; j < nfeatures_B; j += WARP_SIZE) {
 
-            /*
-             * perform the reduction
-             */
-            for (int i = 0; i < nfeatures_A; i++) {
+                scalar_t grad_in_ij = buffer_grad_in[i * nfeatures_B + j];
 
-                scalar_t dsumA = 0.0;
+                buffer_grad_B[threadRow * nfeatures_B + j] +=
+                    grad_in_ij * buffer_A[i];
 
-                for (int j = 0; j < TB; j++) {
-
-                    scalar_t grad_in_ij = 0.0;
-
-                    if (i * nfeatures_B + global_B + j * WARP_SIZE + threadCol <
-                        nfeatures_A * nfeatures_B) {
-                        grad_in_ij = buffer_grad_in[i * nfeatures_B + global_B +
-                                                    j * WARP_SIZE + threadCol];
-                    }
-
-                    if (global_B + j * WARP_SIZE + threadCol < nfeatures_B)
-                        buffer_grad_B[threadRow * (TB * WARP_SIZE) +
-                                      threadCol] += grad_in_ij * buffer_A[i];
-
-                    dsumA += grad_in_ij * regB[j];
-                }
-
-                // need to warp shuffle reduce across the threads
-                // accessing each B index.
-                for (int offset = WARP_SIZE / 2; offset > 0; offset /= 2) {
-                    dsumA +=
-                        __shfl_down_sync(FULL_MASK, dsumA, offset, WARP_SIZE);
-                }
-
-                // thread 0 contains the gradient for this subset of features_B.
-                if (threadCol == 0)
-                    buffer_grad_A[i * nfeatures_A + threadRow] += dsumA;
+                dsumA += grad_in_ij * buffer_B[j];
             }
 
             __syncwarp();
 
-            // write gradB
-            for (int k = threadCol; k < nfeatures_B; k += WARP_SIZE) {
-                grad_B[edge * nfeatures_B + threadCol] =
-                    buffer_grad_B[threadRow * WARP_SIZE + threadCol];
+            // need to warp shuffle reduce across the threads
+            // accessing each B index.
+            for (int offset = WARP_SIZE / 2; offset > 0; offset /= 2) {
+                dsumA += __shfl_down_sync(FULL_MASK, dsumA, offset, WARP_SIZE);
             }
+
+            // thread 0 contains the gradient for this subset of features_B.
+            if (threadCol == 0)
+                buffer_grad_A[i * nThreadRow + threadRow] = dsumA;
         }
 
         __syncwarp();
 
+        // write gradB
+        for (int j = threadCol; j < nfeatures_B; j += WARP_SIZE) {
+            grad_B[edge * nfeatures_B + j] =
+                buffer_grad_B[threadRow * nfeatures_B + j];
+        }
+
         // write gradA
         for (int i = threadCol; i < nfeatures_A; i += WARP_SIZE) {
-            grad_A[edge * nfeatures_A + threadCol] =
-                buffer_grad_A[i * nfeatures_A + threadRow];
+            grad_A[edge * nfeatures_A + i] =
+                buffer_grad_A[i * nThreadRow + threadRow];
         }
     }
 }
-
-template <typename scalar_t>
-void mops::cuda::outer_product_scatter_add_cuda(
-    const scalar_t *A,             // [nedges, nfeatures_A]
-    const scalar_t *B,             // [nedges, nfeatures_B]
-    const int32_t nnodes,          // number of nodes we're summing into
-    const int32_t nedges,          // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,     // number of features of A
-    const int32_t nfeatures_B,     // number of features of B
-    const int32_t *indices_output, // sorted list of indices to
-                                   // sum into [nedges]
-    scalar_t *output               // shape: [nnodes, nfeatures_B, nfeatures_A]
-                                   // -> this ordering because contiguity of
-                                   // threadCol
-
-) {
-
-    int32_t *first_occurences =
-        calculate_first_occurences_cuda(indices_output, nedges, nnodes);
-
-    dim3 gridDim(nnodes, 1, 1);
-
-    dim3 blockDim(NWARPS_PER_BLOCK * WARP_SIZE, 1, 1);
-
-    outer_product_scatter_add_kernel<scalar_t, 2, 2><<<gridDim, blockDim, 0>>>(
-        A, B, nnodes, nedges, nfeatures_A, nfeatures_B, first_occurences,
-        indices_output, output);
-
-    CUDA_CHECK_ERROR(cudaGetLastError());
-
-    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
-
-    cudaDeviceSynchronize();
-}
-
-template void mops::cuda::outer_product_scatter_add_cuda<float>(
-    const float *A,                // [nedges, nfeatures_A]
-    const float *B,                // [nedges, nfeatures_B]
-    const int32_t nnodes,          // number of nodes we're summing into
-    const int32_t nedges,          // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,     // number of features of A
-    const int32_t nfeatures_B,     // number of features of B
-    const int32_t *indices_output, // sorted list of indices to
-                                   // sum into [nedges]
-    float *output                  // shape: [nnodes, nfeatures_B, nfeatures_A]
-                                   // -> this ordering because contiguity of
-                                   // threadCol
-);
 
 template void mops::cuda::outer_product_scatter_add_cuda<double>(
     const double *A,               // [nedges, nfeatures_A]
@@ -399,9 +365,9 @@ void mops::cuda::outer_product_scatter_add_vjp_cuda(
     shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_A, sptr, &space);
     shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_B, sptr, &space);
     shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_A, sptr, &space);
-    shared_array<scalar_t>(NWARPS_PER_BLOCK * WARP_SIZE * 2, sptr, &space);
+    shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_B, sptr, &space);
 
-    outer_product_scatter_add_vjp_kernel<scalar_t, 2>
+    outer_product_scatter_add_vjp_kernel<scalar_t>
         <<<gridDim, blockDim, space>>>(A, B, nnodes, nedges, nfeatures_A,
                                        nfeatures_B, first_occurences,
                                        indices_output, grad_in, grad_A, grad_B);
@@ -409,8 +375,6 @@ void mops::cuda::outer_product_scatter_add_vjp_cuda(
     CUDA_CHECK_ERROR(cudaGetLastError());
 
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
-
-    cudaDeviceSynchronize();
 }
 
 template void mops::cuda::outer_product_scatter_add_vjp_cuda<float>(

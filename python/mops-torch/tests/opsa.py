@@ -66,3 +66,18 @@ def test_opsa_cuda():
         A.cuda(), B.cuda(), indices.cuda(), output_size)
 
     assert torch.allclose(reference, actual.cpu())
+    
+def test_opsa_grad_cuda():
+    A = torch.rand(100, 20, dtype=torch.float64, requires_grad=True, device='cuda')
+    B = torch.rand(100, 5, dtype=torch.float64, requires_grad=True, device='cuda')
+
+    output_size = 10
+    indices = torch.sort(
+        torch.randint(output_size, size=(100,), dtype=torch.int32)
+    ).values.cuda()
+
+    assert torch.autograd.gradcheck(
+        mops.torch.outer_product_scatter_add,
+        (A, B, indices, output_size),
+        fast_mode=True,
+    )
