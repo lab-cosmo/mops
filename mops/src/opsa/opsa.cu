@@ -176,6 +176,20 @@ template void mops::cuda::outer_product_scatter_add_cuda<float>(
                                    // threadCol
 );
 
+template void mops::cuda::outer_product_scatter_add_cuda<double>(
+    const double *A,               // [nedges, nfeatures_A]
+    const double *B,               // [nedges, nfeatures_B]
+    const int32_t nnodes,          // number of nodes we're summing into
+    const int32_t nedges,          // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,     // number of features of A
+    const int32_t nfeatures_B,     // number of features of B
+    const int32_t *indices_output, // sorted list of indices to
+                                   // sum into [nedges]
+    double *output                 // shape: [nnodes, nfeatures_B, nfeatures_A]
+                                   // -> this ordering because contiguity of
+                                   // threadCol
+);
+
 template <typename scalar_t>
 __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
     outer_product_scatter_add_vjp_kernel(
@@ -287,12 +301,10 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
                 scalar_t grad_in_ij = buffer_grad_in[i * nfeatures_B + j];
 
                 buffer_grad_B[threadRow * nfeatures_B + j] +=
-                    grad_in_ij * buffer_A[i];
+                    grad_in_ij * buffer_A[threadRow * nfeatures_A + i];
 
-                dsumA += grad_in_ij * buffer_B[j];
+                dsumA += grad_in_ij * buffer_B[threadRow * nfeatures_B + j];
             }
-
-            __syncwarp();
 
             // need to warp shuffle reduce across the threads
             // accessing each B index.
@@ -320,20 +332,6 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
         }
     }
 }
-
-template void mops::cuda::outer_product_scatter_add_cuda<double>(
-    const double *A,               // [nedges, nfeatures_A]
-    const double *B,               // [nedges, nfeatures_B]
-    const int32_t nnodes,          // number of nodes we're summing into
-    const int32_t nedges,          // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,     // number of features of A
-    const int32_t nfeatures_B,     // number of features of B
-    const int32_t *indices_output, // sorted list of indices to
-                                   // sum into [nedges]
-    double *output                 // shape: [nnodes, nfeatures_B, nfeatures_A]
-                                   // -> this ordering because contiguity of
-                                   // threadCol
-);
 
 template <typename scalar_t>
 void mops::cuda::outer_product_scatter_add_vjp_cuda(

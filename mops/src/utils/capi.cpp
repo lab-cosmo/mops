@@ -12,8 +12,9 @@ static size_t checked_cast(int64_t value) {
     return static_cast<size_t>(value);
 }
 
-extern "C" int32_t *mops_cuda_first_occurences(mops_tensor_1d_i32_t receiver_list,
-                                           int32_t nedges, int32_t nnodes) {
+extern "C" int32_t *
+mops_cuda_first_occurences(mops_tensor_1d_i32_t receiver_list, int32_t nedges,
+                           int32_t nnodes) {
 
     MOPS_CATCH_EXCEPTIONS_WITH_RETURN(
         mops::cuda::calculate_first_occurences_cuda(receiver_list.data, nedges,
