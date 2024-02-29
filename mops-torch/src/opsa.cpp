@@ -43,10 +43,8 @@ torch::Tensor OuterProductScatterAdd::forward(
     } else {
 
 #ifndef MOPS_CUDA_ENABLED
-        C10_THROW_ERROR(
-            ValueError,
-            "outer_product_scatter_add is not implemented for device " +
-                A.device().str());
+        C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " +
+                                        A.device().str());
 #else
         output = torch::empty(
             {output_size, A.size(1), B.size(1)},
@@ -115,14 +113,10 @@ OuterProductScatterAdd::backward(torch::autograd::AutogradContext *ctx,
     } else {
 
 #ifndef MOPS_CUDA_ENABLED
-        C10_THROW_ERROR(
-            ValueError,
-            "outer_product_scatter_add is not implemented for device " +
-                A.device().str());
-#else
-        AT_DISPATCH_FLOATING_TYPES(
-            A.scalar_type(), "outer_product_scatter_add", [&]() {
-                auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+        C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " +
+                                        A.device().str());
+#elseValueError, "MOPS was not compiled with CUDA support " +
+                                        auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (A.requires_grad()) {
                     grad_A = torch::empty_like(A);
                     mops_grad_A = torch_to_mops_2d<scalar_t>(grad_A);
