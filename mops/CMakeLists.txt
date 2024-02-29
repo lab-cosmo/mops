@@ -90,7 +90,6 @@ if(CMAKE_CUDA_COMPILER)
         "include/mops/cuda_utils.cuh"
 
         "src/opsa/opsa.cu"
-        "include/mops/cuda_opsa.hpp"
 
         "src/utils/first_occurences.cu"
         "include/mops/cuda_first_occurences.hpp"

@@ -1,7 +1,7 @@
 
 #include "mops/cuda_first_occurences.hpp"
-#include "mops/cuda_opsa.hpp"
 #include "mops/cuda_utils.cuh"
+#include "mops/opsa.hpp"
 
 using namespace mops::cuda;
 
@@ -131,64 +131,40 @@ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_ke
 }
 
 template <typename scalar_t>
-void mops::cuda::outer_product_scatter_add_cuda(
-    const scalar_t *A,             // [nedges, nfeatures_A]
-    const scalar_t *B,             // [nedges, nfeatures_B]
-    const int32_t nnodes,          // number of nodes we're summing into
-    const int32_t nedges,          // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,     // number of features of A
-    const int32_t nfeatures_B,     // number of features of B
-    const int32_t *indices_output, // sorted list of indices to
-                                   // sum into [nedges]
-    scalar_t *output               // shape: [nnodes, nfeatures_B, nfeatures_A]
-                                   // -> this ordering because contiguity of
-                                   // threadCol
+void mops::cuda::outer_product_scatter_add(Tensor<scalar_t, 2> output,
+                                           Tensor<scalar_t, 2> A,
+                                           Tensor<scalar_t, 2> B,
+                                           Tensor<int32_t, 1> indices_output) {
 
-) {
+    int32_t nedges = A.shape[0];
+    int32_t nnodes = output.shape[0];
+    int32_t nfeatures_A = A.shape[1];
+    int32_t nfeatures_B = B.shape[1];
 
     int32_t *first_occurences =
-        calculate_first_occurences_cuda(indices_output, nedges, nnodes);
+        calculate_first_occurences_cuda(indices_output.data, nedges, nnodes);
 
     dim3 gridDim(nnodes, 1, 1);
 
     dim3 blockDim(NWARPS_PER_BLOCK * WARP_SIZE, 1, 1);
 
     outer_product_scatter_add_kernel<scalar_t, 2, 2><<<gridDim, blockDim, 0>>>(
-        A, B, nnodes, nedges, nfeatures_A, nfeatures_B, first_occurences,
-        indices_output, output);
+        A.data, B.data, nnodes, nedges, nfeatures_A, nfeatures_B,
+        first_occurences, indices_output.data, output.data);
 
     CUDA_CHECK_ERROR(cudaGetLastError());
 
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
 }
 
-template void mops::cuda::outer_product_scatter_add_cuda<float>(
-    const float *A,                // [nedges, nfeatures_A]
-    const float *B,                // [nedges, nfeatures_B]
-    const int32_t nnodes,          // number of nodes we're summing into
-    const int32_t nedges,          // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,     // number of features of A
-    const int32_t nfeatures_B,     // number of features of B
-    const int32_t *indices_output, // sorted list of indices to
-                                   // sum into [nedges]
-    float *output                  // shape: [nnodes, nfeatures_B, nfeatures_A]
-                                   // -> this ordering because contiguity of
-                                   // threadCol
-);
+// explicit instanciations of CUDA templates
+template void mops::cuda::outer_product_scatter_add<float>(
+    Tensor<float, 2> output, Tensor<float, 2> A, Tensor<float, 2> B,
+    Tensor<int32_t, 1> indices_output);
 
-template void mops::cuda::outer_product_scatter_add_cuda<double>(
-    const double *A,               // [nedges, nfeatures_A]
-    const double *B,               // [nedges, nfeatures_B]
-    const int32_t nnodes,          // number of nodes we're summing into
-    const int32_t nedges,          // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,     // number of features of A
-    const int32_t nfeatures_B,     // number of features of B
-    const int32_t *indices_output, // sorted list of indices to
-                                   // sum into [nedges]
-    double *output                 // shape: [nnodes, nfeatures_B, nfeatures_A]
-                                   // -> this ordering because contiguity of
-                                   // threadCol
-);
+template void mops::cuda::outer_product_scatter_add<double>(
+    Tensor<double, 2> output, Tensor<double, 2> A, Tensor<double, 2> B,
+    Tensor<int32_t, 1> indices_output);
 
 template <typename scalar_t>
 __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
@@ -256,14 +232,6 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
 
     __syncthreads();
 
-    /*
-     * buffer_grad_A shape = [NWARPS_PER_BLOCK * nfeatures_A]: need to reduce
-     * across warps in a separate step */
-
-    /*
-     * buffer_grad_B shape: [nfeatures_B] -> can use warp shuffles to reduce
-     * across threads */
-
     for (int32_t edge_idx = threadRow; edge_idx < nedges;
          edge_idx += nThreadRow) {
 
@@ -312,7 +280,7 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
                 dsumA += __shfl_down_sync(FULL_MASK, dsumA, offset, WARP_SIZE);
             }
 
-            // thread 0 contains the gradient for this subset of features_B.
+            // thread 0 contains the gradient for this subset of features_A.
             if (threadCol == 0)
                 buffer_grad_A[i * nThreadRow + threadRow] = dsumA;
         }
@@ -334,23 +302,18 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
 }
 
 template <typename scalar_t>
-void mops::cuda::outer_product_scatter_add_vjp_cuda(
-    const scalar_t *A,             // [nedges, nfeatures_A]
-    const scalar_t *B,             // [nedges, nfeatures_B]
-    const int32_t nnodes,          // number of nodes we're summing into
-    const int32_t nedges,          // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,     // number of features of A
-    const int32_t nfeatures_B,     // number of features of B
-    const int32_t *indices_output, // sorted list of indices to
-                                   // sum into [nedges]
-    scalar_t *grad_in,             // grad_input: [nnodes, nfeatures_B,
-                                   // nfeatures_A]
-    scalar_t *grad_A,              // [nedges, nfeatures_A],
-    scalar_t *grad_B               // [nedges, nfeatures_B]
-) {
+void mops::cuda::outer_product_scatter_add_vjp(
+    Tensor<scalar_t, 2> grad_A, Tensor<scalar_t, 2> grad_B,
+    Tensor<scalar_t, 2> grad_output, Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B, Tensor<int32_t, 1> indices_output) {
+
+    int32_t nedges = A.shape[0];
+    int32_t nnodes = grad_output.shape[0];
+    int32_t nfeatures_A = A.shape[1];
+    int32_t nfeatures_B = B.shape[1];
 
     int32_t *first_occurences =
-        calculate_first_occurences_cuda(indices_output, nedges, nnodes);
+        calculate_first_occurences_cuda(indices_output.data, nedges, nnodes);
 
     dim3 gridDim(nnodes, 1, 1);
 
@@ -366,41 +329,23 @@ void mops::cuda::outer_product_scatter_add_vjp_cuda(
     shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_B, sptr, &space);
 
     outer_product_scatter_add_vjp_kernel<scalar_t>
-        <<<gridDim, blockDim, space>>>(A, B, nnodes, nedges, nfeatures_A,
-                                       nfeatures_B, first_occurences,
-                                       indices_output, grad_in, grad_A, grad_B);
+        <<<gridDim, blockDim, space>>>(
+            A.data, B.data, nnodes, nedges, nfeatures_A, nfeatures_B,
+            first_occurences, indices_output.data, grad_output.data,
+            grad_A.data, grad_B.data);
 
     CUDA_CHECK_ERROR(cudaGetLastError());
 
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
 }
 
-template void mops::cuda::outer_product_scatter_add_vjp_cuda<float>(
-    const float *A,                // [nedges, nfeatures_A]
-    const float *B,                // [nedges, nfeatures_B]
-    const int32_t nnodes,          // number of nodes we're summing into
-    const int32_t nedges,          // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,     // number of features of A
-    const int32_t nfeatures_B,     // number of features of B
-    const int32_t *indices_output, // sorted list of indices to
-                                   // sum into [nedges]
-    float *grad_in,                // grad_input: [nnodes, nfeatures_B,
-                                   // nfeatures_A]
-    float *grad_A,                 // [nedges, nfeatures_A],
-    float *grad_B                  // [nedges, nfeatures_B]
-);
+// these templates will be precompiled and provided in the mops library
+template void mops::cuda::outer_product_scatter_add_vjp<float>(
+    Tensor<float, 2> grad_A, Tensor<float, 2> grad_B,
+    Tensor<float, 2> grad_output, Tensor<float, 2> A, Tensor<float, 2> B,
+    Tensor<int32_t, 1> indices_output);
 
-template void mops::cuda::outer_product_scatter_add_vjp_cuda<double>(
-    const double *A,               // [nedges, nfeatures_A]
-    const double *B,               // [nedges, nfeatures_B]
-    const int32_t nnodes,          // number of nodes we're summing into
-    const int32_t nedges,          // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,     // number of features of A
-    const int32_t nfeatures_B,     // number of features of B
-    const int32_t *indices_output, // sorted list of indices to
-                                   // sum into [nedges]
-    double *grad_in,               // grad_input: [nnodes, nfeatures_B,
-                                   // nfeatures_A]
-    double *grad_A,                // [nedges, nfeatures_A],
-    double *grad_B                 // [nedges, nfeatures_B]
-);
+template void mops::cuda::outer_product_scatter_add_vjp<double>(
+    Tensor<double, 2> grad_A, Tensor<double, 2> grad_B,
+    Tensor<double, 2> grad_output, Tensor<double, 2> A, Tensor<double, 2> B,
+    Tensor<int32_t, 1> indices_output);

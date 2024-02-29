@@ -12,7 +12,6 @@
 
 #ifdef MOPS_CUDA_ENABLED
 #include "mops/cuda_first_occurences.hpp"
-#include "mops/cuda_opsa.hpp"
 #endif
 
 #endif

@@ -7,7 +7,6 @@
 
 namespace mops_torch {
 
-/// TODO
 torch::Tensor outer_product_scatter_add(torch::Tensor A, torch::Tensor B,
                                         torch::Tensor indices_output,
                                         int64_t output_size);
