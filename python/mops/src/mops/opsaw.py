@@ -1,14 +1,12 @@
 import numpy as np
 
 from ._c_lib import _get_library
-from .checks import check_opsaw
+from .checks import _check_opsaw
 from .utils import numpy_to_mops_tensor
 
 
-def outer_product_scatter_add_with_weights(
-    A, B, W, indices_w, indices_output, output_size
-):
-    check_opsaw(A, B, W, indices_w, indices_output, output_size)
+def outer_product_scatter_add_with_weights(A, B, W, indices_w, indices_output):
+    _check_opsaw(A, B, W, indices_w, indices_output)
 
     A = np.ascontiguousarray(A)
     B = np.ascontiguousarray(B)
@@ -18,7 +16,7 @@ def outer_product_scatter_add_with_weights(
     indices_w = indices_w.astype(np.int32)
     indices_output = indices_output.astype(np.int32)
 
-    output = np.zeros((output_size, A.shape[1], B.shape[1]), dtype=A.dtype)
+    output = np.empty((W.shape[0], A.shape[1], B.shape[1]), dtype=A.dtype)
 
     lib = _get_library()
 
