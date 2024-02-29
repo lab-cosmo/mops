@@ -39,44 +39,44 @@ def test_opsa_grad():
         fast_mode=True,
     )
 
-
 def test_opsa_cuda():
-    A = torch.rand(100, 20)
-    B = torch.rand(100, 5)
+    if (torch.cuda.is_available()): 
+        A = torch.rand(100, 20)
+        B = torch.rand(100, 5)
 
-    output_size = 10
+        output_size = 10
 
-    indices = torch.sort(
-        torch.randint(output_size, size=(100,), dtype=torch.int32)
-    ).values
-    # substitute all 1s by 2s so as to test the no-neighbor case
-    indices[indices == 1] = 2
+        indices = torch.sort(
+            torch.randint(output_size, size=(100,), dtype=torch.int32)
+        ).values
+        # substitute all 1s by 2s so as to test the no-neighbor case
+        indices[indices == 1] = 2
 
-    reference = torch.tensor(
-        ref.outer_product_scatter_add(
-            A.numpy(), B.numpy(), indices.numpy(), output_size
+        reference = torch.tensor(
+            ref.outer_product_scatter_add(
+                A.numpy(), B.numpy(), indices.numpy(), output_size
+            )
         )
-    )
 
-    actual = mops.torch.outer_product_scatter_add(
-        A.cuda(), B.cuda(), indices.cuda(), output_size)
+        actual = mops.torch.outer_product_scatter_add(
+            A.cuda(), B.cuda(), indices.cuda(), output_size)
 
-    assert torch.allclose(reference, actual.cpu())
-
+        assert torch.allclose(reference, actual.cpu())
 
 def test_opsa_grad_cuda():
-    A = torch.rand(100, 32, dtype=torch.float64,
-                   requires_grad=True, device='cuda')
-    B = torch.rand(100, 8, dtype=torch.float64,
-                   requires_grad=True, device='cuda')
+    if (torch.cuda.is_available()): 
+        A = torch.rand(100, 32, dtype=torch.float64,
+                    requires_grad=True, device='cuda')
+        B = torch.rand(100, 8, dtype=torch.float64,
+                    requires_grad=True, device='cuda')
 
-    output_size = 10
-    indices = torch.sort(
-        torch.randint(output_size, size=(100,), dtype=torch.int32)
-    ).values.cuda()
+        output_size = 10
+        indices = torch.sort(
+            torch.randint(output_size, size=(100,), dtype=torch.int32)
+        ).values.cuda()
 
-    assert torch.autograd.gradcheck(
-        mops.torch.outer_product_scatter_add,
-        (A, B, indices, output_size),
-        fast_mode=True,
-    )
+        assert torch.autograd.gradcheck(
+            mops.torch.outer_product_scatter_add,
+            (A, B, indices, output_size),
+            fast_mode=True,
+        )
