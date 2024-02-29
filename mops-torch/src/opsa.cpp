@@ -57,10 +57,10 @@ torch::Tensor OuterProductScatterAdd::forward(
         AT_DISPATCH_FLOATING_TYPES(
             A.scalar_type(), "outer_product_scatter_add", [&]() {
                 mops::cuda::outer_product_scatter_add<scalar_t>(
-                    torch_to_mops_3d<scalar_t>(output),
-                    torch_to_mops_2d<scalar_t>(A),
-                    torch_to_mops_2d<scalar_t>(B),
-                    torch_to_mops_1d<int32_t>(indices_output));
+                    details::torch_to_mops_3d<scalar_t>(output),
+                    details::torch_to_mops_2d<scalar_t>(A),
+                    details::torch_to_mops_2d<scalar_t>(B),
+                    details::torch_to_mops_1d<int32_t>(indices_output));
             });
 
 #endif
@@ -115,26 +115,27 @@ std::vector<torch::Tensor> OuterProductScatterAdd::backward(
         C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " +
                                         A.device().str());
 #else
+        AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "outer_product_scatter_add_vjp", [&]() {
                 auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
 
                 if (A.requires_grad()) {
                     grad_A = torch::empty_like(A);
-                    mops_grad_A = torch_to_mops_2d<scalar_t>(grad_A);
+                    mops_grad_A = details::torch_to_mops_2d<scalar_t>(grad_A);
                 }
 
                 auto mops_grad_B = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (B.requires_grad()) {
                     grad_B = torch::empty_like(B);
-                    mops_grad_B = torch_to_mops_2d<scalar_t>(grad_B);
+                    mops_grad_B = details::torch_to_mops_2d<scalar_t>(grad_B);
                 }
 
                 mops::cuda::outer_product_scatter_add_vjp<scalar_t>(
                     mops_grad_A, mops_grad_B,
-                    torch_to_mops_3d<scalar_t>(grad_output),
-                    torch_to_mops_2d<scalar_t>(A),
-                    torch_to_mops_2d<scalar_t>(B),
-                    torch_to_mops_1d<int32_t>(indices_output));
-   
+                    details::torch_to_mops_3d<scalar_t>(grad_output),
+                    details::torch_to_mops_2d<scalar_t>(A),
+                    details::torch_to_mops_2d<scalar_t>(B),
+                    details::torch_to_mops_1d<int32_t>(indices_output));
+        });
 #endif
     }
 
