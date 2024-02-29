@@ -63,7 +63,7 @@ torch::Tensor SparseAccumulationScatterAddWithWeights::forward(
 
     torch::Tensor output;
     if (A.device().is_cpu()) {
-        output = torch::zeros(
+        output = torch::empty(
             {W.size(0), output_size, W.size(2)},
             torch::TensorOptions().dtype(A.scalar_type()).device(A.device())
         );
@@ -119,10 +119,7 @@ std::vector<torch::Tensor> SparseAccumulationScatterAddWithWeights::backward(
     auto indices_output_1 = saved_variables[7];
     auto indices_output_2 = saved_variables[8];
 
-    auto grad_output = grad_outputs[0];
-    if (!grad_output.is_contiguous()) {
-        throw std::runtime_error("expected contiguous grad_output");
-    }
+    auto grad_output = grad_outputs[0].contiguous();
 
     if (C.requires_grad()) {
         C10_THROW_ERROR(
@@ -143,19 +140,19 @@ std::vector<torch::Tensor> SparseAccumulationScatterAddWithWeights::backward(
             [&]() {
                 auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (A.requires_grad()) {
-                    grad_A = torch::zeros_like(A);
+                    grad_A = torch::empty_like(A);
                     mops_grad_A = details::torch_to_mops_2d<scalar_t>(grad_A);
                 }
 
                 auto mops_grad_B = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
                 if (B.requires_grad()) {
-                    grad_B = torch::zeros_like(B);
+                    grad_B = torch::empty_like(B);
                     mops_grad_B = details::torch_to_mops_2d<scalar_t>(grad_B);
                 }
 
                 auto mops_grad_W = mops::Tensor<scalar_t, 3>{nullptr, {0, 0, 0}};
                 if (W.requires_grad()) {
-                    grad_W = torch::zeros_like(W);
+                    grad_W = torch::empty_like(W);
                     mops_grad_W = details::torch_to_mops_3d<scalar_t>(grad_W);
                 }
 
@@ -190,6 +187,7 @@ std::vector<torch::Tensor> SparseAccumulationScatterAddWithWeights::backward(
         grad_B,
         torch::Tensor(),
         grad_W,
+        torch::Tensor(),
         torch::Tensor(),
         torch::Tensor(),
         torch::Tensor(),

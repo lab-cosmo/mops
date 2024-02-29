@@ -32,7 +32,7 @@ def outer_product_scatter_add(A, B, indices_output, output_size):
         numpy_to_mops_tensor(indices_output),
     )
 
-    return output.reshape(-1, A.shape[1], B.shape[1])
+    return output.reshape((output_size, A.shape[1], B.shape[1]))
 
 
 def outer_product_scatter_add_vjp(
