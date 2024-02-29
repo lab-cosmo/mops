@@ -223,9 +223,6 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE) outer_product_sca
     const int32_t node_index = indices_output[edge_start];
     const int32_t nedges = edge_end - edge_start;
 
-    /* total number of columns of B we can process is TB * WARP_SIZE, so
-     * we need to loop find_integer_divisor(nfeatures_B, TB*WARP_SIZE) times
-     */
 
     /*
      * initialise buffer_grad_in for this sub block
