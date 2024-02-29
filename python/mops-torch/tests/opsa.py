@@ -1,7 +1,6 @@
 import mops.torch
 import torch
-import pytest
-from time import time
+
 from mops import reference_implementations as ref
 
 torch.manual_seed(0xDEADBEEF)
@@ -39,8 +38,9 @@ def test_opsa_grad():
         fast_mode=True,
     )
 
+
 def test_opsa_cuda():
-    if (torch.cuda.is_available()): 
+    if torch.cuda.is_available():
         A = torch.rand(100, 20)
         B = torch.rand(100, 5)
 
@@ -59,16 +59,16 @@ def test_opsa_cuda():
         )
 
         actual = mops.torch.outer_product_scatter_add(
-            A.cuda(), B.cuda(), indices.cuda(), output_size)
+            A.cuda(), B.cuda(), indices.cuda(), output_size
+        )
 
         assert torch.allclose(reference, actual.cpu())
 
+
 def test_opsa_grad_cuda():
-    if (torch.cuda.is_available()): 
-        A = torch.rand(100, 32, dtype=torch.float64,
-                    requires_grad=True, device='cuda')
-        B = torch.rand(100, 8, dtype=torch.float64,
-                    requires_grad=True, device='cuda')
+    if torch.cuda.is_available():
+        A = torch.rand(100, 32, dtype=torch.float64, requires_grad=True, device="cuda")
+        B = torch.rand(100, 8, dtype=torch.float64, requires_grad=True, device="cuda")
 
         output_size = 10
         indices = torch.sort(
