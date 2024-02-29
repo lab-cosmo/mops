@@ -223,7 +223,6 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE) outer_product_sca
     const int32_t node_index = indices_output[edge_start];
     const int32_t nedges = edge_end - edge_start;
 
-
     /*
      * initialise buffer_grad_in for this sub block
      */
