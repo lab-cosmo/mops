@@ -1,5 +1,3 @@
-import argparse
-
 import mops.torch
 import torch
 from benchmark import benchmark, format_mean_std, initialize
