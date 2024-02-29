@@ -70,8 +70,6 @@ if (${MOPS_MAIN_PROJECT})
 endif()
 
 
-
-
 add_library(mops
     "src/capi.cpp"
     "src/opsa/opsa.cpp"
