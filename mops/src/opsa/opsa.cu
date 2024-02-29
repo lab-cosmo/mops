@@ -1,4 +1,5 @@
 
+#include "mops/checks.hpp"
 #include "mops/cuda_first_occurences.hpp"
 #include "mops/cuda_utils.cuh"
 #include "mops/opsa.hpp"
@@ -130,6 +131,11 @@ void mops::cuda::outer_product_scatter_add(
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> indices_output
 ) {
+
+    check_sizes(A, "A", 0, B, "B", 0, "opsa");
+    check_sizes(A, "A", 1, output, "output", 1, "opsa");
+    check_sizes(B, "B", 1, output, "output", 2, "opsa");
+    check_sizes(A, "A", 0, indices_output, "indices_output", 0, "opsa");
 
     int32_t nedges = A.shape[0];
     int32_t nnodes = output.shape[0];
@@ -320,6 +326,11 @@ void mops::cuda::outer_product_scatter_add_vjp(
     Tensor<int32_t, 1> indices_output
 ) {
 
+    check_sizes(A, "A", 0, B, "B", 0, "cuda_opsa_vjp");
+    check_sizes(A, "A", 1, grad_output, "grad_output", 1, "cuda_opsa_vjp");
+    check_sizes(B, "B", 1, grad_output, "grad_output", 2, "cuda_opsa_vjp");
+    check_sizes(A, "A", 0, indices_output, "indices_output", 0, "cuda_opsa_vjp");
+
     int32_t nedges = A.shape[0];
     int32_t nnodes = grad_output.shape[0];
     int32_t nfeatures_A = grad_output.shape[1];
@@ -339,9 +350,11 @@ void mops::cuda::outer_product_scatter_add_vjp(
     shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_B, sptr, &space);
 
     if (grad_A.data != nullptr) {
+        check_same_shape(grad_A, "grad_A", A, "A", "cuda_opsa_vjp");
         shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_A, sptr, &space);
     }
     if (grad_B.data != nullptr) {
+        check_same_shape(grad_B, "grad_B", B, "B", "cuda_opsa_vjp");
         shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_B, sptr, &space);
     }
 
