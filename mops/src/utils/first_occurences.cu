@@ -10,7 +10,6 @@
 #define NEIGHBOUR_NEDGES_PER_BLOCK 512
 
 using namespace std;
-using namespace mops::cuda;
 
 __global__ void calculate_first_occurences_kernel(
     const int32_t *__restrict__ receiver_list, const int32_t nedges,
@@ -81,9 +80,8 @@ the same reciever index.
 if first_occurences is nullptr on entry, it will allocate the memory required
 and return the alloc'd pointer. */
 
-int32_t *
-mops::cuda::calculate_first_occurences_cuda(const int32_t *receiver_list,
-                                            int32_t nedges, int32_t nnodes) {
+int32_t *calculate_first_occurences_cuda(const int32_t *receiver_list,
+                                         int32_t nedges, int32_t nnodes) {
 
     static void *cached_first_occurences = nullptr;
     static size_t cached_size = 0;

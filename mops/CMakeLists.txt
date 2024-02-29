@@ -93,7 +93,6 @@ if(CMAKE_CUDA_COMPILER)
 
         "src/utils/first_occurences.cu"
         "include/mops/cuda_first_occurences.hpp"
-        "src/utils/capi.cpp"
     )
 endif()
 
