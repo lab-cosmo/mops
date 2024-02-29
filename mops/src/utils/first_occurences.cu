@@ -12,9 +12,12 @@
 using namespace std;
 
 __global__ void calculate_first_occurences_kernel(
-    const int32_t *__restrict__ receiver_list, const int32_t nedges,
-    const int32_t *__restrict__ sort_idx, bool use_sort,
-    int32_t *__restrict__ first_occurences) {
+    const int32_t *__restrict__ receiver_list,
+    const int32_t nedges,
+    const int32_t *__restrict__ sort_idx,
+    bool use_sort,
+    int32_t *__restrict__ first_occurences
+) {
     extern __shared__ char buffer[];
     size_t offset = 0;
     int32_t *smem = reinterpret_cast<int32_t *>(buffer + offset);
@@ -22,8 +25,7 @@ __global__ void calculate_first_occurences_kernel(
     int32_t block_start = blockIdx.x * NEIGHBOUR_NEDGES_PER_BLOCK;
 
     // load all elements of senderlist needed by block into shared memory
-    for (int32_t i = threadIdx.x; i < NEIGHBOUR_NEDGES_PER_BLOCK + 1;
-         i += blockDim.x) {
+    for (int32_t i = threadIdx.x; i < NEIGHBOUR_NEDGES_PER_BLOCK + 1; i += blockDim.x) {
         int32_t idx = block_start + i;
 
         if (idx < nedges) {
@@ -38,8 +40,7 @@ __global__ void calculate_first_occurences_kernel(
     __syncthreads();
 
     // deal with even boundaries
-    for (int32_t i = 2 * threadIdx.x; i < NEIGHBOUR_NEDGES_PER_BLOCK;
-         i += 2 * blockDim.x) {
+    for (int32_t i = 2 * threadIdx.x; i < NEIGHBOUR_NEDGES_PER_BLOCK; i += 2 * blockDim.x) {
         int32_t idx = block_start + i;
 
         if (idx + 1 < nedges) {
@@ -53,8 +54,7 @@ __global__ void calculate_first_occurences_kernel(
     }
 
     // deal with odd boundaries
-    for (int32_t i = 2 * threadIdx.x + 1; i < NEIGHBOUR_NEDGES_PER_BLOCK + 1;
-         i += 2 * blockDim.x) {
+    for (int32_t i = 2 * threadIdx.x + 1; i < NEIGHBOUR_NEDGES_PER_BLOCK + 1; i += 2 * blockDim.x) {
         int32_t idx = block_start + i;
 
         if (idx + 1 < nedges) {
@@ -80,8 +80,7 @@ the same reciever index.
 if first_occurences is nullptr on entry, it will allocate the memory required
 and return the alloc'd pointer. */
 
-int32_t *calculate_first_occurences_cuda(const int32_t *receiver_list,
-                                         int32_t nedges, int32_t nnodes) {
+int32_t *calculate_first_occurences_cuda(const int32_t *receiver_list, int32_t nedges, int32_t nnodes) {
 
     static void *cached_first_occurences = nullptr;
     static size_t cached_size = 0;
@@ -103,7 +102,8 @@ int32_t *calculate_first_occurences_cuda(const int32_t *receiver_list,
     size_t total_buff_size = (NEIGHBOUR_NEDGES_PER_BLOCK + 1) * sizeof(int32_t);
 
     calculate_first_occurences_kernel<<<block_dim, grid_dim, total_buff_size>>>(
-        receiver_list, nedges, nullptr, false, result);
+        receiver_list, nedges, nullptr, false, result
+    );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
 

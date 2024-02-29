@@ -49,6 +49,7 @@ void mops::cuda::outer_product_scatter_add_vjp(
     Tensor<scalar_t, 2> grad_B,
     Tensor<scalar_t, 3> grad_output,
     Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> indices_output
 ) {
     throw std::runtime_error("MOPS was not compiled with CUDA support");
@@ -72,4 +73,5 @@ template void mops::cuda::outer_product_scatter_add_vjp<double>(
     Tensor<double, 2> B,
     Tensor<int32_t, 1> indices_output
 );
+
 #endif
