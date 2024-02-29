@@ -10,22 +10,18 @@ using namespace mops::cuda;
 #define FULL_MASK 0xffffffff
 
 template <typename scalar_t, const int32_t TA, const int32_t TB>
-__global__
-__launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_kernel(
-    const scalar_t
-        *__restrict__ A, // [nedges, nfeatures_A] - edge angular features
-    const scalar_t
-        *__restrict__ B,        // [nedges, nfeatures_B] - radial/edge features
-    const int32_t nnodes,       // number of nodes we're summing into
-    const int32_t nedges_total, // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,  // number of features of A
-    const int32_t nfeatures_B,  // number of features of B
+__global__ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_kernel(
+    const scalar_t *__restrict__ A, // [nedges, nfeatures_A] - edge angular features
+    const scalar_t *__restrict__ B, // [nedges, nfeatures_B] - radial/edge features
+    const int32_t nnodes,           // number of nodes we're summing into
+    const int32_t nedges_total,     // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,      // number of features of A
+    const int32_t nfeatures_B,      // number of features of B
     const int32_t *first_occurences,
     const int32_t *__restrict__ indices_output, // sorted list of indices to sum
                                                 // into [nedges]
-    scalar_t
-        *__restrict__ output // shape: [nnodes, nfeatures_A, nfeatures_B] ->
-                             // this ordering because contiguity of threadCol
+    scalar_t *__restrict__ output               // shape: [nnodes, nfeatures_A, nfeatures_B] ->
+                                                // this ordering because contiguity of threadCol
 ) {
 
     extern __shared__ char buffer[];
@@ -42,9 +38,8 @@ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_ke
     scalar_t regOP[TA * TB] = {0.0};
 
     const int32_t edge_start = first_occurences[blockIdx.x];
-    const int32_t edge_end = (blockIdx.x == nnodes - 1)
-                                 ? nedges_total
-                                 : first_occurences[blockIdx.x + 1];
+    const int32_t edge_end =
+        (blockIdx.x == nnodes - 1) ? nedges_total : first_occurences[blockIdx.x + 1];
     const int32_t node_index = indices_output[edge_start];
     const int32_t nedges = edge_end - edge_start;
 
@@ -84,18 +79,18 @@ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_ke
                  *  load A from GMEM into local registers
                  */
                 for (int32_t i = 0; i < TA; i++) {
-                    if (global_A + i * nThreadRow + threadRow < nfeatures_A)
-                        regA[i] = A[edge * nfeatures_A + global_A +
-                                    i * nThreadRow + threadRow];
+                    if (global_A + i * nThreadRow + threadRow < nfeatures_A) {
+                        regA[i] = A[edge * nfeatures_A + global_A + i * nThreadRow + threadRow];
+                    }
                 }
 
                 /*
                  *  load B from GMEM into local registers
                  */
                 for (int32_t i = 0; i < TB; i++) {
-                    if (global_B + i * WARP_SIZE + threadCol < nfeatures_B)
-                        regB[i] = B[edge * nfeatures_B + global_B +
-                                    i * WARP_SIZE + threadCol];
+                    if (global_B + i * WARP_SIZE + threadCol < nfeatures_B) {
+                        regB[i] = B[edge * nfeatures_B + global_B + i * WARP_SIZE + threadCol];
+                    }
                 }
 
                 /*
@@ -115,13 +110,11 @@ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_ke
             for (int32_t j = 0; j < TB; j++) {
                 if (global_B + j * WARP_SIZE + threadCol < nfeatures_B) {
                     for (int32_t i = 0; i < TA; i++) {
-                        if (global_A + i * nThreadRow + threadRow <
-                            nfeatures_A) {
-                            output[node_index * nfeatures_B * nfeatures_A +
-                                   (global_A + i * nThreadRow + threadRow) *
-                                       nfeatures_B +
-                                   global_B + j * WARP_SIZE + threadCol] =
-                                regOP[i * TB + j];
+                        if (global_A + i * nThreadRow + threadRow < nfeatures_A) {
+                            output
+                                [node_index * nfeatures_B * nfeatures_A +
+                                 (global_A + i * nThreadRow + threadRow) * nfeatures_B + global_B +
+                                 j * WARP_SIZE + threadCol] = regOP[i * TB + j];
                         }
                     }
                 }
@@ -131,26 +124,35 @@ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_ke
 }
 
 template <typename scalar_t>
-void mops::cuda::outer_product_scatter_add(Tensor<scalar_t, 2> output,
-                                           Tensor<scalar_t, 2> A,
-                                           Tensor<scalar_t, 2> B,
-                                           Tensor<int32_t, 1> indices_output) {
+void mops::cuda::outer_product_scatter_add(
+    Tensor<scalar_t, 3> output,
+    Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B,
+    Tensor<int32_t, 1> indices_output
+) {
 
     int32_t nedges = A.shape[0];
     int32_t nnodes = output.shape[0];
-    int32_t nfeatures_A = A.shape[1];
-    int32_t nfeatures_B = B.shape[1];
+    int32_t nfeatures_A = output.shape[1];
+    int32_t nfeatures_B = output.shape[2];
 
-    int32_t *first_occurences =
-        calculate_first_occurences_cuda(indices_output.data, nedges, nnodes);
+    int32_t *first_occurences = calculate_first_occurences_cuda(indices_output.data, nedges, nnodes);
 
     dim3 gridDim(nnodes, 1, 1);
 
     dim3 blockDim(NWARPS_PER_BLOCK * WARP_SIZE, 1, 1);
 
     outer_product_scatter_add_kernel<scalar_t, 2, 2><<<gridDim, blockDim, 0>>>(
-        A.data, B.data, nnodes, nedges, nfeatures_A, nfeatures_B,
-        first_occurences, indices_output.data, output.data);
+        A.data,
+        B.data,
+        nnodes,
+        nedges,
+        nfeatures_A,
+        nfeatures_B,
+        first_occurences,
+        indices_output.data,
+        output.data
+    );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
 
@@ -159,33 +161,30 @@ void mops::cuda::outer_product_scatter_add(Tensor<scalar_t, 2> output,
 
 // explicit instanciations of CUDA templates
 template void mops::cuda::outer_product_scatter_add<float>(
-    Tensor<float, 2> output, Tensor<float, 2> A, Tensor<float, 2> B,
-    Tensor<int32_t, 1> indices_output);
+    Tensor<float, 3> output, Tensor<float, 2> A, Tensor<float, 2> B, Tensor<int32_t, 1> indices_output
+);
 
 template void mops::cuda::outer_product_scatter_add<double>(
-    Tensor<double, 2> output, Tensor<double, 2> A, Tensor<double, 2> B,
-    Tensor<int32_t, 1> indices_output);
+    Tensor<double, 3> output, Tensor<double, 2> A, Tensor<double, 2> B, Tensor<int32_t, 1> indices_output
+);
 
 template <typename scalar_t>
-__global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
-    outer_product_scatter_add_vjp_kernel(
-        const scalar_t
-            *__restrict__ A, // [nedges, nfeatures_A] -> angular features
-        const scalar_t *__restrict__ B, // [nedges, nfeatures_B] -> radial +
-                                        // element features
-        const int32_t nnodes,           // number of nodes we're summing into
-        const int32_t nedges_total, // number of edges -> batch size of A and B
-        const int32_t nfeatures_A,  // number of features of A
-        const int32_t nfeatures_B,  // number of features of B
-        const int32_t
-            *__restrict__ first_occurences, // indices in indices_output where
-                                            // the values change [nnodes]
-        const int32_t *__restrict__ indices_output, // sorted list of indices to
-                                                    // sum into [nedges]
-        scalar_t *__restrict__ grad_in, // [nnodes, nfeatures_A, nfeatures_B]
-        scalar_t *__restrict__ grad_A,  // [nedges, nfeatures_A]
-        scalar_t *__restrict__ grad_B   // [nedges, nfeatures_B]
-    ) {
+__global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE) outer_product_scatter_add_vjp_kernel(
+    const scalar_t *__restrict__ A,               // [nedges, nfeatures_A] -> angular features
+    const scalar_t *__restrict__ B,               // [nedges, nfeatures_B] -> radial +
+                                                  // element features
+    const int32_t nnodes,                         // number of nodes we're summing into
+    const int32_t nedges_total,                   // number of edges -> batch size of A and B
+    const int32_t nfeatures_A,                    // number of features of A
+    const int32_t nfeatures_B,                    // number of features of B
+    const int32_t *__restrict__ first_occurences, // indices in indices_output where
+                                                  // the values change [nnodes]
+    const int32_t *__restrict__ indices_output,   // sorted list of indices to
+                                                  // sum into [nedges]
+    scalar_t *__restrict__ grad_in,               // [nnodes, nfeatures_A, nfeatures_B]
+    scalar_t *__restrict__ grad_A,                // [nedges, nfeatures_A]
+    scalar_t *__restrict__ grad_B                 // [nedges, nfeatures_B]
+) {
 
     extern __shared__ char buffer[];
 
@@ -196,23 +195,17 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
     void *sptr = buffer;
     size_t space = 0;
 
-    scalar_t *buffer_grad_in =
-        shared_array<scalar_t>(nfeatures_A * nfeatures_B, sptr, &space);
+    scalar_t *buffer_grad_in = shared_array<scalar_t>(nfeatures_A * nfeatures_B, sptr, &space);
 
-    scalar_t *buffer_A =
-        shared_array<scalar_t>(nThreadRow * nfeatures_A, sptr, &space);
-    scalar_t *buffer_B =
-        shared_array<scalar_t>(nThreadRow * nfeatures_B, sptr, &space);
+    scalar_t *buffer_A = shared_array<scalar_t>(nThreadRow * nfeatures_A, sptr, &space);
+    scalar_t *buffer_B = shared_array<scalar_t>(nThreadRow * nfeatures_B, sptr, &space);
 
-    scalar_t *buffer_grad_A =
-        shared_array<scalar_t>(nThreadRow * nfeatures_A, sptr, &space);
-    scalar_t *buffer_grad_B =
-        shared_array<scalar_t>(nThreadRow * nfeatures_B, sptr, &space);
+    scalar_t *buffer_grad_A = shared_array<scalar_t>(nThreadRow * nfeatures_A, sptr, &space);
+    scalar_t *buffer_grad_B = shared_array<scalar_t>(nThreadRow * nfeatures_B, sptr, &space);
 
     const int32_t edge_start = first_occurences[blockIdx.x];
-    const int32_t edge_end = (blockIdx.x == nnodes - 1)
-                                 ? nedges_total
-                                 : first_occurences[blockIdx.x + 1];
+    const int32_t edge_end =
+        (blockIdx.x == nnodes - 1) ? nedges_total : first_occurences[blockIdx.x + 1];
     const int32_t node_index = indices_output[edge_start];
     const int32_t nedges = edge_end - edge_start;
 
@@ -224,16 +217,13 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
      * initialise buffer_grad_in for this sub block
      */
 
-    for (int tid = threadIdx.x; tid < nfeatures_A * nfeatures_B;
-         tid += blockDim.x) {
-        buffer_grad_in[tid] =
-            grad_in[node_index * nfeatures_A * nfeatures_B + tid];
+    for (int tid = threadIdx.x; tid < nfeatures_A * nfeatures_B; tid += blockDim.x) {
+        buffer_grad_in[tid] = grad_in[node_index * nfeatures_A * nfeatures_B + tid];
     }
 
     __syncthreads();
 
-    for (int32_t edge_idx = threadRow; edge_idx < nedges;
-         edge_idx += nThreadRow) {
+    for (int32_t edge_idx = threadRow; edge_idx < nedges; edge_idx += nThreadRow) {
 
         __syncwarp();
 
@@ -245,14 +235,12 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
 
         for (int tid = threadCol; tid < nfeatures_A; tid += WARP_SIZE) {
             buffer_grad_A[threadRow * nfeatures_A + tid] = 0.0;
-            buffer_A[threadRow * nfeatures_A + tid] =
-                A[edge * nfeatures_A + tid];
+            buffer_A[threadRow * nfeatures_A + tid] = A[edge * nfeatures_A + tid];
         }
 
         for (int tid = threadCol; tid < nfeatures_B; tid += WARP_SIZE) {
             buffer_grad_B[threadRow * nfeatures_B + tid] = 0.0;
-            buffer_B[threadRow * nfeatures_B + tid] =
-                B[edge * nfeatures_B + tid];
+            buffer_B[threadRow * nfeatures_B + tid] = B[edge * nfeatures_B + tid];
         }
 
         __syncwarp();
@@ -281,39 +269,41 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE)
             }
 
             // thread 0 contains the gradient for this subset of features_A.
-            if (threadCol == 0)
+            if (threadCol == 0) {
                 buffer_grad_A[i * nThreadRow + threadRow] = dsumA;
+            }
         }
 
         __syncwarp();
 
         // write gradB
         for (int j = threadCol; j < nfeatures_B; j += WARP_SIZE) {
-            grad_B[edge * nfeatures_B + j] =
-                buffer_grad_B[threadRow * nfeatures_B + j];
+            grad_B[edge * nfeatures_B + j] = buffer_grad_B[threadRow * nfeatures_B + j];
         }
 
         // write gradA
         for (int i = threadCol; i < nfeatures_A; i += WARP_SIZE) {
-            grad_A[edge * nfeatures_A + i] =
-                buffer_grad_A[i * nThreadRow + threadRow];
+            grad_A[edge * nfeatures_A + i] = buffer_grad_A[i * nThreadRow + threadRow];
         }
     }
 }
 
 template <typename scalar_t>
 void mops::cuda::outer_product_scatter_add_vjp(
-    Tensor<scalar_t, 2> grad_A, Tensor<scalar_t, 2> grad_B,
-    Tensor<scalar_t, 2> grad_output, Tensor<scalar_t, 2> A,
-    Tensor<scalar_t, 2> B, Tensor<int32_t, 1> indices_output) {
+    Tensor<scalar_t, 2> grad_A,
+    Tensor<scalar_t, 2> grad_B,
+    Tensor<scalar_t, 3> grad_output,
+    Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B,
+    Tensor<int32_t, 1> indices_output
+) {
 
     int32_t nedges = A.shape[0];
     int32_t nnodes = grad_output.shape[0];
-    int32_t nfeatures_A = A.shape[1];
-    int32_t nfeatures_B = B.shape[1];
+    int32_t nfeatures_A = grad_output.shape[1];
+    int32_t nfeatures_B = grad_output.shape[2];
 
-    int32_t *first_occurences =
-        calculate_first_occurences_cuda(indices_output.data, nedges, nnodes);
+    int32_t *first_occurences = calculate_first_occurences_cuda(indices_output.data, nedges, nnodes);
 
     dim3 gridDim(nnodes, 1, 1);
 
@@ -328,11 +318,19 @@ void mops::cuda::outer_product_scatter_add_vjp(
     shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_A, sptr, &space);
     shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_B, sptr, &space);
 
-    outer_product_scatter_add_vjp_kernel<scalar_t>
-        <<<gridDim, blockDim, space>>>(
-            A.data, B.data, nnodes, nedges, nfeatures_A, nfeatures_B,
-            first_occurences, indices_output.data, grad_output.data,
-            grad_A.data, grad_B.data);
+    outer_product_scatter_add_vjp_kernel<scalar_t><<<gridDim, blockDim, space>>>(
+        A.data,
+        B.data,
+        nnodes,
+        nedges,
+        nfeatures_A,
+        nfeatures_B,
+        first_occurences,
+        indices_output.data,
+        grad_output.data,
+        grad_A.data,
+        grad_B.data
+    );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
 
@@ -341,11 +339,19 @@ void mops::cuda::outer_product_scatter_add_vjp(
 
 // these templates will be precompiled and provided in the mops library
 template void mops::cuda::outer_product_scatter_add_vjp<float>(
-    Tensor<float, 2> grad_A, Tensor<float, 2> grad_B,
-    Tensor<float, 2> grad_output, Tensor<float, 2> A, Tensor<float, 2> B,
-    Tensor<int32_t, 1> indices_output);
+    Tensor<float, 2> grad_A,
+    Tensor<float, 2> grad_B,
+    Tensor<float, 3> grad_output,
+    Tensor<float, 2> A,
+    Tensor<float, 2> B,
+    Tensor<int32_t, 1> indices_output
+);
 
 template void mops::cuda::outer_product_scatter_add_vjp<double>(
-    Tensor<double, 2> grad_A, Tensor<double, 2> grad_B,
-    Tensor<double, 2> grad_output, Tensor<double, 2> A, Tensor<double, 2> B,
-    Tensor<int32_t, 1> indices_output);
+    Tensor<double, 2> grad_A,
+    Tensor<double, 2> grad_B,
+    Tensor<double, 3> grad_output,
+    Tensor<double, 2> A,
+    Tensor<double, 2> B,
+    Tensor<int32_t, 1> indices_output
+);
