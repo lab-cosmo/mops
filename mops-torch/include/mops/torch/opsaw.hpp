@@ -8,23 +8,25 @@
 namespace mops_torch {
 
 /// TODO
-torch::Tensor
-outer_product_scatter_add_with_weights(torch::Tensor A, torch::Tensor B,
-                                       torch::Tensor W, torch::Tensor indices_W,
-                                       torch::Tensor indices_output);
+torch::Tensor outer_product_scatter_add_with_weights(
+    torch::Tensor A, torch::Tensor B, torch::Tensor W, torch::Tensor indices_W, torch::Tensor indices_output
+);
 
 class OuterProductScatterAddWithWeights
-    : public torch::autograd::Function<
-          mops_torch::OuterProductScatterAddWithWeights> {
+    : public torch::autograd::Function<mops_torch::OuterProductScatterAddWithWeights> {
   public:
-    static torch::Tensor forward(torch::autograd::AutogradContext *ctx,
-                                 torch::Tensor A, torch::Tensor B,
-                                 torch::Tensor W, torch::Tensor indices_W,
-                                 torch::Tensor indices_output);
+    static torch::Tensor forward(
+        torch::autograd::AutogradContext *ctx,
+        torch::Tensor A,
+        torch::Tensor B,
+        torch::Tensor W,
+        torch::Tensor indices_W,
+        torch::Tensor indices_output
+    );
 
-    static std::vector<torch::Tensor>
-    backward(torch::autograd::AutogradContext *ctx,
-             std::vector<torch::Tensor> grad_outputs);
+    static std::vector<torch::Tensor> backward(
+        torch::autograd::AutogradContext *ctx, std::vector<torch::Tensor> grad_outputs
+    );
 };
 
 } // namespace mops_torch
