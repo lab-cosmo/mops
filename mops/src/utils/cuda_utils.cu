@@ -25,7 +25,7 @@ __host__ __device__ T *shared_array(std::size_t n_elements, void *&ptr,
     return reinterpret_cast<T *>(inptr);
 }
 
-// forward declare for differnt types...
+// forward declare for different types...
 template float *shared_array<float>(std::size_t n_elements, void *&ptr,
                                     std::size_t *space) noexcept;
 template double *shared_array<double>(std::size_t n_elements, void *&ptr,
@@ -51,3 +51,17 @@ __host__ __device__ T *align_array(std::size_t n_elements, void *&ptr,
     ptr = reinterpret_cast<void *>(end);
     return reinterpret_cast<T *>(aligned);
 }
+
+// forward declare for different types...
+template float *align_array<float>(std::size_t n_elements, void *&ptr,
+                                   const std::size_t alignment,
+                                   std::size_t *space) noexcept;
+template double *align_array<double>(std::size_t n_elements, void *&ptr,
+                                     const std::size_t alignment,
+                                     std::size_t *space) noexcept;
+template int *align_array<int>(std::size_t n_elements, void *&ptr,
+                               const std::size_t alignment,
+                               std::size_t *space) noexcept;
+template short *align_array<short>(std::size_t n_elements, void *&ptr,
+                                   const std::size_t alignment,
+                                   std::size_t *space) noexcept;
