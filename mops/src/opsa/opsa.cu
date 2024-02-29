@@ -200,8 +200,16 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE) outer_product_sca
     scalar_t *buffer_A = shared_array<scalar_t>(nThreadRow * nfeatures_A, sptr, &space);
     scalar_t *buffer_B = shared_array<scalar_t>(nThreadRow * nfeatures_B, sptr, &space);
 
-    scalar_t *buffer_grad_A = shared_array<scalar_t>(nThreadRow * nfeatures_A, sptr, &space);
-    scalar_t *buffer_grad_B = shared_array<scalar_t>(nThreadRow * nfeatures_B, sptr, &space);
+    scalar_t *buffer_grad_A;
+    scalar_t *buffer_grad_B;
+
+    if (grad_A != nullptr) {
+        buffer_grad_A = shared_array<scalar_t>(nThreadRow * nfeatures_A, sptr, &space);
+    }
+
+    if (grad_B != nullptr) {
+        buffer_grad_B = shared_array<scalar_t>(nThreadRow * nfeatures_B, sptr, &space);
+    }
 
     const int32_t edge_start = first_occurences[blockIdx.x];
     const int32_t edge_end =
@@ -234,12 +242,16 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE) outer_product_sca
          */
 
         for (int tid = threadCol; tid < nfeatures_A; tid += WARP_SIZE) {
-            buffer_grad_A[threadRow * nfeatures_A + tid] = 0.0;
+            if (grad_A != nullptr) {
+                buffer_grad_A[threadRow * nfeatures_A + tid] = 0.0;
+            }
             buffer_A[threadRow * nfeatures_A + tid] = A[edge * nfeatures_A + tid];
         }
 
         for (int tid = threadCol; tid < nfeatures_B; tid += WARP_SIZE) {
-            buffer_grad_B[threadRow * nfeatures_B + tid] = 0.0;
+            if (grad_B != nullptr) {
+                buffer_grad_B[threadRow * nfeatures_B + tid] = 0.0;
+            }
             buffer_B[threadRow * nfeatures_B + tid] = B[edge * nfeatures_B + tid];
         }
 
@@ -256,34 +268,44 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE) outer_product_sca
 
                 scalar_t grad_in_ij = buffer_grad_in[i * nfeatures_B + j];
 
-                buffer_grad_B[threadRow * nfeatures_B + j] +=
-                    grad_in_ij * buffer_A[threadRow * nfeatures_A + i];
+                if (grad_B != nullptr) {
+                    buffer_grad_B[threadRow * nfeatures_B + j] +=
+                        grad_in_ij * buffer_A[threadRow * nfeatures_A + i];
+                }
 
-                dsumA += grad_in_ij * buffer_B[threadRow * nfeatures_B + j];
+                if (grad_A != nullptr) {
+                    dsumA += grad_in_ij * buffer_B[threadRow * nfeatures_B + j];
+                }
             }
 
             // need to warp shuffle reduce across the threads
             // accessing each B index.
-            for (int offset = WARP_SIZE / 2; offset > 0; offset /= 2) {
-                dsumA += __shfl_down_sync(FULL_MASK, dsumA, offset, WARP_SIZE);
-            }
+            if (grad_A != nullptr) {
+                for (int offset = WARP_SIZE / 2; offset > 0; offset /= 2) {
+                    dsumA += __shfl_down_sync(FULL_MASK, dsumA, offset, WARP_SIZE);
+                }
 
-            // thread 0 contains the gradient for this subset of features_A.
-            if (threadCol == 0) {
-                buffer_grad_A[i * nThreadRow + threadRow] = dsumA;
+                // thread 0 contains the gradient for this subset of features_A.
+                if (threadCol == 0) {
+                    buffer_grad_A[i * nThreadRow + threadRow] = dsumA;
+                }
             }
         }
 
         __syncwarp();
 
-        // write gradB
-        for (int j = threadCol; j < nfeatures_B; j += WARP_SIZE) {
-            grad_B[edge * nfeatures_B + j] = buffer_grad_B[threadRow * nfeatures_B + j];
+        if (grad_B != nullptr) {
+            // write gradB
+            for (int j = threadCol; j < nfeatures_B; j += WARP_SIZE) {
+                grad_B[edge * nfeatures_B + j] = buffer_grad_B[threadRow * nfeatures_B + j];
+            }
         }
 
-        // write gradA
-        for (int i = threadCol; i < nfeatures_A; i += WARP_SIZE) {
-            grad_A[edge * nfeatures_A + i] = buffer_grad_A[i * nThreadRow + threadRow];
+        if (grad_A != nullptr) {
+            // write gradA
+            for (int i = threadCol; i < nfeatures_A; i += WARP_SIZE) {
+                grad_A[edge * nfeatures_A + i] = buffer_grad_A[i * nThreadRow + threadRow];
+            }
         }
     }
 }
@@ -315,8 +337,13 @@ void mops::cuda::outer_product_scatter_add_vjp(
     shared_array<scalar_t>(nfeatures_A * nfeatures_B, sptr, &space);
     shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_A, sptr, &space);
     shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_B, sptr, &space);
-    shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_A, sptr, &space);
-    shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_B, sptr, &space);
+
+    if (grad_A.data != nullptr) {
+        shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_A, sptr, &space);
+    }
+    if (grad_B.data != nullptr) {
+        shared_array<scalar_t>(NWARPS_PER_BLOCK * nfeatures_B, sptr, &space);
+    }
 
     outer_product_scatter_add_vjp_kernel<scalar_t><<<gridDim, blockDim, space>>>(
         A.data,
