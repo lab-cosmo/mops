@@ -9,7 +9,6 @@ from mops import sparse_accumulation_scatter_add_with_weights as sasaw
 
 np.random.seed(0xDEADBEEF)
 
-
 try:
     import cupy as cp
 

@@ -9,7 +9,6 @@ from mops import outer_product_scatter_add_with_weights as opsaw
 
 np.random.seed(0xDEADBEEF)
 
-
 try:
     import cupy as cp
 
