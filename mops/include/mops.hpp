@@ -11,8 +11,4 @@
 #include "mops/sasaw.hpp" // IWYU pragma: export
 #include "mops/utils.hpp" // IWYU pragma: export
 
-#ifdef MOPS_CUDA_ENABLED
-#include "mops/cuda_first_occurences.hpp"
-#endif
-
 #endif
