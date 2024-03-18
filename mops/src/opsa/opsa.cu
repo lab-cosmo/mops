@@ -33,11 +33,11 @@ __global__ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_sca
     scalar_t regB[TB] = {0.0};
     scalar_t regOP[TA * TB] = {0.0};
 
-    const int32_t edge_start = first_occurences.data[blockIdx.x];
-    const int32_t edge_end =
+    const int32_t sample_start = first_occurences.data[blockIdx.x];
+    const int32_t sample_end =
         (blockIdx.x == output.shape[0] - 1) ? A.shape[0] : first_occurences.data[blockIdx.x + 1];
-    const int32_t node_index = indices_output.data[edge_start];
-    const int32_t nedges = edge_end - edge_start;
+    const int32_t node_index = indices_output.data[sample_start];
+    const int32_t nsamples = sample_end - sample_start;
 
     /* total number of columns of A we can process is TA * WARP_SIZE, so
      * we need to loop find_integer_divisor( A.shape[1], TA*WARP_SIZE) times
@@ -67,16 +67,17 @@ __global__ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_sca
                 regOP[i] = 0.0;
             }
 
-            for (int32_t edge_idx = 0; edge_idx < nedges; edge_idx++) {
+            for (int32_t sample_idx = 0; sample_idx < nsamples; sample_idx++) {
 
-                int32_t edge = edge_idx + edge_start;
+                int32_t sample = sample_idx + sample_start;
 
                 /*
                  *  load A from GMEM into local registers
                  */
                 for (int32_t i = 0; i < TA; i++) {
                     if (global_A + i * nThreadRow + threadRow < A.shape[1]) {
-                        regA[i] = A.data[edge * A.shape[1] + global_A + i * nThreadRow + threadRow];
+                        regA[i] =
+                            A.data[sample * A.shape[1] + global_A + i * nThreadRow + threadRow];
                     }
                 }
 
@@ -85,7 +86,7 @@ __global__ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_sca
                  */
                 for (int32_t i = 0; i < TB; i++) {
                     if (global_B + i * WARP_SIZE + threadCol < B.shape[1]) {
-                        regB[i] = B.data[edge * B.shape[1] + global_B + i * WARP_SIZE + threadCol];
+                        regB[i] = B.data[sample * B.shape[1] + global_B + i * WARP_SIZE + threadCol];
                     }
                 }
 
@@ -193,11 +194,15 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE) outer_product_sca
         buffer_grad_B = shared_array<scalar_t>(nThreadRow * B.shape[1], sptr, &space);
     }
 
-    const int32_t edge_start = first_occurences.data[blockIdx.x];
-    const int32_t edge_end =
+    const int32_t sample_start = first_occurences.data[blockIdx.x];
+    const int32_t sample_end =
         (blockIdx.x == grad_in.shape[0] - 1) ? A.shape[0] : first_occurences.data[blockIdx.x + 1];
-    const int32_t node_index = indices_output.data[edge_start];
-    const int32_t nedges = edge_end - edge_start;
+    const int32_t node_index = indices_output.data[sample_start];
+    const int32_t nsamples = sample_end - sample_start;
+
+    if (nsamples == 0) {
+        return;
+    }
 
     /*
      * initialise buffer_grad_in for this sub block
@@ -209,11 +214,11 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE) outer_product_sca
 
     __syncthreads();
 
-    for (int32_t edge_idx = threadRow; edge_idx < nedges; edge_idx += nThreadRow) {
+    for (int32_t sample_idx = threadRow; sample_idx < nsamples; sample_idx += nThreadRow) {
 
         __syncwarp();
 
-        int32_t edge = edge_idx + edge_start;
+        int32_t sample = sample_idx + sample_start;
 
         /*
          * zero temporary buffers and load A, B into shared memory
@@ -223,14 +228,14 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE) outer_product_sca
             if (grad_A.data != nullptr) {
                 buffer_grad_A[threadRow * A.shape[1] + tid] = 0.0;
             }
-            buffer_A[threadRow * A.shape[1] + tid] = A.data[edge * A.shape[1] + tid];
+            buffer_A[threadRow * A.shape[1] + tid] = A.data[sample * A.shape[1] + tid];
         }
 
         for (int tid = threadCol; tid < B.shape[1]; tid += WARP_SIZE) {
             if (grad_B.data != nullptr) {
                 buffer_grad_B[threadRow * B.shape[1] + tid] = 0.0;
             }
-            buffer_B[threadRow * B.shape[1] + tid] = B.data[edge * B.shape[1] + tid];
+            buffer_B[threadRow * B.shape[1] + tid] = B.data[sample * B.shape[1] + tid];
         }
 
         __syncwarp();
@@ -275,14 +280,14 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE) outer_product_sca
         if (grad_B.data != nullptr) {
             // write gradB
             for (int j = threadCol; j < B.shape[1]; j += WARP_SIZE) {
-                grad_B.data[edge * B.shape[1] + j] = buffer_grad_B[threadRow * B.shape[1] + j];
+                grad_B.data[sample * B.shape[1] + j] = buffer_grad_B[threadRow * B.shape[1] + j];
             }
         }
 
         if (grad_A.data != nullptr) {
             // write gradA
             for (int i = threadCol; i < A.shape[1]; i += WARP_SIZE) {
-                grad_A.data[edge * A.shape[1] + i] = buffer_grad_A[i * nThreadRow + threadRow];
+                grad_A.data[sample * A.shape[1] + i] = buffer_grad_A[i * nThreadRow + threadRow];
             }
         }
     }
