@@ -4,6 +4,7 @@
 #include "mops/cuda_utils.cuh"
 #include "mops/opsa.hpp"
 
+using namespace mops;
 using namespace mops::cuda;
 
 #define WARP_SIZE 32
@@ -12,17 +13,11 @@ using namespace mops::cuda;
 
 template <typename scalar_t, const int32_t TA, const int32_t TB>
 __global__ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_kernel(
-    const scalar_t *__restrict__ A, // [nedges, nfeatures_A] - edge angular features
-    const scalar_t *__restrict__ B, // [nedges, nfeatures_B] - radial/edge features
-    const int32_t nnodes,           // number of nodes we're summing into
-    const int32_t nedges_total,     // number of edges -> batch size of A and B
-    const int32_t nfeatures_A,      // number of features of A
-    const int32_t nfeatures_B,      // number of features of B
-    const int32_t *first_occurences,
-    const int32_t *__restrict__ indices_output, // sorted list of indices to sum
-                                                // into [nedges]
-    scalar_t *__restrict__ output               // shape: [nnodes, nfeatures_A, nfeatures_B] ->
-                                                // this ordering because contiguity of threadCol
+    Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B,
+    Tensor<int32_t, 1> first_occurences,
+    Tensor<int32_t, 1> indices_output,
+    Tensor<scalar_t, 3> output
 ) {
 
     extern __shared__ char buffer[];
@@ -38,22 +33,18 @@ __global__ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_sca
     scalar_t regB[TB] = {0.0};
     scalar_t regOP[TA * TB] = {0.0};
 
-    const int32_t edge_start = first_occurences[blockIdx.x];
+    const int32_t edge_start = first_occurences.data[blockIdx.x];
     const int32_t edge_end =
-        (blockIdx.x == nnodes - 1) ? nedges_total : first_occurences[blockIdx.x + 1];
-    const int32_t node_index = indices_output[edge_start];
+        (blockIdx.x == output.shape[0] - 1) ? A.shape[0] : first_occurences.data[blockIdx.x + 1];
+    const int32_t node_index = indices_output.data[edge_start];
     const int32_t nedges = edge_end - edge_start;
 
-    if (nedges == 0) {
-        return;
-    }
-
     /* total number of columns of A we can process is TA * WARP_SIZE, so
-     * we need to loop find_integer_divisor(nfeatures_A, TA*WARP_SIZE) times
+     * we need to loop find_integer_divisor( A.shape[1], TA*WARP_SIZE) times
      */
 
-    int32_t niter_A = find_integer_divisor(nfeatures_A, TA * nThreadRow);
-    int32_t niter_B = find_integer_divisor(nfeatures_B, TB * WARP_SIZE);
+    int32_t niter_A = find_integer_divisor(A.shape[1], TA * nThreadRow);
+    int32_t niter_B = find_integer_divisor(B.shape[1], TB * WARP_SIZE);
 
     for (int32_t iter_B = 0; iter_B < niter_B; iter_B++) {
         int32_t global_B = iter_B * TB * WARP_SIZE;
@@ -84,8 +75,8 @@ __global__ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_sca
                  *  load A from GMEM into local registers
                  */
                 for (int32_t i = 0; i < TA; i++) {
-                    if (global_A + i * nThreadRow + threadRow < nfeatures_A) {
-                        regA[i] = A[edge * nfeatures_A + global_A + i * nThreadRow + threadRow];
+                    if (global_A + i * nThreadRow + threadRow < A.shape[1]) {
+                        regA[i] = A.data[edge * A.shape[1] + global_A + i * nThreadRow + threadRow];
                     }
                 }
 
@@ -93,8 +84,8 @@ __global__ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_sca
                  *  load B from GMEM into local registers
                  */
                 for (int32_t i = 0; i < TB; i++) {
-                    if (global_B + i * WARP_SIZE + threadCol < nfeatures_B) {
-                        regB[i] = B[edge * nfeatures_B + global_B + i * WARP_SIZE + threadCol];
+                    if (global_B + i * WARP_SIZE + threadCol < B.shape[1]) {
+                        regB[i] = B.data[edge * B.shape[1] + global_B + i * WARP_SIZE + threadCol];
                     }
                 }
 
@@ -110,15 +101,15 @@ __global__ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_sca
 
             /*
              * writeout the content of regOP to the output for this block of
-             * [node, nfeatures_A, nfeatures_B]
+             * [node,  A.shape[1], B.shape[1]]
              */
             for (int32_t j = 0; j < TB; j++) {
-                if (global_B + j * WARP_SIZE + threadCol < nfeatures_B) {
+                if (global_B + j * WARP_SIZE + threadCol < B.shape[1]) {
                     for (int32_t i = 0; i < TA; i++) {
-                        if (global_A + i * nThreadRow + threadRow < nfeatures_A) {
-                            output
-                                [node_index * nfeatures_B * nfeatures_A +
-                                 (global_A + i * nThreadRow + threadRow) * nfeatures_B + global_B +
+                        if (global_A + i * nThreadRow + threadRow < A.shape[1]) {
+                            output.data
+                                [node_index * B.shape[1] * A.shape[1] +
+                                 (global_A + i * nThreadRow + threadRow) * B.shape[1] + global_B +
                                  j * WARP_SIZE + threadCol] = regOP[i * TB + j];
                         }
                     }
@@ -153,15 +144,7 @@ void mops::cuda::outer_product_scatter_add(
     dim3 blockDim(NWARPS_PER_BLOCK * WARP_SIZE, 1, 1);
 
     outer_product_scatter_add_kernel<scalar_t, 2, 2><<<gridDim, blockDim, 0>>>(
-        A.data,
-        B.data,
-        nnodes,
-        nedges,
-        nfeatures_A,
-        nfeatures_B,
-        first_occurences,
-        indices_output.data,
-        output.data
+        A, B, mops::Tensor<int32_t, 1>{first_occurences, {A.shape[0]}}, indices_output, output
     );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
@@ -226,10 +209,6 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE) outer_product_sca
         (blockIdx.x == nnodes - 1) ? nedges_total : first_occurences[blockIdx.x + 1];
     const int32_t node_index = indices_output[edge_start];
     const int32_t nedges = edge_end - edge_start;
-
-    if (nedges == 0) {
-        return;
-    }
 
     /*
      * initialise buffer_grad_in for this sub block
@@ -381,6 +360,7 @@ void mops::cuda::outer_product_scatter_add_vjp(
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
 }
 
+// these templates will be precompiled and provided in the mops library
 template void mops::cuda::outer_product_scatter_add_vjp<float>(
     Tensor<float, 2> grad_A,
     Tensor<float, 2> grad_B,
