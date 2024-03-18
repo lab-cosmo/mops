@@ -55,7 +55,6 @@ void mops::cuda::outer_product_scatter_add_vjp(
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
 
-// these templates will be precompiled and provided in the mops library
 template void mops::cuda::outer_product_scatter_add_vjp<float>(
     Tensor<float, 2> grad_A,
     Tensor<float, 2> grad_B,

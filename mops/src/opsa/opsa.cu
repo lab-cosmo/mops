@@ -44,6 +44,10 @@ __global__ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_sca
     const int32_t node_index = indices_output[edge_start];
     const int32_t nedges = edge_end - edge_start;
 
+    if (nedges == 0) {
+        return;
+    }
+
     /* total number of columns of A we can process is TA * WARP_SIZE, so
      * we need to loop find_integer_divisor(nfeatures_A, TA*WARP_SIZE) times
      */
@@ -223,6 +227,10 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE) outer_product_sca
     const int32_t node_index = indices_output[edge_start];
     const int32_t nedges = edge_end - edge_start;
 
+    if (nedges == 0) {
+        return;
+    }
+
     /*
      * initialise buffer_grad_in for this sub block
      */
@@ -373,7 +381,6 @@ void mops::cuda::outer_product_scatter_add_vjp(
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
 }
 
-// these templates will be precompiled and provided in the mops library
 template void mops::cuda::outer_product_scatter_add_vjp<float>(
     Tensor<float, 2> grad_A,
     Tensor<float, 2> grad_B,

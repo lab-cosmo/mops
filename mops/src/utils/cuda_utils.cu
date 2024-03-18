@@ -10,10 +10,6 @@ __host__ __device__ int32_t find_integer_divisor(int32_t x, int32_t bdim) {
     return (x + bdim - 1) / bdim;
 }
 
-/*
- * helper function to allocate correctly sized shared memory buffers.
- */
-
 template <typename T>
 __host__ __device__ T *shared_array(std::size_t n_elements, void *&ptr, std::size_t *space) noexcept {
     const std::uintptr_t inptr = reinterpret_cast<uintptr_t>(ptr);
@@ -31,10 +27,6 @@ template double *shared_array<double>(std::size_t n_elements, void *&ptr, std::s
 template int *shared_array<int>(std::size_t n_elements, void *&ptr, std::size_t *space) noexcept;
 template short *shared_array<short>(std::size_t n_elements, void *&ptr, std::size_t *space) noexcept;
 
-/*
- * helper function to allocate correctly sized shared memory buffers, which are
- * aligned to a certain byte boundary.
- */
 template <typename T>
 __host__ __device__ T *align_array(
     std::size_t n_elements, void *&ptr, const std::size_t alignment, std::size_t *space

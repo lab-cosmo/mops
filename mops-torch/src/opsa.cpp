@@ -44,8 +44,7 @@ torch::Tensor OuterProductScatterAdd::forward(
                 details::torch_to_mops_1d<int32_t>(indices_output)
             );
         });
-    } else {
-
+    } else if (A.device().is_cuda()) {
 #ifndef MOPS_CUDA_ENABLED
         C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " + A.device().str());
 #else
@@ -64,6 +63,10 @@ torch::Tensor OuterProductScatterAdd::forward(
         });
 
 #endif
+    } else {
+        C10_THROW_ERROR(
+            ValueError, "outer_product_scatter_add is not implemented for device " + A.device().str()
+        );
     }
 
     if (A.requires_grad() || B.requires_grad()) {
@@ -109,8 +112,7 @@ std::vector<torch::Tensor> OuterProductScatterAdd::backward(
                 details::torch_to_mops_1d<int32_t>(indices_output)
             );
         });
-    } else {
-
+    } else if (A.device().is_cuda()) {
 #ifndef MOPS_CUDA_ENABLED
         C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " + A.device().str());
 #else
@@ -138,6 +140,10 @@ std::vector<torch::Tensor> OuterProductScatterAdd::backward(
             );
         });
 #endif
+    } else {
+        C10_THROW_ERROR(
+            ValueError, "outer_product_scatter_add is not implemented for device " + A.device().str()
+        );
     }
 
     return {grad_A, grad_B, torch::Tensor(), torch::Tensor()};

@@ -7,13 +7,13 @@
 #include <cuda_runtime.h>
 #include <memory>
 
-#define NEIGHBOUR_NEDGES_PER_BLOCK 512
+#define NELEMENTS_PER_BLOCK 512
 
 using namespace std;
 
 __global__ void calculate_first_occurences_kernel(
     const int32_t *__restrict__ receiver_list,
-    const int32_t nedges,
+    const int32_t nelements,
     const int32_t *__restrict__ sort_idx,
     bool use_sort,
     int32_t *__restrict__ first_occurences
@@ -22,13 +22,13 @@ __global__ void calculate_first_occurences_kernel(
     size_t offset = 0;
     int32_t *smem = reinterpret_cast<int32_t *>(buffer + offset);
 
-    int32_t block_start = blockIdx.x * NEIGHBOUR_NEDGES_PER_BLOCK;
+    int32_t block_start = blockIdx.x * NELEMENTS_PER_BLOCK;
 
     // load all elements of senderlist needed by block into shared memory
-    for (int32_t i = threadIdx.x; i < NEIGHBOUR_NEDGES_PER_BLOCK + 1; i += blockDim.x) {
+    for (int32_t i = threadIdx.x; i < NELEMENTS_PER_BLOCK + 1; i += blockDim.x) {
         int32_t idx = block_start + i;
 
-        if (idx < nedges) {
+        if (idx < nelements) {
             if (use_sort) {
                 smem[i] = receiver_list[sort_idx[idx]];
             } else {
@@ -40,10 +40,10 @@ __global__ void calculate_first_occurences_kernel(
     __syncthreads();
 
     // deal with even boundaries
-    for (int32_t i = 2 * threadIdx.x; i < NEIGHBOUR_NEDGES_PER_BLOCK; i += 2 * blockDim.x) {
+    for (int32_t i = 2 * threadIdx.x; i < NELEMENTS_PER_BLOCK; i += 2 * blockDim.x) {
         int32_t idx = block_start + i;
 
-        if (idx + 1 < nedges) {
+        if (idx + 1 < nelements) {
             int32_t loc1 = smem[i];
             int32_t loc2 = smem[i + 1];
 
@@ -54,10 +54,10 @@ __global__ void calculate_first_occurences_kernel(
     }
 
     // deal with odd boundaries
-    for (int32_t i = 2 * threadIdx.x + 1; i < NEIGHBOUR_NEDGES_PER_BLOCK + 1; i += 2 * blockDim.x) {
+    for (int32_t i = 2 * threadIdx.x + 1; i < NELEMENTS_PER_BLOCK + 1; i += 2 * blockDim.x) {
         int32_t idx = block_start + i;
 
-        if (idx + 1 < nedges) {
+        if (idx + 1 < nelements) {
             int32_t loc1 = smem[i];
             int32_t loc2 = smem[i + 1];
 
@@ -73,36 +73,31 @@ __global__ void calculate_first_occurences_kernel(
     }
 }
 
-/* from a sorted receiver list, computes the indices at which the reciever list
-changes. I.e, gives the indiex range on the edges which should be summed into
-the same reciever index.
-
-if first_occurences is nullptr on entry, it will allocate the memory required
-and return the alloc'd pointer. */
-
-int32_t *calculate_first_occurences_cuda(const int32_t *receiver_list, int32_t nedges, int32_t nnodes) {
+int32_t *calculate_first_occurences_cuda(
+    const int32_t *receiver_list, int32_t nelements_input, int32_t nelements_output
+) {
 
     static void *cached_first_occurences = nullptr;
     static size_t cached_size = 0;
 
-    if (cached_size < nnodes) {
-        cudaMalloc(&cached_first_occurences, nnodes * sizeof(int32_t));
+    if (cached_size < nelements_output) {
+        cudaMalloc(&cached_first_occurences, nelements_output * sizeof(int32_t));
         CUDA_CHECK_ERROR(cudaGetLastError());
-        cached_size = nnodes;
+        cached_size = nelements_output;
     }
 
     int32_t *result = reinterpret_cast<int32_t *>(cached_first_occurences);
 
-    int32_t nbx = find_integer_divisor(nedges, NEIGHBOUR_NEDGES_PER_BLOCK);
+    int32_t nbx = find_integer_divisor(nelements_input, NELEMENTS_PER_BLOCK);
 
     dim3 block_dim(nbx);
 
     dim3 grid_dim(64, 1, 1);
 
-    size_t total_buff_size = (NEIGHBOUR_NEDGES_PER_BLOCK + 1) * sizeof(int32_t);
+    size_t total_buff_size = (NELEMENTS_PER_BLOCK + 1) * sizeof(int32_t);
 
     calculate_first_occurences_kernel<<<block_dim, grid_dim, total_buff_size>>>(
-        receiver_list, nedges, nullptr, false, result
+        receiver_list, nelements_input, nullptr, false, result
     );
 
     CUDA_CHECK_ERROR(cudaGetLastError());

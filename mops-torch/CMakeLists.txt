@@ -99,12 +99,6 @@ set_target_properties(mops PROPERTIES
     CXX_VISIBILITY_PRESET hidden
 )
 
-if (CMAKE_CUDA_COMPILER)
-    set_target_properties(mops_torch PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-    set_target_properties(mops_torch PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
-endif()
-
-
 target_include_directories(mops_torch PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
