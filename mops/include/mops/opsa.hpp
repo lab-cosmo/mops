@@ -15,7 +15,7 @@ namespace mops {
  * is given by the tensor indices_output.
  *
  * For example, If A has shape (5, 32) and B has shape (5, 16), and indices_output contains
- * [0, 0, 1, 1, 2], the output will have shape (3, 32, 16). For example using numpy terminology, the
+ * [0, 0, 1, 1, 2], the output will have shape (3, 32, 16). For clarity, the
  * value of output[0] in this case would be equal to
  * output[0, :, :] = A[0, :, None] * B[0, None, :] + A[1, :, None] * B[1, None,  :]
  */
