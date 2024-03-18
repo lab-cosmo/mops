@@ -132,14 +132,10 @@ void mops::cuda::outer_product_scatter_add(
     check_sizes(B, "B", 1, output, "output", 2, "opsa");
     check_sizes(A, "A", 0, indices_output, "indices_output", 0, "opsa");
 
-    int32_t nedges = A.shape[0];
-    int32_t nnodes = output.shape[0];
-    int32_t nfeatures_A = output.shape[1];
-    int32_t nfeatures_B = output.shape[2];
+    int32_t *first_occurences =
+        calculate_first_occurences_cuda(indices_output.data, A.shape[0], output.shape[0]);
 
-    int32_t *first_occurences = calculate_first_occurences_cuda(indices_output.data, nedges, nnodes);
-
-    dim3 gridDim(nnodes, 1, 1);
+    dim3 gridDim(output.shape[0], 1, 1);
 
     dim3 blockDim(NWARPS_PER_BLOCK * WARP_SIZE, 1, 1);
 

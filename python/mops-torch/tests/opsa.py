@@ -41,7 +41,8 @@ def test_opsa(dtype, device):
 
     assert torch.allclose(reference, actual)
 
-#only test F64 here as numerical issues arise for F32.
+
+# only test F64 here as numerical issues arise for F32.
 @pytest.mark.parametrize("dtype", [torch.float64])
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
 def test_opsa_grad(dtype, device):
