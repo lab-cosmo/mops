@@ -111,6 +111,7 @@ if(CMAKE_CUDA_COMPILER)
         "include/mops/cuda_utils.cuh"
 
         "src/opsa/opsa.cu"
+        "src/hpe/hpe.cu"
 
         "src/utils/first_occurences.cu"
         "include/mops/cuda_first_occurences.hpp"
