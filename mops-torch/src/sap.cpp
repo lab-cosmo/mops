@@ -18,7 +18,7 @@ torch::Tensor mops_torch::sparse_accumulation_of_products(
 }
 
 torch::Tensor SparseAccumulationOfProducts::forward(
-    torch::autograd::AutogradContext *ctx,
+    torch::autograd::AutogradContext* ctx,
     torch::Tensor A,
     torch::Tensor B,
     torch::Tensor C,
@@ -74,7 +74,7 @@ torch::Tensor SparseAccumulationOfProducts::forward(
 }
 
 std::vector<torch::Tensor> SparseAccumulationOfProducts::backward(
-    torch::autograd::AutogradContext *ctx, std::vector<torch::Tensor> grad_outputs
+    torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
 ) {
     auto saved_variables = ctx->get_saved_variables();
     auto A = saved_variables[0];

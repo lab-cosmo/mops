@@ -33,14 +33,14 @@ template <> constexpr size_t get_simd_element_count<float>() {
 /// simd_element_count).
 template <typename scalar_t, size_t simd_element_count>
 void interleave_tensor(
-    mops::Tensor<scalar_t, 2> initial_data, scalar_t *interleft_data, scalar_t *remainder_data
+    mops::Tensor<scalar_t, 2> initial_data, scalar_t* interleft_data, scalar_t* remainder_data
 ) {
 
     size_t batch_dim = initial_data.shape[0];
     size_t remainder = batch_dim % simd_element_count;
     size_t quotient = batch_dim / simd_element_count;
     size_t calculation_dim = initial_data.shape[1];
-    scalar_t *initial_data_ptr = initial_data.data;
+    scalar_t* initial_data_ptr = initial_data.data;
 
 #pragma omp parallel for
     for (size_t i = 0; i < quotient; i++) {
@@ -65,14 +65,14 @@ void interleave_tensor(
 /// This is the inverse operation of interleave_tensor.
 template <typename scalar_t, size_t simd_element_count>
 void un_interleave_tensor(
-    mops::Tensor<scalar_t, 2> output_data, scalar_t *interleft_data, scalar_t *remainder_data
+    mops::Tensor<scalar_t, 2> output_data, scalar_t* interleft_data, scalar_t* remainder_data
 ) {
 
     size_t batch_dim = output_data.shape[0];
     size_t remainder = batch_dim % simd_element_count;
     size_t quotient = batch_dim / simd_element_count;
     size_t calculation_dim = output_data.shape[1];
-    scalar_t *output_data_ptr = output_data.data;
+    scalar_t* output_data_ptr = output_data.data;
 
 #pragma omp parallel for
     for (size_t i = 0; i < quotient; i++) {
