@@ -25,7 +25,7 @@ class SparseAccumulationScatterAddWithWeights
     : public torch::autograd::Function<mops_torch::SparseAccumulationScatterAddWithWeights> {
   public:
     static torch::Tensor forward(
-        torch::autograd::AutogradContext *ctx,
+        torch::autograd::AutogradContext* ctx,
         torch::Tensor A,
         torch::Tensor B,
         torch::Tensor C,
@@ -39,7 +39,7 @@ class SparseAccumulationScatterAddWithWeights
     );
 
     static std::vector<torch::Tensor> backward(
-        torch::autograd::AutogradContext *ctx, std::vector<torch::Tensor> grad_outputs
+        torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
     );
 };
 

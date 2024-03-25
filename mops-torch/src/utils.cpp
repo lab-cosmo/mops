@@ -4,12 +4,12 @@
 
 #include "mops/torch/utils.hpp"
 
-void mops_torch::details::check_all_same_device(const std::vector<torch::Tensor> &tensors) {
+void mops_torch::details::check_all_same_device(const std::vector<torch::Tensor>& tensors) {
     if (tensors.empty()) {
         return;
     }
     auto device = tensors[0].device();
-    for (const auto &tensor : tensors) {
+    for (const auto& tensor : tensors) {
         if (tensor.device() != device) {
             C10_THROW_ERROR(
                 ValueError,
@@ -20,7 +20,7 @@ void mops_torch::details::check_all_same_device(const std::vector<torch::Tensor>
     }
 }
 
-void mops_torch::details::check_floating_dtype(const std::vector<torch::Tensor> &tensors) {
+void mops_torch::details::check_floating_dtype(const std::vector<torch::Tensor>& tensors) {
     if (tensors.empty()) {
         return;
     }
@@ -31,7 +31,7 @@ void mops_torch::details::check_floating_dtype(const std::vector<torch::Tensor> 
             "Found dtype" + std::string(dtype.name()) + ", only float32 and float64 are supported"
         );
     }
-    for (const auto &tensor : tensors) {
+    for (const auto& tensor : tensors) {
         if (tensor.dtype() != dtype) {
             C10_THROW_ERROR(
                 TypeError,
@@ -42,8 +42,8 @@ void mops_torch::details::check_floating_dtype(const std::vector<torch::Tensor> 
     }
 }
 
-void mops_torch::details::check_integer_dtype(const std::vector<torch::Tensor> &tensors) {
-    for (const auto &tensor : tensors) {
+void mops_torch::details::check_integer_dtype(const std::vector<torch::Tensor>& tensors) {
+    for (const auto& tensor : tensors) {
         if (tensor.dtype() != torch::kI32) {
             C10_THROW_ERROR(
                 TypeError,

@@ -12,15 +12,15 @@
 using namespace std;
 
 __global__ void calculate_first_occurences_kernel(
-    const int32_t *__restrict__ receiver_list,
+    const int32_t* __restrict__ receiver_list,
     const int32_t nelements,
-    const int32_t *__restrict__ sort_idx,
+    const int32_t* __restrict__ sort_idx,
     bool use_sort,
-    int32_t *__restrict__ first_occurences
+    int32_t* __restrict__ first_occurences
 ) {
     extern __shared__ char buffer[];
     size_t offset = 0;
-    int32_t *smem = reinterpret_cast<int32_t *>(buffer + offset);
+    int32_t* smem = reinterpret_cast<int32_t*>(buffer + offset);
 
     int32_t block_start = blockIdx.x * NELEMENTS_PER_BLOCK;
 
@@ -73,11 +73,11 @@ __global__ void calculate_first_occurences_kernel(
     }
 }
 
-int32_t *calculate_first_occurences_cuda(
-    const int32_t *receiver_list, int32_t nelements_input, int32_t nelements_output
+int32_t* calculate_first_occurences_cuda(
+    const int32_t* receiver_list, int32_t nelements_input, int32_t nelements_output
 ) {
 
-    static void *cached_first_occurences = nullptr;
+    static void* cached_first_occurences = nullptr;
     static size_t cached_size = 0;
 
     if (cached_size < nelements_output) {
@@ -86,7 +86,7 @@ int32_t *calculate_first_occurences_cuda(
         cached_size = nelements_output;
     }
 
-    int32_t *result = reinterpret_cast<int32_t *>(cached_first_occurences);
+    int32_t* result = reinterpret_cast<int32_t*>(cached_first_occurences);
 
     int32_t nbx = find_integer_divisor(nelements_input, NELEMENTS_PER_BLOCK);
 

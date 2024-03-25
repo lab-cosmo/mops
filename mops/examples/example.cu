@@ -33,10 +33,10 @@ int main() {
     auto indices_output = std::vector<int32_t>(100);
     auto output = std::vector<double>(10 * 20 * 5);
 
-    double *A_cuda;
-    double *B_cuda;
-    int32_t *indices_output_cuda;
-    double *output_cuda;
+    double* A_cuda;
+    double* B_cuda;
+    int32_t* indices_output_cuda;
+    double* output_cuda;
 
     CUDA_CHECK(cudaMalloc(&A_cuda, A.size() * sizeof(double)));
     CUDA_CHECK(cudaMalloc(&B_cuda, B.size() * sizeof(double)));

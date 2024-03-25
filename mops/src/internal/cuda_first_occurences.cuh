@@ -12,8 +12,8 @@
  *
  * This function allocates memory which must be freed with `cudaFree` when no longer required.
  */
-int32_t *calculate_first_occurences_cuda(
-    const int32_t *receiver_list, int32_t nelements_input, int32_t nelements_output
+int32_t* calculate_first_occurences_cuda(
+    const int32_t* receiver_list, int32_t nelements_input, int32_t nelements_output
 );
 
 #endif // MOPS_CUDA_FIRST_OCCURENCES_HPP
