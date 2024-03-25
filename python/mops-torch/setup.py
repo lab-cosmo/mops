@@ -37,6 +37,7 @@ class cmake_ext(build_ext):
                 "cmake",
                 "--build",
                 build_dir,
+                "--parallel",
                 "--config",
                 "Release",
                 "--target",
