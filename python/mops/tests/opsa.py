@@ -119,11 +119,9 @@ def test_opsa_cupy(valid_arguments):
     B = cp.array(B)
     indices_output = cp.array(indices_output)
 
-    reference = ref_opsa(  # noqa: F841
+    reference = ref_opsa(
         A.get(), B.get(), indices_output.get(), output_size
     )
+    actual = opsa(A, B, indices_output, output_size)
+    assert cp.allclose(reference, actual.get())
 
-    with pytest.raises(
-        mops.status.MopsError, match="CUDA implementation does not exist yet"
-    ):
-        actual = opsa(A, B, indices_output, output_size)  # noqa: F841
