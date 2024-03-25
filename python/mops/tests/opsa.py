@@ -119,9 +119,6 @@ def test_opsa_cupy(valid_arguments):
     B = cp.array(B)
     indices_output = cp.array(indices_output)
 
-    reference = ref_opsa(
-        A.get(), B.get(), indices_output.get(), output_size
-    )
+    reference = ref_opsa(A.get(), B.get(), indices_output.get(), output_size)
     actual = opsa(A, B, indices_output, output_size)
     assert cp.allclose(reference, actual.get())
-
