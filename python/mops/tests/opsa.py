@@ -115,6 +115,7 @@ def test_opsa_out_of_bounds(valid_arguments):
 @pytest.mark.skipif(not HAS_CUPY, reason="CuPy is not installed")
 def test_opsa_cupy(valid_arguments):
     A, B, indices_output, output_size = valid_arguments
+    indices_output = np.sort(indices_output)
     A = cp.array(A)
     B = cp.array(B)
     indices_output = cp.array(indices_output)
