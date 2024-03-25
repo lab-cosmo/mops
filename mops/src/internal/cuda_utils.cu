@@ -1,8 +1,9 @@
-#include "mops/cuda_utils.cuh"
-
 #include <cstdint>
-#include <cstdio> // Include for fprintf
+#include <cstdio>
+
 #include <cuda.h>
+
+#include "mops/cuda_utils.cuh"
 
 using namespace std;
 

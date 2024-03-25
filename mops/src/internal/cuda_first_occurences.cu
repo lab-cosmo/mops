@@ -1,11 +1,11 @@
-#include "mops/cuda_first_occurences.hpp"
-#include "mops/cuda_utils.cuh"
-
 #include <cstdint>
 #include <cstdio>
+
 #include <cuda.h>
 #include <cuda_runtime.h>
-#include <memory>
+
+#include "cuda_first_occurences.cuh"
+#include "cuda_utils.cuh"
 
 #define NELEMENTS_PER_BLOCK 512
 

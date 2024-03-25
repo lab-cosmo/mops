@@ -1,12 +1,10 @@
-#include <cassert>
 #include <algorithm>
-#include <stdexcept>
-#include <string>
 #include <array>
 
 #include "mops/sap.hpp"
-#include "mops/checks.hpp"
-#include "mops/utils.hpp"
+
+#include "internal/checks.hpp"
+#include "internal/utils.hpp"
 
 
 template<typename scalar_t>
@@ -70,7 +68,7 @@ void mops::sparse_accumulation_of_products(
 
     std::fill(interleft_o_ptr, interleft_o_ptr+size_first_dimension_interleft*size_second_dimension_o*simd_element_count, static_cast<scalar_t>(0.0));
     std::fill(remainder_o_ptr, remainder_o_ptr+size_remainder*size_second_dimension_o, static_cast<scalar_t>(0.0));
-    
+
     #pragma omp parallel for
     for (size_t i = 0; i < size_first_dimension_interleft; i++) {
         scalar_t* a_ptr_shifted_first_dim = interleft_a_ptr + i * size_second_dimension_a*simd_element_count;
@@ -83,7 +81,7 @@ void mops::sparse_accumulation_of_products(
             scalar_t current_c = c_ptr[j];
             for (size_t k = 0; k < simd_element_count; k++) {
                 o_ptr_shifted_second_dim[k] += current_c * a_ptr_shifted_second_dim[k] * b_ptr_shifted_second_dim[k];
-            }                                             
+            }
         }
     }
 
@@ -95,7 +93,7 @@ void mops::sparse_accumulation_of_products(
         scalar_t current_c = c_ptr[j];
         for (size_t k = 0; k < size_remainder; k++) {
             o_ptr_shifted_second_dim[k] += current_c * a_ptr_shifted_second_dim[k] * b_ptr_shifted_second_dim[k];
-        }                                             
+        }
     }
 
     un_interleave_tensor<scalar_t, simd_element_count>(output, interleft_o_ptr, remainder_o_ptr);

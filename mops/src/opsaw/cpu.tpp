@@ -1,11 +1,9 @@
-#include <cassert>
 #include <algorithm>
-#include <stdexcept>
-#include <string>
 
 #include "mops/opsaw.hpp"
-#include "mops/checks.hpp"
-#include "mops/utils.hpp"
+
+#include "internal/checks.hpp"
+#include "internal/utils.hpp"
 
 
 template<typename scalar_t>
@@ -44,7 +42,7 @@ void mops::outer_product_scatter_add_with_weights(
 
     std::fill(o_ptr, o_ptr+output.shape[0]*output.shape[1]*output.shape[2], static_cast<scalar_t>(0.0));
 
-    #pragma omp parallel for 
+    #pragma omp parallel for
     for (size_t i = 0; i < size_output_first_dimension; i++) {
         scalar_t* o_ptr_e = o_ptr + i * size_ab;
         // iterate over input indices that will write to the output index i

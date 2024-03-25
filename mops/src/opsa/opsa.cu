@@ -1,8 +1,8 @@
-
-#include "mops/checks.hpp"
-#include "mops/cuda_first_occurences.hpp"
-#include "mops/cuda_utils.cuh"
 #include "mops/opsa.hpp"
+
+#include "internal/checks.hpp"
+#include "internal/cuda_first_occurences.hpp"
+#include "internal/cuda_utils.cuh"
 
 using namespace mops;
 using namespace mops::cuda;

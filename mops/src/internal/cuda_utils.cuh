@@ -1,8 +1,9 @@
-#ifndef CUDA_UTILS_CUH
-#define CUDA_UTILS_CUH
+#ifndef MOPS_CUDA_UTILS_CUH
+#define MOPS_CUDA_UTILS_CUH
 
 #include <cstdint>
 #include <cstdio>
+
 #include <cuda.h>
 
 using namespace std;

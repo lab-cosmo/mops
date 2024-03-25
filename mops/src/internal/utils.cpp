@@ -1,6 +1,8 @@
-#include "mops/utils.hpp"
-#include "mops/tensor.hpp"
 #include <vector>
+
+#include "mops/tensor.hpp"
+
+#include "utils.hpp"
 
 std::vector<std::vector<size_t>> get_write_list(mops::Tensor<int32_t, 1> write_coordinates) {
     std::vector<std::vector<size_t>> write_list(write_coordinates.shape[0]);

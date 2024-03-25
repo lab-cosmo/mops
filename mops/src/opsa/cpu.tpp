@@ -1,11 +1,9 @@
 #include <algorithm>
-#include <cassert>
-#include <stdexcept>
-#include <string>
 
-#include "mops/checks.hpp"
 #include "mops/opsa.hpp"
-#include "mops/utils.hpp"
+
+#include "internal/checks.hpp"
+#include "internal/utils.hpp"
 
 template <typename scalar_t>
 void mops::outer_product_scatter_add(

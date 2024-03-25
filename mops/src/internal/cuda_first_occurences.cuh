@@ -1,7 +1,6 @@
-#ifndef FIRST_OCCURENCES_HPP
-#define FIRST_OCCURENCES_HPP
+#ifndef MOPS_CUDA_FIRST_OCCURENCES_HPP
+#define MOPS_CUDA_FIRST_OCCURENCES_HPP
 
-#include "mops/tensor.hpp"
 #include <cstdint>
 
 /*
@@ -17,4 +16,4 @@ int32_t *calculate_first_occurences_cuda(
     const int32_t *receiver_list, int32_t nelements_input, int32_t nelements_output
 );
 
-#endif // FIRST_OCCURENCES_HP
+#endif // MOPS_CUDA_FIRST_OCCURENCES_HPP
