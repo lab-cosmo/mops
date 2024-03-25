@@ -21,12 +21,12 @@
 template <typename T_1, size_t N_DIMS_1, typename T_2, size_t N_DIMS_2>
 void check_sizes(
     mops::Tensor<T_1, N_DIMS_1> tensor_1,
-    std::string name_1,
+    const std::string &name_1,
     size_t dim_1,
     mops::Tensor<T_2, N_DIMS_2> tensor_2,
-    std::string name_2,
+    const std::string &name_2,
     size_t dim_2,
-    std::string operation
+    const std::string &operation
 ) {
     if (tensor_1.shape[dim_1] != tensor_2.shape[dim_2]) {
         throw std::runtime_error(
@@ -45,7 +45,10 @@ void check_sizes(
 /// out-of-bounds indices, a runtime error is thrown.
 template <size_t N_DIMS>
 void check_index_tensor(
-    mops::Tensor<int32_t, N_DIMS> tensor, std::string name, size_t max_value, std::string operation
+    mops::Tensor<int32_t, N_DIMS> tensor,
+    const std::string &name,
+    size_t max_value,
+    const std::string &operation
 ) {
     int32_t *data_pointer = tensor.data;
     size_t total_size = 1;
@@ -82,10 +85,10 @@ void check_index_tensor(
 template <typename T, size_t N_DIMS>
 void check_same_shape(
     mops::Tensor<T, N_DIMS> tensor_1,
-    std::string name_1,
+    const std::string &name_1,
     mops::Tensor<T, N_DIMS> tensor_2,
-    std::string name_2,
-    std::string operation
+    const std::string &name_2,
+    const std::string &operation
 ) {
     for (size_t i_dim = 0; i_dim < N_DIMS; i_dim++) {
         if (tensor_1.shape[i_dim] != tensor_2.shape[i_dim]) {

@@ -5,10 +5,19 @@
 
 #include "mops/exports.h"
 #include "mops/tensor.hpp"
-#include "mops/utils.hpp"
 
 namespace mops {
-/// TODO
+/*
+ * Outer-Product-Scatter-Add (OPSA)
+ * Computes the outer product between tensors A, B along the last dimension, and sums the result
+ * into a new tensor of shape [output_size, A.shape[1], B.shape[1]], where the summation index
+ * is given by the tensor indices_output.
+ *
+ * For example, If A has shape (5, 32) and B has shape (5, 16), and indices_output contains
+ * [0, 0, 1, 1, 2], the output will have shape (3, 32, 16). For clarity, the
+ * value of output[0] in this case would be equal to
+ * output[0, :, :] = A[0, :, None] * B[0, None, :] + A[1, :, None] * B[1, None,  :]
+ */
 template <typename scalar_t>
 void MOPS_EXPORT outer_product_scatter_add(
     Tensor<scalar_t, 3> output,
@@ -73,6 +82,44 @@ void MOPS_EXPORT outer_product_scatter_add(
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> indices_output
 );
+
+extern template void outer_product_scatter_add(
+    Tensor<float, 3> output, Tensor<float, 2> A, Tensor<float, 2> B, Tensor<int32_t, 1> indices_output
+);
+
+extern template void outer_product_scatter_add(
+    Tensor<double, 3> output, Tensor<double, 2> A, Tensor<double, 2> B, Tensor<int32_t, 1> indices_output
+);
+
+template <typename scalar_t>
+void MOPS_EXPORT outer_product_scatter_add_vjp(
+    Tensor<scalar_t, 2> grad_A,
+    Tensor<scalar_t, 2> grad_B,
+    Tensor<scalar_t, 3> grad_output,
+    Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B,
+    Tensor<int32_t, 1> indices_output
+);
+
+// these templates will be precompiled and provided in the mops library
+extern template void outer_product_scatter_add_vjp(
+    Tensor<float, 2> grad_A,
+    Tensor<float, 2> grad_B,
+    Tensor<float, 3> grad_output,
+    Tensor<float, 2> A,
+    Tensor<float, 2> B,
+    Tensor<int32_t, 1> indices_output
+);
+
+extern template void outer_product_scatter_add_vjp(
+    Tensor<double, 2> grad_A,
+    Tensor<double, 2> grad_B,
+    Tensor<double, 3> grad_output,
+    Tensor<double, 2> A,
+    Tensor<double, 2> B,
+    Tensor<int32_t, 1> indices_output
+);
+
 } // namespace cuda
 } // namespace mops
 
