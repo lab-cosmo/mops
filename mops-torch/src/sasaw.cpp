@@ -21,7 +21,7 @@ torch::Tensor mops_torch::sparse_accumulation_scatter_add_with_weights(
 }
 
 torch::Tensor SparseAccumulationScatterAddWithWeights::forward(
-    torch::autograd::AutogradContext *ctx,
+    torch::autograd::AutogradContext* ctx,
     torch::Tensor A,
     torch::Tensor B,
     torch::Tensor C,
@@ -106,7 +106,7 @@ torch::Tensor SparseAccumulationScatterAddWithWeights::forward(
 }
 
 std::vector<torch::Tensor> SparseAccumulationScatterAddWithWeights::backward(
-    torch::autograd::AutogradContext *ctx, std::vector<torch::Tensor> grad_outputs
+    torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
 ) {
     auto saved_variables = ctx->get_saved_variables();
     auto A = saved_variables[0];

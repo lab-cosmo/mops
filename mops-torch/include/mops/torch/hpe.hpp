@@ -16,11 +16,11 @@ class HomogeneousPolynomialEvaluation
     : public torch::autograd::Function<mops_torch::HomogeneousPolynomialEvaluation> {
   public:
     static torch::Tensor forward(
-        torch::autograd::AutogradContext *ctx, torch::Tensor A, torch::Tensor C, torch::Tensor indices_A
+        torch::autograd::AutogradContext* ctx, torch::Tensor A, torch::Tensor C, torch::Tensor indices_A
     );
 
     static std::vector<torch::Tensor> backward(
-        torch::autograd::AutogradContext *ctx, std::vector<torch::Tensor> grad_outputs
+        torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
     );
 };
 

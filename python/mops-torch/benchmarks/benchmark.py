@@ -1,9 +1,23 @@
+import argparse
 import gc
 import math
 import time
 
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
+
+
+def initialize():
+    torch.manual_seed(0xDEADBEEF)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--device", type=str, default="cpu")
+    parser.add_argument("--dtype", type=str, default="float32")
+    device = parser.parse_args().device
+    dtype = parser.parse_args().dtype
+    print(f"Running on {device} with dtype {dtype}")
+    torch.set_default_device(device)
+    torch.set_default_dtype(getattr(torch, dtype))
 
 
 def benchmark(function, repeats=1000, warmup=10, plot=True):
