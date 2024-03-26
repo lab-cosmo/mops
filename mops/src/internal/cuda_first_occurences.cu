@@ -24,6 +24,8 @@ __global__ void calculate_first_occurences_kernel(
 
     int32_t block_start = blockIdx.x * NELEMENTS_PER_BLOCK;
 
+    __syncthreads();
+
     // load all elements of senderlist needed by block into shared memory
     for (int32_t i = threadIdx.x; i < NELEMENTS_PER_BLOCK + 1; i += blockDim.x) {
         int32_t idx = block_start + i;
@@ -87,6 +89,9 @@ int32_t* calculate_first_occurences_cuda(
     }
 
     int32_t* result = reinterpret_cast<int32_t*>(cached_first_occurences);
+
+    // set to -1 as default so boundaries can be detected.
+    cudaMemset(result, -1, nelements_output * sizeof(int32_t));
 
     int32_t nbx = find_integer_divisor(nelements_input, NELEMENTS_PER_BLOCK);
 
