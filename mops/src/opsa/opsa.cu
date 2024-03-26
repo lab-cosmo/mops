@@ -137,11 +137,20 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK* WARP_SIZE) outer_product_sca
         buffer_grad_B = shared_array<scalar_t>(nThreadRow * B.shape[1], sptr, &space);
     }
 
-    const int32_t sample_start = first_occurences.data[blockIdx.x];
-    const int32_t sample_end =
-        (blockIdx.x == grad_in.shape[0] - 1) ? A.shape[0] : first_occurences.data[blockIdx.x + 1];
-    const int32_t node_index = indices_output.data[sample_start];
-    const int32_t nsamples = sample_end - sample_start;
+    int32_t sample_start = first_occurences.data[blockIdx.x];
+    int32_t sample_end = -1;
+    int32_t node_index = -1;
+
+    if (sample_start != -1) {
+        node_index = indices_output.data[sample_start];
+        sample_end = (blockIdx.x == first_occurences.shape[0] - 1)
+                         ? indices_output.shape[0]
+                         : (first_occurences.data[blockIdx.x + 1] == -1
+                                ? indices_output.shape[0]
+                                : first_occurences.data[blockIdx.x + 1]);
+    }
+
+    int32_t nsamples = sample_end - sample_start;
 
     if (nsamples == 0) {
         return;
