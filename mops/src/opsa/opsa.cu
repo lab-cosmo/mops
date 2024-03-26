@@ -11,7 +11,7 @@ using namespace mops::cuda;
 #define NWARPS_PER_BLOCK 4
 #define FULL_MASK 0xffffffff
 
-template <typename scalar_t, const int32_t TA, const int32_t TB>
+template <typename scalar_t>
 __global__ __launch_bounds__(WARP_SIZE* NWARPS_PER_BLOCK) void outer_product_scatter_add_kernel(
     Tensor<scalar_t, 2> A,
     Tensor<scalar_t, 2> B,
