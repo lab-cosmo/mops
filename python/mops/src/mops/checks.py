@@ -1,11 +1,13 @@
 import numpy as np
 
+from . import _dispatch
+
 # For each operation, we only check the correctness of types and number of dimensions.
 # Size consistency checks will be performed in the C++ backend.
 
 
 def _check_number_of_dimensions(array, expected, operation, name):
-    if not isinstance(array, np.ndarray):
+    if not _dispatch.is_array(array):
         raise TypeError(f"`{name}` must be an array in {operation}, got {type(array)}")
 
     if len(array.shape) != expected:
@@ -16,8 +18,10 @@ def _check_number_of_dimensions(array, expected, operation, name):
 
 
 def _check_scalar(variable, operation, name):
-    if isinstance(variable, np.ndarray):
-        raise TypeError(f"{name} must be a scalar in {operation}, found a `np.ndarray`")
+    if not _dispatch.is_scalar(variable):
+        raise TypeError(
+            f"`{name}` must be a scalar in {operation}, got {type(variable)}"
+        )
 
 
 def _check_array_dtype(array, expected_dtype, operation, name):

@@ -3,7 +3,7 @@
 
 #include <cuda.h>
 
-#include "mops/cuda_utils.cuh"
+#include "cuda_utils.cuh"
 
 using namespace std;
 

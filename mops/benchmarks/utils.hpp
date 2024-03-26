@@ -1,4 +1,5 @@
 #include <random>
+#include <ctime>
 
 void fill_vector_random_integers(std::vector<int32_t>& vector, size_t n) {
     // Random engine seeded with current time
