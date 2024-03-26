@@ -26,7 +26,6 @@ void mops::sparse_accumulation_of_products(
     check_index_tensor(indices_B, "indices_B", B.shape[1], "sap");
     check_index_tensor(indices_output, "indices_output", output.shape[1], "sap");
 
-    scalar_t* o_ptr = output.data;
     scalar_t* c_ptr = C.data;
     int32_t* indices_A_ptr = indices_A.data;
     int32_t* indices_B_ptr = indices_B.data;

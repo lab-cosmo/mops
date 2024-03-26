@@ -1,7 +1,7 @@
 #include "mops/opsa.hpp"
 
 #include "internal/checks.hpp"
-#include "internal/cuda_first_occurences.hpp"
+#include "internal/cuda_first_occurences.cuh"
 #include "internal/cuda_utils.cuh"
 
 using namespace mops;
@@ -149,7 +149,7 @@ void mops::cuda::outer_product_scatter_add(
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
 }
 
-// explicit instanciations of CUDA templates
+// explicit instantiations of CUDA templates
 template void mops::cuda::outer_product_scatter_add<float>(
     Tensor<float, 3> output, Tensor<float, 2> A, Tensor<float, 2> B, Tensor<int32_t, 1> indices_output
 );

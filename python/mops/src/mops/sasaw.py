@@ -1,8 +1,9 @@
 import numpy as np
 
-from ._c_lib import _get_library
-from .checks import _check_sasaw
-from .utils import numpy_to_mops_tensor
+from . import _dispatch
+from .checks import _check_sasaw, _check_sasaw_vjp
+from .dispatch_operation import dispatch_operation
+from .utils import mops_tensor, null_mops_tensor_like
 
 
 def sparse_accumulation_scatter_add_with_weights(
@@ -30,45 +31,131 @@ def sparse_accumulation_scatter_add_with_weights(
         output_size,
     )
 
-    A = np.ascontiguousarray(A)
-    B = np.ascontiguousarray(B)
-    C = np.ascontiguousarray(C)
-    W = np.ascontiguousarray(W)
-    indices_A = np.ascontiguousarray(indices_A)
-    indices_W_1 = np.ascontiguousarray(indices_W_1)
-    indices_W_2 = np.ascontiguousarray(indices_W_2)
-    indices_output_1 = np.ascontiguousarray(indices_output_1)
-    indices_output_2 = np.ascontiguousarray(indices_output_2)
+    A = _dispatch.make_contiguous(A)
+    B = _dispatch.make_contiguous(B)
+    C = _dispatch.make_contiguous(C)
+    W = _dispatch.make_contiguous(W)
+    indices_A = _dispatch.make_contiguous(indices_A)
+    indices_W_1 = _dispatch.make_contiguous(indices_W_1)
+    indices_W_2 = _dispatch.make_contiguous(indices_W_2)
+    indices_output_1 = _dispatch.make_contiguous(indices_output_1)
+    indices_output_2 = _dispatch.make_contiguous(indices_output_2)
     indices_A = indices_A.astype(np.int32)
     indices_W_1 = indices_W_1.astype(np.int32)
     indices_W_2 = indices_W_2.astype(np.int32)
     indices_output_1 = indices_output_1.astype(np.int32)
     indices_output_2 = indices_output_2.astype(np.int32)
 
-    output = np.empty((W.shape[0], output_size, B.shape[1]), dtype=A.dtype)
+    output = _dispatch.empty_like((W.shape[0], output_size, B.shape[1]), A)
 
-    lib = _get_library()
-
-    if A.dtype == np.float32:
-        function = lib.mops_sparse_accumulation_scatter_add_with_weights_f32
-    elif A.dtype == np.float64:
-        function = lib.mops_sparse_accumulation_scatter_add_with_weights_f64
-    else:
-        raise TypeError(
-            "Unsupported dtype detected. outputnly float32 and float64 are supported"
-        )
+    function = dispatch_operation(
+        "sparse_accumulation_scatter_add_with_weights",
+        A,
+    )
 
     function(
-        numpy_to_mops_tensor(output),
-        numpy_to_mops_tensor(A),
-        numpy_to_mops_tensor(B),
-        numpy_to_mops_tensor(C),
-        numpy_to_mops_tensor(W),
-        numpy_to_mops_tensor(indices_A),
-        numpy_to_mops_tensor(indices_W_1),
-        numpy_to_mops_tensor(indices_W_2),
-        numpy_to_mops_tensor(indices_output_1),
-        numpy_to_mops_tensor(indices_output_2),
+        mops_tensor(output),
+        mops_tensor(A),
+        mops_tensor(B),
+        mops_tensor(C),
+        mops_tensor(W),
+        mops_tensor(indices_A),
+        mops_tensor(indices_W_1),
+        mops_tensor(indices_W_2),
+        mops_tensor(indices_output_1),
+        mops_tensor(indices_output_2),
     )
 
     return output
+
+
+def sparse_accumulation_scatter_add_with_weights_vjp(
+    grad_output,
+    A,
+    B,
+    C,
+    W,
+    indices_A,
+    indices_W_1,
+    indices_W_2,
+    indices_output_1,
+    indices_output_2,
+    compute_grad_A=True,
+    compute_grad_B=True,
+    compute_grad_C=True,
+    compute_grad_W=True,
+):
+    _check_sasaw_vjp(
+        grad_output,
+        A,
+        B,
+        C,
+        W,
+        indices_A,
+        indices_W_1,
+        indices_W_2,
+        indices_output_1,
+        indices_output_2,
+        grad_output.shape[1],
+    )
+
+    grad_output = _dispatch.make_contiguous(grad_output)
+    A = _dispatch.make_contiguous(A)
+    B = _dispatch.make_contiguous(B)
+    C = _dispatch.make_contiguous(C)
+    W = _dispatch.make_contiguous(W)
+    indices_A = _dispatch.make_contiguous(indices_A)
+    indices_W_1 = _dispatch.make_contiguous(indices_W_1)
+    indices_W_2 = _dispatch.make_contiguous(indices_W_2)
+    indices_output_1 = _dispatch.make_contiguous(indices_output_1)
+    indices_output_2 = _dispatch.make_contiguous(indices_output_2)
+
+    indices_A = indices_A.astype(np.int32)
+    indices_W_1 = indices_W_1.astype(np.int32)
+    indices_W_2 = indices_W_2.astype(np.int32)
+    indices_output_1 = indices_output_1.astype(np.int32)
+    indices_output_2 = indices_output_2.astype(np.int32)
+
+    if compute_grad_A:
+        grad_A = _dispatch.empty_like(A.shape, A)
+        mops_grad_A = mops_tensor(grad_A)
+    else:
+        grad_A = None
+        mops_grad_A = null_mops_tensor_like(A)
+
+    if compute_grad_B:
+        grad_B = _dispatch.empty_like(B.shape, B)
+        mops_grad_B = mops_tensor(grad_B)
+    else:
+        grad_B = None
+        mops_grad_B = null_mops_tensor_like(B)
+
+    if compute_grad_W:
+        grad_W = _dispatch.empty_like(W.shape, W)
+        mops_grad_W = mops_tensor(grad_W)
+    else:
+        grad_W = None
+        mops_grad_W = null_mops_tensor_like(W)
+
+    function = dispatch_operation(
+        "sparse_accumulation_scatter_add_with_weights_vjp",
+        A,
+    )
+
+    function(
+        mops_grad_A,
+        mops_grad_B,
+        mops_grad_W,
+        mops_tensor(grad_output),
+        mops_tensor(A),
+        mops_tensor(B),
+        mops_tensor(C),
+        mops_tensor(W),
+        mops_tensor(indices_A),
+        mops_tensor(indices_W_1),
+        mops_tensor(indices_W_2),
+        mops_tensor(indices_output_1),
+        mops_tensor(indices_output_2),
+    )
+
+    return grad_A, grad_B, grad_W

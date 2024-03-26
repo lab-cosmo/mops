@@ -163,3 +163,61 @@ extern "C" int mops_cuda_outer_product_scatter_add_with_weights_f64(
         );
     MOPS_CATCH_EXCEPTIONS_END
 }
+
+extern "C" int mops_cuda_outer_product_scatter_add_with_weights_vjp_f32(
+    mops_tensor_2d_f32_t grad_A,
+    mops_tensor_2d_f32_t grad_B,
+    mops_tensor_2d_f32_t grad_W,
+    mops_tensor_3d_f32_t grad_output,
+    mops_tensor_2d_f32_t A,
+    mops_tensor_2d_f32_t B,
+    mops_tensor_2d_f32_t W,
+    mops_tensor_1d_i32_t indices_W,
+    mops_tensor_1d_i32_t indices_output
+) {
+    MOPS_CATCH_EXCEPTIONS_BEGIN
+        mops::cuda::outer_product_scatter_add_with_weights_vjp<float>(
+            {grad_A.data, {checked_cast(grad_A.shape[0]), checked_cast(grad_A.shape[1])}},
+            {grad_B.data, {checked_cast(grad_B.shape[0]), checked_cast(grad_B.shape[1])}},
+            {grad_W.data, {checked_cast(grad_W.shape[0]), checked_cast(grad_W.shape[1])}},
+            {grad_output.data,
+             {checked_cast(grad_output.shape[0]),
+              checked_cast(grad_output.shape[1]),
+              checked_cast(grad_output.shape[2])}},
+            {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
+            {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
+            {W.data, {checked_cast(W.shape[0]), checked_cast(W.shape[1])}},
+            {indices_W.data, {checked_cast(indices_W.shape[0])}},
+            {indices_output.data, {checked_cast(indices_output.shape[0])}}
+        );
+    MOPS_CATCH_EXCEPTIONS_END
+}
+
+extern "C" int mops_cuda_outer_product_scatter_add_with_weights_vjp_f64(
+    mops_tensor_2d_f64_t grad_A,
+    mops_tensor_2d_f64_t grad_B,
+    mops_tensor_2d_f64_t grad_W,
+    mops_tensor_3d_f64_t grad_output,
+    mops_tensor_2d_f64_t A,
+    mops_tensor_2d_f64_t B,
+    mops_tensor_2d_f64_t W,
+    mops_tensor_1d_i32_t indices_W,
+    mops_tensor_1d_i32_t indices_output
+) {
+    MOPS_CATCH_EXCEPTIONS_BEGIN
+        mops::cuda::outer_product_scatter_add_with_weights_vjp<double>(
+            {grad_A.data, {checked_cast(grad_A.shape[0]), checked_cast(grad_A.shape[1])}},
+            {grad_B.data, {checked_cast(grad_B.shape[0]), checked_cast(grad_B.shape[1])}},
+            {grad_W.data, {checked_cast(grad_W.shape[0]), checked_cast(grad_W.shape[1])}},
+            {grad_output.data,
+             {checked_cast(grad_output.shape[0]),
+              checked_cast(grad_output.shape[1]),
+              checked_cast(grad_output.shape[2])}},
+            {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
+            {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
+            {W.data, {checked_cast(W.shape[0]), checked_cast(W.shape[1])}},
+            {indices_W.data, {checked_cast(indices_W.shape[0])}},
+            {indices_output.data, {checked_cast(indices_output.shape[0])}}
+        );
+    MOPS_CATCH_EXCEPTIONS_END
+}

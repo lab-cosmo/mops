@@ -1,36 +1,58 @@
 import numpy as np
 
-from ._c_lib import _get_library
-from .checks import _check_hpe
-from .utils import numpy_to_mops_tensor
+from . import _dispatch
+from .checks import _check_hpe, _check_hpe_vjp
+from .dispatch_operation import dispatch_operation
+from .utils import mops_tensor
 
 
 def homogeneous_polynomial_evaluation(A, C, indices_A):
     _check_hpe(A, C, indices_A)
 
-    A = np.ascontiguousarray(A)
-    C = np.ascontiguousarray(C)
-    indices_A = np.ascontiguousarray(indices_A)
+    A = _dispatch.make_contiguous(A)
+    C = _dispatch.make_contiguous(C)
+    indices_A = _dispatch.make_contiguous(indices_A)
     indices_A = indices_A.astype(np.int32)
 
-    O = np.empty((A.shape[0],), dtype=A.dtype)
+    output = _dispatch.empty_like((A.shape[0],), A)
 
-    lib = _get_library()
-
-    if A.dtype == np.float32:
-        function = lib.mops_homogeneous_polynomial_evaluation_f32
-    elif A.dtype == np.float64:
-        function = lib.mops_homogeneous_polynomial_evaluation_f64
-    else:
-        raise TypeError(
-            "Unsupported dtype detected. Only float32 and float64 are supported"
-        )
-
-    function(
-        numpy_to_mops_tensor(O),
-        numpy_to_mops_tensor(A),
-        numpy_to_mops_tensor(C),
-        numpy_to_mops_tensor(indices_A),
+    function = dispatch_operation(
+        "homogeneous_polynomial_evaluation",
+        A,
     )
 
-    return O
+    function(
+        mops_tensor(output),
+        mops_tensor(A),
+        mops_tensor(C),
+        mops_tensor(indices_A),
+    )
+
+    return output
+
+
+def homogeneous_polynomial_evaluation_vjp(grad_output, A, C, indices_A):
+    _check_hpe_vjp(grad_output, A, C, indices_A)
+
+    grad_output = _dispatch.make_contiguous(grad_output)
+    A = _dispatch.make_contiguous(A)
+    C = _dispatch.make_contiguous(C)
+    indices_A = _dispatch.make_contiguous(indices_A)
+    indices_A = indices_A.astype(np.int32)
+
+    grad_A = _dispatch.empty_like(A.shape, A)
+
+    function = dispatch_operation(
+        "homogeneous_polynomial_evaluation_vjp",
+        A,
+    )
+
+    function(
+        mops_tensor(grad_A),
+        mops_tensor(grad_output),
+        mops_tensor(A),
+        mops_tensor(C),
+        mops_tensor(indices_A),
+    )
+
+    return grad_A

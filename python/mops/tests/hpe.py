@@ -8,6 +8,15 @@ from mops import homogeneous_polynomial_evaluation as hpe
 np.random.seed(0xDEADBEEF)
 
 
+try:
+    import cupy as cp
+
+    cp.random.seed(0xDEADBEEF)
+    HAS_CUPY = True
+except ImportError:
+    HAS_CUPY = False
+
+
 @pytest.fixture
 def valid_arguments():
     A = np.random.rand(100, 20)
@@ -70,3 +79,19 @@ def test_hpe_out_of_bounds(valid_arguments):
         "parameters, it can only contain elements up to 19",
     ):
         hpe(A, C, indices_A)
+
+
+@pytest.mark.skipif(not HAS_CUPY, reason="CuPy is not installed")
+def test_hpe_cupy(valid_arguments):
+    A, C, indices_A = valid_arguments
+
+    A = cp.array(A)
+    C = cp.array(C)
+    indices_A = cp.array(indices_A)
+
+    reference = ref_hpe(A, C, indices_A)  # noqa: F841
+
+    with pytest.raises(
+        mops.status.MopsError, match="CUDA implementation does not exist yet"
+    ):
+        actual = hpe(A, C, indices_A)  # noqa: F841

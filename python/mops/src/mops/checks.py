@@ -1,11 +1,13 @@
 import numpy as np
 
+from . import _dispatch
+
 # For each operation, we only check the correctness of types and number of dimensions.
 # Size consistency checks will be performed in the C++ backend.
 
 
 def _check_number_of_dimensions(array, expected, operation, name):
-    if not isinstance(array, np.ndarray):
+    if not _dispatch.is_array(array):
         raise TypeError(f"`{name}` must be an array in {operation}, got {type(array)}")
 
     if len(array.shape) != expected:
@@ -16,8 +18,10 @@ def _check_number_of_dimensions(array, expected, operation, name):
 
 
 def _check_scalar(variable, operation, name):
-    if isinstance(variable, np.ndarray):
-        raise TypeError(f"{name} must be a scalar in {operation}, found a `np.ndarray`")
+    if not _dispatch.is_scalar(variable):
+        raise TypeError(
+            f"`{name}` must be a scalar in {operation}, got {type(variable)}"
+        )
 
 
 def _check_array_dtype(array, expected_dtype, operation, name):
@@ -137,3 +141,73 @@ def _check_sasaw(
     _check_array_dtype(indices_output_1, np.integer, function, "indices_output_1")
     _check_array_dtype(indices_output_2, np.integer, function, "indices_output_2")
     _check_scalar_dtype(output_size, np.integer, function, "output_size")
+
+
+def _check_hpe_vjp(grad_output, A, C, indices_A):
+    function = "homogeneous_polynomial_evaluation_vjp"
+
+    _check_number_of_dimensions(grad_output, 1, function, "grad_output")
+    _check_array_dtype(grad_output, np.floating, function, "grad_output")
+
+    _check_hpe(A, C, indices_A)
+
+
+def _check_sap_vjp(
+    grad_output, A, B, C, indices_A, indices_B, indices_output, output_size
+):
+    function = "sparse_accumulation_of_products_vjp"
+
+    _check_number_of_dimensions(grad_output, 2, function, "grad_output")
+    _check_array_dtype(grad_output, np.floating, function, "grad_output")
+
+    _check_sap(A, B, C, indices_A, indices_B, indices_output, output_size)
+
+
+def _check_opsa_vjp(grad_output, A, B, indices_output, output_size):
+    function = "outer_product_scatter_add_vjp"
+
+    _check_number_of_dimensions(grad_output, 3, function, "grad_output")
+    _check_array_dtype(grad_output, np.floating, function, "grad_output")
+
+    _check_opsa(A, B, indices_output, output_size)
+
+
+def _check_opsaw_vjp(grad_output, A, B, W, indices_W, indices_output):
+    function = "outer_product_scatter_add_with_weights_vjp"
+
+    _check_number_of_dimensions(grad_output, 3, function, "grad_output")
+    _check_array_dtype(grad_output, np.floating, function, "grad_output")
+
+    _check_opsaw(A, B, W, indices_W, indices_output)
+
+
+def _check_sasaw_vjp(
+    grad_output,
+    A,
+    B,
+    C,
+    W,
+    indices_A,
+    indices_W_1,
+    indices_W_2,
+    indices_output_1,
+    indices_output_2,
+    output_size,
+):
+    function = "sparse_accumulation_scatter_add_with_weights"
+
+    _check_number_of_dimensions(grad_output, 3, function, "grad_output")
+    _check_array_dtype(grad_output, np.floating, function, "grad_output")
+
+    _check_sasaw(
+        A,
+        B,
+        C,
+        W,
+        indices_A,
+        indices_W_1,
+        indices_W_2,
+        indices_output_1,
+        indices_output_2,
+        output_size,
+    )
