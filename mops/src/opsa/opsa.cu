@@ -83,7 +83,7 @@ void mops::cuda::outer_product_scatter_add(
 
     dim3 blockDim(WARP_SIZE * NWARPS_PER_BLOCK, 1, 1);
 
-    outer_product_scatter_add_kernel<scalar_t, 2, 2><<<gridDim, blockDim, 0>>>(
+    outer_product_scatter_add_kernel<scalar_t><<<gridDim, blockDim, 0>>>(
         A, B, mops::Tensor<int32_t, 1>{first_occurences, {output.shape[0]}}, indices_output, output
     );
 
