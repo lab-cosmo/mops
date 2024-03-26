@@ -45,10 +45,6 @@ __global__ __launch_bounds__(WARP_SIZE* NWARPS_PER_BLOCK) void outer_product_sca
         return;
     }
 
-    /* total number of columns of A we can process is TA * WARP_SIZE, so
-     * we need to loop find_integer_divisor( A.shape[1], TA*WARP_SIZE) times
-     */
-
     for (int i = threadRow; i < A.shape[1]; i += nThreadRow) {
         for (int j = threadCol; j < B.shape[1]; j += WARP_SIZE) {
 
