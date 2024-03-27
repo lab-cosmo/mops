@@ -10,7 +10,7 @@ torch::Tensor mops_torch::outer_product_scatter_add(
 }
 
 torch::Tensor OuterProductScatterAdd::forward(
-    torch::autograd::AutogradContext *ctx,
+    torch::autograd::AutogradContext* ctx,
     torch::Tensor A,
     torch::Tensor B,
     torch::Tensor indices_output,
@@ -77,7 +77,7 @@ torch::Tensor OuterProductScatterAdd::forward(
 }
 
 std::vector<torch::Tensor> OuterProductScatterAdd::backward(
-    torch::autograd::AutogradContext *ctx, std::vector<torch::Tensor> grad_outputs
+    torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
 ) {
     auto saved_variables = ctx->get_saved_variables();
     auto A = saved_variables[0];

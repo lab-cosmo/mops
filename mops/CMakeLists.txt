@@ -82,13 +82,14 @@ add_library(mops
     "src/opsaw/capi.cpp"
     "src/sasaw/sasaw.cpp"
     "src/sasaw/capi.cpp"
-    "src/utils.cpp"
+
+    "src/internal/checks.hpp"
+    "src/internal/utils.hpp"
+    "src/internal/utils.cpp"
 
     "include/mops.hpp"
     "include/mops.h"
     "include/mops/capi.hpp"
-    "include/mops/checks.hpp"
-    "include/mops/utils.hpp"
     "include/mops/opsa.hpp"
     "include/mops/opsa.h"
     "include/mops/sap.hpp"
@@ -99,22 +100,19 @@ add_library(mops
     "include/mops/opsaw.h"
     "include/mops/sasaw.hpp"
     "include/mops/sasaw.h"
-    "include/mops/checks.hpp"
-    "include/mops/utils.hpp"
 )
 
 if(CMAKE_CUDA_COMPILER)
     target_compile_definitions(mops PUBLIC MOPS_CUDA_ENABLED)
     target_sources(mops
         PRIVATE
-        "src/utils/cuda_utils.cu"
-        "include/mops/cuda_utils.cuh"
+        "src/internal/cuda_utils.cuh"
+        "src/internal/cuda_utils.cu"
+
+        "src/internal/cuda_first_occurences.cuh"
+        "src/internal/cuda_first_occurences.cu"
 
         "src/opsa/opsa.cu"
-        "src/hpe/hpe.cu"
-
-        "src/utils/first_occurences.cu"
-        "include/mops/cuda_first_occurences.hpp"
     )
 endif()
 
@@ -143,6 +141,8 @@ target_include_directories(mops PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
+
+target_include_directories(mops PRIVATE src)
 
 
 # Handle optimization and OpenMP flags

@@ -9,6 +9,14 @@ from mops import outer_product_scatter_add_with_weights as opsaw
 
 np.random.seed(0xDEADBEEF)
 
+try:
+    import cupy as cp
+
+    cp.random.seed(0xDEADBEEF)
+    HAS_CUPY = True
+except ImportError:
+    HAS_CUPY = False
+
 
 @pytest.fixture
 def valid_arguments():
@@ -87,3 +95,21 @@ def test_opsaw_out_of_bounds(valid_arguments):
         "parameters, it can only contain elements up to 19",
     ):
         opsaw(A, B, W, indices_W, indices_output)
+
+
+@pytest.mark.skipif(not HAS_CUPY, reason="CuPy is not installed")
+def test_opsaw_cupy(valid_arguments):
+    A, B, W, indices_W, indices_output = valid_arguments
+    A = cp.array(A)
+    B = cp.array(B)
+    W = cp.array(W)
+    indices_W = cp.array(indices_W)
+    indices_output = cp.array(indices_output)
+
+    reference = ref_opsaw(  # noqa: F841
+        A.get(), B.get(), W.get(), indices_W.get(), indices_output.get()
+    )
+    with pytest.raises(
+        mops.status.MopsError, match="CUDA implementation does not exist yet"
+    ):
+        actual = opsaw(A, B, W, indices_W, indices_output)  # noqa: F841

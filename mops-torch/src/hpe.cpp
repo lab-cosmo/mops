@@ -10,7 +10,7 @@ torch::Tensor mops_torch::homogeneous_polynomial_evaluation(
 }
 
 torch::Tensor HomogeneousPolynomialEvaluation::forward(
-    torch::autograd::AutogradContext *ctx, torch::Tensor A, torch::Tensor C, torch::Tensor indices_A
+    torch::autograd::AutogradContext* ctx, torch::Tensor A, torch::Tensor C, torch::Tensor indices_A
 ) {
     details::check_all_same_device({A, C, indices_A});
     details::check_floating_dtype({A, C});
@@ -63,7 +63,7 @@ torch::Tensor HomogeneousPolynomialEvaluation::forward(
 }
 
 std::vector<torch::Tensor> HomogeneousPolynomialEvaluation::backward(
-    torch::autograd::AutogradContext *ctx, std::vector<torch::Tensor> grad_outputs
+    torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
 ) {
     auto saved_variables = ctx->get_saved_variables();
     auto A = saved_variables[0];

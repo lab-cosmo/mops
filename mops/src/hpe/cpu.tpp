@@ -1,13 +1,12 @@
-#include <cassert>
 #include <algorithm>
 #include <stdexcept>
-#include <string>
 #include <vector>
 #include <array>
 
 #include "mops/hpe.hpp"
-#include "mops/checks.hpp"
-#include "mops/utils.hpp"
+
+#include "internal/checks.hpp"
+#include "internal/utils.hpp"
 
 
 template<typename scalar_t, uint8_t polynomial_order>
@@ -147,7 +146,7 @@ void _homogeneous_polynomial_evaluation_vjp_templated_polynomial_order(
     if (grad_A.data != nullptr) {
 
         check_same_shape(grad_A, "grad_A", A, "A", "hpe_vjp");
-        
+
         scalar_t* grad_o_ptr = grad_output.data;
         scalar_t* a_ptr = A.data;
         scalar_t* c_ptr = C.data;

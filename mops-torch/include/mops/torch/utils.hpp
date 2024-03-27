@@ -30,11 +30,11 @@ template <typename T> static mops::Tensor<T, 3> torch_to_mops_3d(torch::Tensor t
     };
 }
 
-void check_all_same_device(const std::vector<torch::Tensor> &tensors);
+void check_all_same_device(const std::vector<torch::Tensor>& tensors);
 
-void check_floating_dtype(const std::vector<torch::Tensor> &tensors);
+void check_floating_dtype(const std::vector<torch::Tensor>& tensors);
 
-void check_integer_dtype(const std::vector<torch::Tensor> &tensors);
+void check_integer_dtype(const std::vector<torch::Tensor>& tensors);
 
 void check_all_same_dtype(std::vector<torch::Tensor> tensors);
 

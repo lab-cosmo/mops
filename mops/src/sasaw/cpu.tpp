@@ -1,10 +1,9 @@
-#include <cassert>
 #include <algorithm>
-#include <stdexcept>
-#include <string>
 
 #include "mops/sasaw.hpp"
-#include "mops/checks.hpp"
+
+#include "internal/utils.hpp"
+#include "internal/checks.hpp"
 
 template<typename scalar_t>
 void mops::sparse_accumulation_scatter_add_with_weights(
@@ -63,7 +62,7 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     for (size_t i = 0; i < size_output_first_dim; i++) {
         // iterate over input indices that will write to the output index i
         // these are stored as entries (variable "e") in write_list[i]
-        // for example, `o_ptr_e` is a pointer to the first element of 
+        // for example, `o_ptr_e` is a pointer to the first element of
         // the row in the O tensor where the current contributions will be added
         for (size_t e : write_list[i]) {
             scalar_t* o_ptr_e = o_ptr + idx_o1_ptr[e] * output_shift_first_dim;

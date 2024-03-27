@@ -5,7 +5,6 @@
 
 #include "mops/exports.h"
 #include "mops/tensor.hpp"
-#include "mops/utils.hpp"
 
 namespace mops {
 /*

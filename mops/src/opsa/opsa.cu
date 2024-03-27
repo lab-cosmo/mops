@@ -1,8 +1,8 @@
-
-#include "mops/checks.hpp"
-#include "mops/cuda_first_occurences.hpp"
-#include "mops/cuda_utils.cuh"
 #include "mops/opsa.hpp"
+
+#include "internal/checks.hpp"
+#include "internal/cuda_first_occurences.cuh"
+#include "internal/cuda_utils.cuh"
 
 using namespace mops;
 using namespace mops::cuda;
@@ -12,7 +12,7 @@ using namespace mops::cuda;
 #define FULL_MASK 0xffffffff
 
 template <typename scalar_t, const int32_t TA, const int32_t TB>
-__global__ __launch_bounds__(WARP_SIZE *NWARPS_PER_BLOCK) void outer_product_scatter_add_kernel(
+__global__ __launch_bounds__(WARP_SIZE* NWARPS_PER_BLOCK) void outer_product_scatter_add_kernel(
     Tensor<scalar_t, 2> A,
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> first_occurences,
@@ -133,7 +133,7 @@ void mops::cuda::outer_product_scatter_add(
     check_sizes(B, "B", 1, output, "output", 2, "opsa");
     check_sizes(A, "A", 0, indices_output, "indices_output", 0, "opsa");
 
-    int32_t *first_occurences =
+    int32_t* first_occurences =
         calculate_first_occurences_cuda(indices_output.data, A.shape[0], output.shape[0]);
 
     dim3 gridDim(output.shape[0], 1, 1);
@@ -159,7 +159,7 @@ template void mops::cuda::outer_product_scatter_add<double>(
 );
 
 template <typename scalar_t>
-__global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE) outer_product_scatter_add_vjp_kernel(
+__global__ void __launch_bounds__(NWARPS_PER_BLOCK* WARP_SIZE) outer_product_scatter_add_vjp_kernel(
     Tensor<scalar_t, 2> A,
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> first_occurences,
@@ -175,16 +175,16 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK *WARP_SIZE) outer_product_sca
     const int32_t threadRow = threadIdx.x / WARP_SIZE;
     const int32_t nThreadRow = blockDim.x / WARP_SIZE;
 
-    void *sptr = buffer;
+    void* sptr = buffer;
     size_t space = 0;
 
-    scalar_t *buffer_grad_in = shared_array<scalar_t>(A.shape[1] * B.shape[1], sptr, &space);
+    scalar_t* buffer_grad_in = shared_array<scalar_t>(A.shape[1] * B.shape[1], sptr, &space);
 
-    scalar_t *buffer_A = shared_array<scalar_t>(nThreadRow * A.shape[1], sptr, &space);
-    scalar_t *buffer_B = shared_array<scalar_t>(nThreadRow * B.shape[1], sptr, &space);
+    scalar_t* buffer_A = shared_array<scalar_t>(nThreadRow * A.shape[1], sptr, &space);
+    scalar_t* buffer_B = shared_array<scalar_t>(nThreadRow * B.shape[1], sptr, &space);
 
-    scalar_t *buffer_grad_A;
-    scalar_t *buffer_grad_B;
+    scalar_t* buffer_grad_A;
+    scalar_t* buffer_grad_B;
 
     if (grad_A.data != nullptr) {
         buffer_grad_A = shared_array<scalar_t>(nThreadRow * A.shape[1], sptr, &space);
@@ -308,14 +308,14 @@ void mops::cuda::outer_product_scatter_add_vjp(
     check_sizes(B, "B", 1, grad_output, "grad_output", 2, "cuda_opsa_vjp");
     check_sizes(A, "A", 0, indices_output, "indices_output", 0, "cuda_opsa_vjp");
 
-    int32_t *first_occurences =
+    int32_t* first_occurences =
         calculate_first_occurences_cuda(indices_output.data, A.shape[0], grad_output.shape[0]);
 
     dim3 gridDim(grad_output.shape[0], 1, 1);
 
     dim3 blockDim(NWARPS_PER_BLOCK * WARP_SIZE, 1, 1);
 
-    void *sptr = 0;
+    void* sptr = 0;
     size_t space = 0;
 
     shared_array<scalar_t>(A.shape[1] * B.shape[1], sptr, &space);

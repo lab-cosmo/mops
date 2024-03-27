@@ -1,12 +1,10 @@
-#include <cassert>
 #include <algorithm>
-#include <stdexcept>
-#include <string>
 #include <array>
 
 #include "mops/sap.hpp"
-#include "mops/checks.hpp"
-#include "mops/utils.hpp"
+
+#include "internal/checks.hpp"
+#include "internal/utils.hpp"
 
 
 template<typename scalar_t>
@@ -70,7 +68,7 @@ void mops::sparse_accumulation_of_products(
 
     std::fill(interleft_o_ptr, interleft_o_ptr+size_first_dimension_interleft*size_second_dimension_o*simd_element_count, static_cast<scalar_t>(0.0));
     std::fill(remainder_o_ptr, remainder_o_ptr+size_remainder*size_second_dimension_o, static_cast<scalar_t>(0.0));
-    
+
     #pragma omp parallel for
     for (size_t i = 0; i < size_first_dimension_interleft; i++) {
         scalar_t* a_ptr_shifted_first_dim = interleft_a_ptr + i * size_second_dimension_a*simd_element_count;
@@ -83,7 +81,7 @@ void mops::sparse_accumulation_of_products(
             scalar_t current_c = c_ptr[j];
             for (size_t k = 0; k < simd_element_count; k++) {
                 o_ptr_shifted_second_dim[k] += current_c * a_ptr_shifted_second_dim[k] * b_ptr_shifted_second_dim[k];
-            }                                             
+            }
         }
     }
 
@@ -95,7 +93,7 @@ void mops::sparse_accumulation_of_products(
         scalar_t current_c = c_ptr[j];
         for (size_t k = 0; k < size_remainder; k++) {
             o_ptr_shifted_second_dim[k] += current_c * a_ptr_shifted_second_dim[k] * b_ptr_shifted_second_dim[k];
-        }                                             
+        }
     }
 
     un_interleave_tensor<scalar_t, simd_element_count>(output, interleft_o_ptr, remainder_o_ptr);
@@ -203,26 +201,32 @@ void mops::sparse_accumulation_of_products_vjp(
             std::fill(remainder_grad_b_ptr, remainder_grad_b_ptr+size_remainder*size_second_dimension_b, static_cast<scalar_t>(0.0));
         }
 
-        scalar_t* grad_output_i = interleft_grad_o_ptr; 
+        scalar_t* grad_output_i = interleft_grad_o_ptr;
         scalar_t* grad_a_i = interleft_grad_a_ptr;
         scalar_t* grad_b_i = interleft_grad_b_ptr;
         scalar_t* a_i = interleft_a_ptr;
         scalar_t* b_i = interleft_b_ptr;
         for (size_t i = 0; i < size_first_dimension_interleft; i++){
             for (size_t j = 0; j < c_size; j++) {
-                scalar_t* grad_output_i_j = grad_output_i + p_o_ptr[j] * simd_element_count;      
-                std::array<scalar_t, simd_element_count> common_factor; 
+                scalar_t* grad_output_i_j = grad_output_i + p_o_ptr[j] * simd_element_count;
+                std::array<scalar_t, simd_element_count> common_factor;
                 scalar_t c_ptr_j = c_ptr[j];
-                for (size_t l = 0; l < simd_element_count; l++) common_factor[l] = c_ptr_j * grad_output_i_j[l];
+                for (size_t l = 0; l < simd_element_count; l++) {
+                    common_factor[l] = c_ptr_j * grad_output_i_j[l];
+                }
                 if (calculate_grad_A) {
                     scalar_t* grad_a_i_j = grad_a_i + p_a_ptr[j] * simd_element_count;
                     scalar_t* b_i_j = b_i + p_b_ptr[j] * simd_element_count;
-                    for (size_t l = 0; l < simd_element_count; l++) grad_a_i_j[l] += common_factor[l] * b_i_j[l];
+                    for (size_t l = 0; l < simd_element_count; l++) {
+                        grad_a_i_j[l] += common_factor[l] * b_i_j[l];
+                    }
                 }
                 if (calculate_grad_B) {
                     scalar_t* grad_b_i_j = grad_b_i + p_b_ptr[j] * simd_element_count;
                     scalar_t* a_i_j = a_i + p_a_ptr[j] * simd_element_count;
-                    for (size_t l = 0; l < simd_element_count; l++) grad_b_i_j[l] += common_factor[l] * a_i_j[l];
+                    for (size_t l = 0; l < simd_element_count; l++) {
+                        grad_b_i_j[l] += common_factor[l] * a_i_j[l];
+                    }
                 }
             }
             grad_output_i += size_second_dimension_o * simd_element_count;
@@ -233,17 +237,24 @@ void mops::sparse_accumulation_of_products_vjp(
         }
 
         // Handle the remainder, i.e., the elements that do not fit inside a multiple of simd_element_count
-        grad_output_i = remainder_grad_o_ptr; 
+        grad_output_i = remainder_grad_o_ptr;
         grad_a_i = remainder_grad_a_ptr;
         grad_b_i = remainder_grad_b_ptr;
         a_i = remainder_a_ptr;
         b_i = remainder_b_ptr;
         for (size_t i = 0; i < size_remainder; i++){
-            for (size_t j = 0; j < c_size; j++) {                
+            for (size_t j = 0; j < c_size; j++) {
                 scalar_t grad_output_j = grad_output_i[p_o_ptr[j]];
                 scalar_t common_factor = grad_output_j * c_ptr[j];
-                if (calculate_grad_A) grad_a_i[p_a_ptr[j]] += common_factor * b_i[p_b_ptr[j]];
-                if (calculate_grad_B) grad_b_i[p_b_ptr[j]] += common_factor * a_i[p_a_ptr[j]];
+
+                if (calculate_grad_A) {
+                    grad_a_i[p_a_ptr[j]] += common_factor * b_i[p_b_ptr[j]];
+                }
+
+                if (calculate_grad_B) {
+                    grad_b_i[p_b_ptr[j]] += common_factor * a_i[p_a_ptr[j]];
+                }
+
             }
             grad_output_i += size_second_dimension_o;
             grad_a_i += size_second_dimension_a;
