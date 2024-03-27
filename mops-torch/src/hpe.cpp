@@ -23,12 +23,10 @@ torch::Tensor HomogeneousPolynomialEvaluation::forward(
     // Shape consistency checks are performed inside
     // mops::homogeneous_polynomial_evaluation
 
-    torch::Tensor output;
+    torch::Tensor output =
+        torch::empty({A.size(0)}, torch::TensorOptions().dtype(A.scalar_type()).device(A.device()));
+
     if (A.device().is_cpu()) {
-        output = torch::empty(
-            {A.size(0)}, torch::TensorOptions().dtype(A.scalar_type()).device(A.device())
-        );
-        assert(output.is_contiguous());
 
         AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "homogeneous_polynomial_evaluation", [&]() {
             mops::homogeneous_polynomial_evaluation<scalar_t>(
@@ -38,6 +36,18 @@ torch::Tensor HomogeneousPolynomialEvaluation::forward(
                 details::torch_to_mops_2d<int32_t>(indices_A)
             );
         });
+    }
+    if (A.device().is_cuda()) {
+
+        AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "homogeneous_polynomial_evaluation", [&]() {
+            mops::cuda::homogeneous_polynomial_evaluation<scalar_t>(
+                details::torch_to_mops_1d<scalar_t>(output),
+                details::torch_to_mops_2d<scalar_t>(A),
+                details::torch_to_mops_1d<scalar_t>(C),
+                details::torch_to_mops_2d<int32_t>(indices_A)
+            );
+        });
+
     } else {
         C10_THROW_ERROR(
             ValueError,

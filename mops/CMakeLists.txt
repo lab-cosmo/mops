@@ -39,8 +39,8 @@ endif()
 
 option(BUILD_SHARED_LIBS "Build shared libraries instead of static ones" OFF)
 
-OPTION(MOPS_OPENMP "Try to use OpenMP when compiling Sphericart" ON)
-OPTION(MOPS_ARCH_NATIVE "Try to use -march=native when compiling Sphericart" ON)
+OPTION(MOPS_OPENMP "Try to use OpenMP when compiling MOPs" ON)
+OPTION(MOPS_ARCH_NATIVE "Try to use -march=native when compiling MOPs" ON)
 
 set(LIB_INSTALL_DIR "lib" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install libraries")
 set(BIN_INSTALL_DIR "bin" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install DLL/binaries")
@@ -104,6 +104,8 @@ add_library(mops
 
 if(CMAKE_CUDA_COMPILER)
     target_compile_definitions(mops PUBLIC MOPS_CUDA_ENABLED)
+    set_target_properties(mops PROPERTIES CUDA_ARCHITECTURES native)
+    
     target_sources(mops
         PRIVATE
         "src/internal/cuda_utils.cuh"
@@ -113,7 +115,9 @@ if(CMAKE_CUDA_COMPILER)
         "src/internal/cuda_first_occurences.cu"
 
         "src/opsa/opsa.cu"
+        "src/hpe/hpe.cu"
     )
+    
 endif()
 
 target_compile_features(mops PUBLIC cxx_std_17)
