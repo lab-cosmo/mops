@@ -11,8 +11,8 @@
  * refers, to the number of output elements. The elements of receiver_list **must** be sorted such
  * that all references to each index appear contiguously and continuously.
  */
-int32_t *calculate_first_occurences_cuda(
-    const int32_t *receiver_list, int32_t nelements_input, int32_t nelements_output
+int32_t* calculate_first_occurences_cuda(
+    const int32_t* receiver_list, int32_t nelements_input, int32_t nelements_output
 );
 
 #endif // FIRST_OCCURENCES_HP

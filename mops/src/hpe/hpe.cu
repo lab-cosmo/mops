@@ -25,12 +25,12 @@ __global__ void homogeneous_polynomial_evaluation_kernel(
     int32_t nnu1 = A.shape[1];
     int32_t nbasis = C.shape[0];
 
-    void *sptr = buffer;
+    void* sptr = buffer;
     size_t space = 0;
 
     /* shared buffers */
-    scalar_t *buffer_nu1 = shared_array<scalar_t>(nnu1, sptr, &space);
-    scalar_t *tmp_sum = shared_array<scalar_t>(blockDim.x / WARP_SIZE, sptr, &space);
+    scalar_t* buffer_nu1 = shared_array<scalar_t>(nnu1, sptr, &space);
+    scalar_t* tmp_sum = shared_array<scalar_t>(blockDim.x / WARP_SIZE, sptr, &space);
 
     int32_t batch_id = blockIdx.x;
 
@@ -104,7 +104,7 @@ void mops::cuda::homogeneous_polynomial_evaluation(
 
     dim3 thread_block(128, 1, 1);
 
-    void *sptr = nullptr;
+    void* sptr = nullptr;
     size_t space = 0;
 
     shared_array<scalar_t>(nnu1, sptr, &space);
