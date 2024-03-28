@@ -106,9 +106,7 @@ def test_opsaw_cupy(valid_arguments):
     indices_W = cp.array(indices_W)
     indices_output = cp.array(indices_output)
 
-    reference = ref_opsaw(  # noqa: F841
-        A.get(), B.get(), W.get(), indices_W.get(), indices_output.get()
-    )
+    reference = ref_opsaw(A, B, W, indices_W, indices_output)  # noqa: F841
     with pytest.raises(
         mops.status.MopsError, match="CUDA implementation does not exist yet"
     ):

@@ -96,12 +96,12 @@ def test_sap_cupy(valid_arguments):
     indices_output = cp.array(indices_output)
 
     reference = ref_sap(  # noqa: F841
-        A.get(),
-        B.get(),
-        C.get(),
-        indices_A.get(),
-        indices_B.get(),
-        indices_output.get(),
+        A,
+        B,
+        C,
+        indices_A,
+        indices_B,
+        indices_output,
         output_size,
     )
     with pytest.raises(
