@@ -1,6 +1,6 @@
 #include "cpu.tpp"
 
-// explicit instanciations of templates
+// explicit instantiations of templates
 template void mops::outer_product_scatter_add<float>(
     Tensor<float, 3> output, Tensor<float, 2> A, Tensor<float, 2> B, Tensor<int32_t, 1> indices_output
 );
@@ -34,7 +34,7 @@ void mops::cuda::
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
 
-// explicit instanciations of CUDA templates
+// explicit instantiations of CUDA templates
 template void mops::cuda::outer_product_scatter_add<float>(
     Tensor<float, 3> output, Tensor<float, 2> A, Tensor<float, 2> B, Tensor<int32_t, 1> indices_output
 );

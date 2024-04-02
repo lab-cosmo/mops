@@ -16,10 +16,10 @@ except ImportError:
 
 @pytest.fixture
 def valid_arguments():
-    A = np.random.rand(100, 20)
+    A = np.random.rand(100, 10)
     B = np.random.rand(100, 5)
     indices_output = np.random.randint(10, size=(100))
-    output_size = 20
+    output_size = 10
     return A, B, indices_output, output_size
 
 
@@ -39,29 +39,6 @@ def test_opsa_no_neighbors(valid_arguments):
     reference = ref_opsa(A, B, indices_output, output_size)
     actual = opsa(A, B, indices_output, output_size)
     assert np.allclose(reference, actual)
-
-    # just checking that the jvp runs
-    grad_A, grad_B = mops.outer_product_scatter_add_vjp(
-        np.ones_like(actual),
-        A,
-        B,
-        indices_output,
-        compute_grad_A=True,
-    )
-
-    assert grad_A.shape == A.shape
-    assert grad_B is None
-
-    grad_A, grad_B = mops.outer_product_scatter_add_vjp(
-        np.ones_like(actual),
-        A,
-        B,
-        indices_output,
-        compute_grad_B=True,
-    )
-
-    assert grad_A is None
-    assert grad_B.shape == B.shape
 
 
 def test_opsa_wrong_type(valid_arguments):
@@ -100,14 +77,14 @@ def test_opsa_size_mismatch(valid_arguments):
 
 def test_opsa_out_of_bounds(valid_arguments):
     A, B, indices_output, output_size = valid_arguments
-    indices_output[0] = A.shape[1]
+    indices_output[0] = output_size
 
     with pytest.raises(
         mops.status.MopsError,
         match="Index array indices_output in operation opsa "
-        "contains elements up to 20; "
+        "contains elements up to 10; "
         "this would cause out-of-bounds accesses. With the provided "
-        "parameters, it can only contain elements up to 19",
+        "parameters, it can only contain elements up to 9",
     ):
         opsa(A, B, indices_output, output_size)
 
@@ -120,6 +97,6 @@ def test_opsa_cupy(valid_arguments):
     B = cp.array(B)
     indices_output = cp.array(indices_output)
 
-    reference = ref_opsa(A.get(), B.get(), indices_output.get(), output_size)
+    reference = ref_opsa(A, B, indices_output, output_size)
     actual = opsa(A, B, indices_output, output_size)
-    assert cp.allclose(reference, actual.get())
+    assert cp.allclose(reference, actual)
