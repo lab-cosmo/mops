@@ -89,9 +89,7 @@ def test_hpe_cupy(valid_arguments):
     C = cp.array(C)
     indices_A = cp.array(indices_A)
 
-    reference = ref_hpe(A, C, indices_A)  # noqa: F841
-
-    with pytest.raises(
-        mops.status.MopsError, match="CUDA implementation does not exist yet"
-    ):
-        actual = hpe(A, C, indices_A)  # noqa: F841
+    reference = ref_hpe(A, C, indices_A) 
+    actual = hpe(A, C, indices_A)
+    
+    assert cp.allclose(reference, actual)
