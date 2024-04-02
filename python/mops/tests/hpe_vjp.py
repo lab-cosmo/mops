@@ -95,5 +95,5 @@ def test_hpe_vjp_cupy(valid_arguments):
 
     reference = ref_hpe_vjp(grad_output, A, C, indices_A)
     actual = hpe_vjp(grad_output, A, C, indices_A)
-    
+
     assert cp.allclose(reference, actual)

@@ -215,8 +215,7 @@ __global__ void homogeneous_polynomial_evaluation_vjp_kernel(
     /* shared buffers */
     scalar_t* buffer_nu1 = shared_array<scalar_t>(nnu1, sptr, &space);
     scalar_t* buffer_gradA = shared_array<scalar_t>(nnu1, sptr, &space);
-    int32_t* buffer_indices_A =
-        shared_array<int32_t>(blockDim.x * polynomial_order, sptr, &space);
+    int32_t* buffer_indices_A = shared_array<int32_t>(blockDim.x * polynomial_order, sptr, &space);
 
     int32_t batch_id = blockIdx.x;
 
