@@ -38,8 +38,6 @@ void mops::cuda::
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
 
-#endif
-
 // explicit instantiations of CUDA templates
 template void mops::cuda::homogeneous_polynomial_evaluation<float>(
     Tensor<float, 1> output, Tensor<float, 2> A, Tensor<float, 1> C, Tensor<int32_t, 2> indices_A
