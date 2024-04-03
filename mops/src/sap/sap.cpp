@@ -58,7 +58,6 @@ void mops::cuda::
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
 
-
 // explicit instantiations of CUDA templates
 template void mops::cuda::sparse_accumulation_of_products<float>(
     Tensor<float, 2> output,
@@ -103,6 +102,5 @@ template void mops::cuda::sparse_accumulation_of_products_vjp<double>(
     Tensor<int32_t, 1> indices_B,
     Tensor<int32_t, 1> indices_output
 );
-
 
 #endif
