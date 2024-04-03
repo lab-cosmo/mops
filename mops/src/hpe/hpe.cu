@@ -11,9 +11,6 @@ using namespace mops::cuda;
 
 #define FULL_MASK 0xffffffff
 
-using namespace mops;
-using namespace mops::cuda;
-
 template <typename scalar_t, int32_t polynomial_order>
 __global__ void homogeneous_polynomial_evaluation_kernel(
     Tensor<scalar_t, 1> output, Tensor<scalar_t, 2> A, Tensor<scalar_t, 1> C, Tensor<int32_t, 2> indices_A
