@@ -46,10 +46,26 @@ torch::Tensor SparseAccumulationOfProducts::forward(
             {A.size(0), output_size},
             torch::TensorOptions().dtype(A.scalar_type()).device(A.device())
         );
-        assert(output.is_contiguous());
 
         AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "sparse_accumulation_of_products", [&]() {
             mops::sparse_accumulation_of_products<scalar_t>(
+                details::torch_to_mops_2d<scalar_t>(output),
+                details::torch_to_mops_2d<scalar_t>(A),
+                details::torch_to_mops_2d<scalar_t>(B),
+                details::torch_to_mops_1d<scalar_t>(C),
+                details::torch_to_mops_1d<int32_t>(indices_A),
+                details::torch_to_mops_1d<int32_t>(indices_B),
+                details::torch_to_mops_1d<int32_t>(indices_output)
+            );
+        });
+    } else if (A.device().is_cuda()) {
+        output = torch::empty(
+            {A.size(0), output_size},
+            torch::TensorOptions().dtype(A.scalar_type()).device(A.device())
+        );
+
+        AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "sparse_accumulation_of_products", [&]() {
+            mops::cuda::sparse_accumulation_of_products<scalar_t>(
                 details::torch_to_mops_2d<scalar_t>(output),
                 details::torch_to_mops_2d<scalar_t>(A),
                 details::torch_to_mops_2d<scalar_t>(B),
