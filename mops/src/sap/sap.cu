@@ -11,26 +11,6 @@ using namespace mops::cuda;
 
 #define FULL_MASK 0xffffffff
 
-// def sparse_accumulation_of_products(
-//     A, B, C, indices_A, indices_B, indices_output, output_size
-// ):
-//     _check_sap(A, B, C, indices_A, indices_B, indices_output, output_size)
-
-//     output = _dispatch.zeros_like((A.shape[0], output_size), A)
-//     K = C.shape[0]
-//     for k in range(K):
-//         output[:, indices_output[k]] += C[k] * A[:, indices_A[k]] * B[:, indices_B[k]]
-
-//     return output
-
-// A = torch.rand(32000, 13, requires_grad=True)
-// B = torch.rand(32000, 7, requires_grad=True)
-// C = torch.rand(900)
-// indices_A = torch.randint(13, size=(900,), dtype=torch.int32)
-// indices_B = torch.randint(7, size=(900,), dtype=torch.int32)
-// n_output = 100
-// indices_output = torch.randint(n_output, size=(900,), dtype=torch.int32)
-
 template <typename scalar_t>
 __global__ void sparse_accumulation_of_products_kernel(
     Tensor<scalar_t, 2> output,
