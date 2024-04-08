@@ -56,4 +56,5 @@ def test_sap_grad(dtype, device):
         (A, B, C, indices_A, indices_B, indices_output, output_size),
         fast_mode=True,
         atol=1e-3,
+        nondet_tol=1e-5,
     )

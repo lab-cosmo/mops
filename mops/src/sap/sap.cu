@@ -288,7 +288,7 @@ void mops::cuda::sparse_accumulation_of_products_vjp(
 
     shared_array<scalar_t>(WARP_SIZE * grad_output.shape[1], sptr, &space);
     shared_array<int32_t>(indices_A.shape[0], sptr, &space);
-    
+
     if (grad_B.data != nullptr) {
         shared_array<scalar_t>(WARP_SIZE * A.shape[1], sptr, &space);
         shared_array<scalar_t>(WARP_SIZE * grad_B.shape[1], sptr, &space);

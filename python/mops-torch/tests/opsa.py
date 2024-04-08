@@ -24,8 +24,7 @@ def test_opsa(dtype, device):
     output_size = 10
 
     indices_output = torch.sort(
-        torch.randint(output_size, size=(100,),
-                      dtype=torch.int32, device=device)
+        torch.randint(output_size, size=(100,), dtype=torch.int32, device=device)
     ).values
     # substitute all 1s by 2s so as to test the no-neighbor case
     indices_output[indices_output == 1] = 2
@@ -38,8 +37,7 @@ def test_opsa(dtype, device):
         device=device,
     )
 
-    actual = mops.torch.outer_product_scatter_add(
-        A, B, indices_output, output_size)
+    actual = mops.torch.outer_product_scatter_add(A, B, indices_output, output_size)
 
     assert torch.allclose(reference, actual)
 
@@ -56,8 +54,7 @@ def test_opsa_grad(dtype, device):
 
     output_size = 10
     indices = torch.sort(
-        torch.randint(output_size, size=(100,),
-                      dtype=torch.int32, device=device)
+        torch.randint(output_size, size=(100,), dtype=torch.int32, device=device)
     ).values
 
     assert torch.autograd.gradcheck(
@@ -65,5 +62,5 @@ def test_opsa_grad(dtype, device):
         (A, B, indices, output_size),
         fast_mode=True,
         atol=1e-3,
-        nondet_tol=1e-5
+        nondet_tol=1e-5,
     )
