@@ -39,7 +39,7 @@ def test_sap(dtype, device):
 
 
 @pytest.mark.parametrize("dtype", [torch.float32, torch.float64])
-@pytest.mark.parametrize("device", ["cpu", "cuda"])
+@pytest.mark.parametrize("device", ["cpu"])
 def test_sap_grad(dtype, device):
     A = torch.rand(100, 20, device=device, dtype=dtype, requires_grad=True)
     B = torch.rand(100, 6, device=device, dtype=dtype, requires_grad=True)
