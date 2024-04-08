@@ -5,10 +5,18 @@ from mops.reference_implementations import sparse_accumulation_of_products as re
 
 torch.manual_seed(0xDEADBEEF)
 
+if torch.cuda.is_available():
+    HAS_CUDA = True
+else:
+    HAS_CUDA = False
+
 
 @pytest.mark.parametrize("dtype", [torch.float32, torch.float64])
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
 def test_sap(dtype, device):
+    if device == "cuda" and not HAS_CUDA:
+        pytest.skip("CUDA not available")
+
     A = torch.rand(100, 20, device=device, dtype=dtype)
     B = torch.rand(100, 6, device=device, dtype=dtype)
     C = torch.rand(30, device=device, dtype=dtype)
@@ -38,9 +46,12 @@ def test_sap(dtype, device):
     assert torch.allclose(reference, actual)
 
 
-@pytest.mark.parametrize("dtype", [torch.float64])
+@pytest.mark.parametrize("dtype", [torch.float32, torch.float64])
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
 def test_sap_grad(dtype, device):
+    if device == "cuda" and not HAS_CUDA:
+        pytest.skip("CUDA not available")
+
     A = torch.rand(100, 20, device=device, dtype=dtype, requires_grad=True)
     B = torch.rand(100, 6, device=device, dtype=dtype, requires_grad=True)
     C = torch.rand(30, device=device, dtype=dtype)
