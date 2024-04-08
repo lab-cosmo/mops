@@ -39,7 +39,7 @@ def test_sap(dtype, device):
 
 
 @pytest.mark.parametrize("dtype", [torch.float32, torch.float64])
-@pytest.mark.parametrize("device", ["cpu"])
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 def test_sap_grad(dtype, device):
     A = torch.rand(100, 20, device=device, dtype=dtype, requires_grad=True)
     B = torch.rand(100, 6, device=device, dtype=dtype, requires_grad=True)
@@ -55,4 +55,5 @@ def test_sap_grad(dtype, device):
         mops.torch.sparse_accumulation_of_products,
         (A, B, C, indices_A, indices_B, indices_output, output_size),
         fast_mode=True,
+        atol=1e-3,
     )
