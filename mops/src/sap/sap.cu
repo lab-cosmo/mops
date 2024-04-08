@@ -64,33 +64,18 @@ __global__ void sparse_accumulation_of_products_kernel(
 
     int32_t idx_start = blockIdx.x * WARP_SIZE;
 
-    for (int idx = threadIdx.x; idx < WARP_SIZE * A.shape[1]; idx += blockDim.x) {
-        buffer_A[idx] = A.data[idx_start * A.shape[1] + idx];
-    }
-    __syncthreads();
+    for (int i = threadIdx.x; i < WARP_SIZE * A.shape[1]; i += blockDim.x) {
+        int col = i % A.shape[1];
+        int row = i / A.shape[1];
 
-    // reshape in smem
-    for (int idx = threadIdx.x; idx < WARP_SIZE * A.shape[1]; idx += blockDim.x) {
-        int row = idx % A.shape[1];
-        int col = idx / A.shape[1];
-        scalar_t current = buffer_A[col * WARP_SIZE + row];
-        buffer_A[col * WARP_SIZE + row] = buffer_A[row * A.shape[1] + col];
-        buffer_A[row * A.shape[1] + col] = current;
+        buffer_A[col * WARP_SIZE + row] = A.data[(idx_start + row) * A.shape[1] + col];
     }
 
-    for (int idx = threadIdx.x; idx < WARP_SIZE * B.shape[1]; idx += blockDim.x) {
-        buffer_B[idx] = B.data[idx_start * B.shape[1] + idx];
-    }
+    for (int i = threadIdx.x; i < WARP_SIZE * B.shape[1]; i += blockDim.x) {
+        int col = i % B.shape[1];
+        int row = i / B.shape[1];
 
-    __syncthreads();
-
-    // reshape in smem
-    for (int idx = threadIdx.x; idx < WARP_SIZE * B.shape[1]; idx += blockDim.x) {
-        int row = idx % B.shape[1];
-        int col = idx / B.shape[1];
-        scalar_t current = buffer_B[col * WARP_SIZE + row];
-        buffer_B[col * WARP_SIZE + row] = buffer_B[row * B.shape[1] + col];
-        buffer_B[row * B.shape[1] + col] = current;
+        buffer_B[col * WARP_SIZE + row] = B.data[(idx_start + row) * B.shape[1] + col];
     }
 
     for (int idx = threadIdx.x; idx < WARP_SIZE * output.shape[1]; idx += blockDim.x) {
@@ -113,8 +98,11 @@ __global__ void sparse_accumulation_of_products_kernel(
 
     __syncthreads();
 
-    for (int idx = threadIdx.x; idx < WARP_SIZE * output.shape[1]; idx += blockDim.x) {
-        output.data[idx_start * output.shape[1] + idx] = buffer_out[idx];
+    for (int i = threadIdx.x; i < WARP_SIZE * output.shape[1]; i += blockDim.x) {
+        int col = i % output.shape[1];
+        int row = i / output.shape[1];
+
+        output.data[(idx_start + row) * output.shape[1] + col] = buffer_out[col * WARP_SIZE + row];
     }
 }
 
