@@ -108,6 +108,7 @@ void mops::cuda::sparse_accumulation_of_products(
     shared_array<scalar_t>(WARP_SIZE * output.shape[1], sptr, &space);
     shared_array<scalar_t>(WARP_SIZE * A.shape[1], sptr, &space);
     shared_array<scalar_t>(WARP_SIZE * B.shape[1], sptr, &space);
+    shared_array<int32_t>(indices_A.shape[0], sptr, &space);
 
     sparse_accumulation_of_products_kernel<scalar_t>
         <<<block_dim, thread_block, space>>>(output, A, B, C, indices_A, indices_B, indices_output);
@@ -158,6 +159,7 @@ __global__ void sparse_accumulation_of_products_vjp_kernel(
     /* shared buffers */
     scalar_t* buffer_gradout =
         shared_array<scalar_t>(WARP_SIZE * grad_output.shape[1], sptr, &space);
+    int32_t* packed_indices = shared_array<int32_t>(indices_A.shape[0], sptr, &space);
 
     scalar_t* buffer_A;
     scalar_t* buffer_B;
@@ -173,8 +175,6 @@ __global__ void sparse_accumulation_of_products_vjp_kernel(
         buffer_B = shared_array<scalar_t>(WARP_SIZE * B.shape[1], sptr, &space);
         buffer_gradA = shared_array<scalar_t>(WARP_SIZE * grad_A.shape[1], sptr, &space);
     }
-
-    int32_t* packed_indices = shared_array<int32_t>(indices_A.shape[0], sptr, &space);
 
     int32_t laneID = threadIdx.x % WARP_SIZE;
     int32_t rowID = threadIdx.x / WARP_SIZE;
@@ -287,7 +287,8 @@ void mops::cuda::sparse_accumulation_of_products_vjp(
     size_t space = 0;
 
     shared_array<scalar_t>(WARP_SIZE * grad_output.shape[1], sptr, &space);
-
+    shared_array<int32_t>(indices_A.shape[0], sptr, &space);
+    
     if (grad_B.data != nullptr) {
         shared_array<scalar_t>(WARP_SIZE * A.shape[1], sptr, &space);
         shared_array<scalar_t>(WARP_SIZE * grad_B.shape[1], sptr, &space);
