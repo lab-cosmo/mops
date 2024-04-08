@@ -35,7 +35,7 @@ __global__ void sparse_accumulation_of_products_kernel(
 
     int32_t laneID = threadIdx.x % WARP_SIZE;
     int32_t rowID = threadIdx.x / WARP_SIZE;
-    int32_t nRows = blockDim.x / WARP_SIZE;
+    int32_t nRows = find_integer_divisor(blockDim.x, WARP_SIZE);
 
     for (int32_t i = threadIdx.x; i < indices_A.shape[0]; i += blockDim.x) {
         packed_indices[i] =
@@ -44,18 +44,32 @@ __global__ void sparse_accumulation_of_products_kernel(
 
     int32_t idx_start = blockIdx.x * WARP_SIZE;
 
+    for (int i = rowID; i < A.shape[1]; i += nRows) {
+
+        if ((idx_start + laneID) * A.shape[1] + i < A.shape[0] * A.shape[1]) {
+            buffer_A[i * WARP_SIZE + laneID] = A.data[(idx_start + laneID) * A.shape[1] + i];
+        }
+    }
+    /*
     for (int i = threadIdx.x; i < WARP_SIZE * A.shape[1]; i += blockDim.x) {
         int col = i % A.shape[1];
         int row = i / A.shape[1];
 
         buffer_A[col * WARP_SIZE + row] = A.data[(idx_start + row) * A.shape[1] + col];
-    }
+    }*/
 
-    for (int i = threadIdx.x; i < WARP_SIZE * B.shape[1]; i += blockDim.x) {
+    /*for (int i = threadIdx.x; i < WARP_SIZE * B.shape[1]; i += blockDim.x) {
         int col = i % B.shape[1];
         int row = i / B.shape[1];
 
         buffer_B[col * WARP_SIZE + row] = B.data[(idx_start + row) * B.shape[1] + col];
+    }*/
+
+    for (int i = rowID; i < B.shape[1]; i += nRows) {
+
+        if ((idx_start + laneID) * B.shape[1] + i < B.shape[0] * B.shape[1]) {
+            buffer_B[i * WARP_SIZE + laneID] = B.data[(idx_start + laneID) * B.shape[1] + i];
+        }
     }
 
     for (int idx = threadIdx.x; idx < WARP_SIZE * output.shape[1]; idx += blockDim.x) {
