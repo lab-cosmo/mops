@@ -5,6 +5,7 @@ from mops.reference_implementations import sparse_accumulation_of_products as re
 
 torch.manual_seed(0xDEADBEEF)
 
+
 @pytest.mark.parametrize("dtype", [torch.float32, torch.float64])
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
 def test_sap(dtype, device):
@@ -14,23 +15,28 @@ def test_sap(dtype, device):
     indices_A = torch.randint(20, size=(30,), dtype=torch.int32, device=device)
     indices_B = torch.randint(6, size=(30,), dtype=torch.int32, device=device)
     output_size = 35
-    indices_output = torch.randint(output_size, size=(30,), dtype=torch.int32, device=device)
+    indices_output = torch.randint(
+        output_size, size=(30,), dtype=torch.int32, device=device
+    )
 
     reference = torch.tensor(
         ref_sap(
-            A.clone().detach().cpu().numpy(),
-            B.clone().detach().cpu().numpy(),
-            C.clone().detach().cpu().numpy(),
-            indices_A.clone().detach().cpu().numpy(),
-            indices_B.clone().detach().cpu().numpy(),
-            indices_output.clone().detach().cpu().numpy(),
+            A.cpu().numpy(),
+            B.cpu().numpy(),
+            C.cpu().numpy(),
+            indices_A.cpu().numpy(),
+            indices_B.cpu().numpy(),
+            indices_output.cpu().numpy(),
             output_size,
-        )
+        ),
+        dtype=dtype,
+        device=device,
     )
     actual = mops.torch.sparse_accumulation_of_products(
         A, B, C, indices_A, indices_B, indices_output, output_size
     )
-    assert torch.allclose(reference, actual.cpu())
+    assert torch.allclose(reference, actual)
+
 
 @pytest.mark.parametrize("dtype", [torch.float32, torch.float64])
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
@@ -41,7 +47,9 @@ def test_sap_grad(dtype, device):
     indices_A = torch.randint(20, size=(30,), dtype=torch.int32, device=device)
     indices_B = torch.randint(6, size=(30,), dtype=torch.int32, device=device)
     output_size = 35
-    indices_output = torch.randint(output_size, size=(30,), dtype=torch.int32, device=device)
+    indices_output = torch.randint(
+        output_size, size=(30,), dtype=torch.int32, device=device
+    )
 
     assert torch.autograd.gradcheck(
         mops.torch.sparse_accumulation_of_products,
