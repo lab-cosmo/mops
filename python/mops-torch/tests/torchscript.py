@@ -1,3 +1,5 @@
+import io
+
 import mops.torch
 import torch
 
@@ -29,6 +31,11 @@ def test_hpe_torchscript():
     assert torch.allclose(result_torch, result_torchscript)
     assert torch.allclose(A_torch.grad, A_torchscript.grad)
 
+    with io.BytesIO() as buffer:
+        torch.jit.save(scripted_fn, buffer)
+        buffer.seek(0)
+        torch.jit.load(buffer)
+
 
 def test_opsa_torchscript():
 
@@ -58,6 +65,11 @@ def test_opsa_torchscript():
     assert torch.allclose(result_torch, result_torchscript)
     assert torch.allclose(A_torch.grad, A_torchscript.grad)
     assert torch.allclose(B_torch.grad, B_torchscript.grad)
+
+    with io.BytesIO() as buffer:
+        torch.jit.save(scripted_fn, buffer)
+        buffer.seek(0)
+        torch.jit.load(buffer)
 
 
 def test_sap_torchscript():
@@ -109,6 +121,11 @@ def test_sap_torchscript():
     assert torch.allclose(A_torch.grad, A_torchscript.grad)
     assert torch.allclose(B_torch.grad, B_torchscript.grad)
 
+    with io.BytesIO() as buffer:
+        torch.jit.save(scripted_fn, buffer)
+        buffer.seek(0)
+        torch.jit.load(buffer)
+
 
 def test_opsaw_torchscript():
 
@@ -148,6 +165,11 @@ def test_opsaw_torchscript():
     assert torch.allclose(A_torch.grad, A_torchscript.grad)
     assert torch.allclose(B_torch.grad, B_torchscript.grad)
     assert torch.allclose(W_torch.grad, W_torchscript.grad)
+
+    with io.BytesIO() as buffer:
+        torch.jit.save(scripted_fn, buffer)
+        buffer.seek(0)
+        torch.jit.load(buffer)
 
 
 def test_sasaw_torchscript():
@@ -231,3 +253,8 @@ def test_sasaw_torchscript():
     assert torch.allclose(A_torch.grad, A_torchscript.grad)
     assert torch.allclose(B_torch.grad, B_torchscript.grad)
     assert torch.allclose(W_torch.grad, W_torchscript.grad)
+
+    with io.BytesIO() as buffer:
+        torch.jit.save(scripted_fn, buffer)
+        buffer.seek(0)
+        torch.jit.load(buffer)
