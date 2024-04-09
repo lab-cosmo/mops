@@ -1,5 +1,5 @@
-import torch
 import mops.torch
+import torch
 
 
 def test_hpe_torchscript():
@@ -12,11 +12,18 @@ def test_hpe_torchscript():
     C_torchscript = C_torch.clone().detach()
     indices_A_torchscript = indices_A_torch.clone().detach()
 
-    result_torch = mops.torch.homogeneous_polynomial_evaluation(A_torch, C_torch, indices_A_torch)
+    result_torch = mops.torch.homogeneous_polynomial_evaluation(
+        A_torch, C_torch, indices_A_torch
+    )
     torch.sum(result_torch).backward()
 
-    scripted_fn = torch.jit.script(mops.torch.homogeneous_polynomial_evaluation)
-    result_torchscript = scripted_fn(A_torchscript, C_torchscript, indices_A_torchscript)
+    def fn(A, C, indices):
+        return mops.torch.homogeneous_polynomial_evaluation(A, C, indices)
+
+    scripted_fn = torch.jit.script(fn)
+    result_torchscript = scripted_fn(
+        A_torchscript, C_torchscript, indices_A_torchscript
+    )
     torch.sum(result_torchscript).backward()
 
     assert torch.allclose(result_torch, result_torchscript)
@@ -34,11 +41,18 @@ def test_opsa_torchscript():
     B_torchscript = B_torch.clone().detach().requires_grad_(True)
     indices_output_torchscript = indices_output_torch.clone().detach()
 
-    result_torch = mops.torch.outer_product_scatter_add(A_torch, B_torch, indices_output_torch, output_size)
+    result_torch = mops.torch.outer_product_scatter_add(
+        A_torch, B_torch, indices_output_torch, output_size
+    )
     torch.sum(result_torch).backward()
 
-    scripted_fn = torch.jit.script(mops.torch.outer_product_scatter_add)
-    result_torchscript = scripted_fn(A_torchscript, B_torchscript, indices_output_torchscript, output_size)
+    def fn(A, B, indices, output_size: int):
+        return mops.torch.outer_product_scatter_add(A, B, indices, output_size)
+
+    scripted_fn = torch.jit.script(fn)
+    result_torchscript = scripted_fn(
+        A_torchscript, B_torchscript, indices_output_torchscript, output_size
+    )
     torch.sum(result_torchscript).backward()
 
     assert torch.allclose(result_torch, result_torchscript)
@@ -63,11 +77,32 @@ def test_sap_torchscript():
     indices_B_torchscript = indices_B_torch.clone().detach()
     indices_output_torchscript = indices_output_torch.clone().detach()
 
-    result_torch = mops.torch.sparse_accumulation_of_products(A_torch, B_torch, C_torch, indices_A_torch, indices_B_torch, indices_output_torch, output_size)
+    result_torch = mops.torch.sparse_accumulation_of_products(
+        A_torch,
+        B_torch,
+        C_torch,
+        indices_A_torch,
+        indices_B_torch,
+        indices_output_torch,
+        output_size,
+    )
     torch.sum(result_torch).backward()
 
-    scripted_fn = torch.jit.script(mops.torch.sparse_accumulation_of_products)
-    result_torchscript = scripted_fn(A_torchscript, B_torchscript, C_torchscript, indices_A_torchscript, indices_B_torchscript, indices_output_torchscript, output_size)
+    def fn(A, B, C, indices_A, indices_B, indices_output, output_size: int):
+        return mops.torch.sparse_accumulation_of_products(
+            A, B, C, indices_A, indices_B, indices_output, output_size
+        )
+
+    scripted_fn = torch.jit.script(fn)
+    result_torchscript = scripted_fn(
+        A_torchscript,
+        B_torchscript,
+        C_torchscript,
+        indices_A_torchscript,
+        indices_B_torchscript,
+        indices_output_torchscript,
+        output_size,
+    )
     torch.sum(result_torchscript).backward()
 
     assert torch.allclose(result_torch, result_torchscript)
@@ -89,11 +124,24 @@ def test_opsaw_torchscript():
     indices_W_torchscript = indices_W_torch.clone().detach()
     indices_output_torchscript = indices_output_torch.clone().detach()
 
-    result_torch = mops.torch.outer_product_scatter_add_with_weights(A_torch, B_torch, W_torch, indices_W_torch, indices_output_torch)
+    result_torch = mops.torch.outer_product_scatter_add_with_weights(
+        A_torch, B_torch, W_torch, indices_W_torch, indices_output_torch
+    )
     torch.sum(result_torch).backward()
 
-    scripted_fn = torch.jit.script(mops.torch.outer_product_scatter_add_with_weights)
-    result_torchscript = scripted_fn(A_torchscript, B_torchscript, W_torchscript, indices_W_torchscript, indices_output_torchscript)
+    def fn(A, B, W, indices_W, indices_output):
+        return mops.torch.outer_product_scatter_add_with_weights(
+            A, B, W, indices_W, indices_output
+        )
+
+    scripted_fn = torch.jit.script(fn)
+    result_torchscript = scripted_fn(
+        A_torchscript,
+        B_torchscript,
+        W_torchscript,
+        indices_W_torchscript,
+        indices_output_torchscript,
+    )
     torch.sum(result_torchscript).backward()
 
     assert torch.allclose(result_torch, result_torchscript)
@@ -125,11 +173,58 @@ def test_sasaw_torchscript():
     indices_output_1_torchscript = indices_output_1_torch.clone().detach()
     indices_output_2_torchscript = indices_output_2_torch.clone().detach()
 
-    result_torch = mops.torch.sparse_accumulation_scatter_add_with_weights(A_torch, B_torch, C_torch, W_torch, indices_A_torch, indices_W_1_torch, indices_W_2_torch, indices_output_1_torch, indices_output_2_torch, output_size)
+    result_torch = mops.torch.sparse_accumulation_scatter_add_with_weights(
+        A_torch,
+        B_torch,
+        C_torch,
+        W_torch,
+        indices_A_torch,
+        indices_W_1_torch,
+        indices_W_2_torch,
+        indices_output_1_torch,
+        indices_output_2_torch,
+        output_size,
+    )
     torch.sum(result_torch).backward()
 
-    scripted_fn = torch.jit.script(mops.torch.sparse_accumulation_scatter_add_with_weights)
-    result_torchscript = scripted_fn(A_torchscript, B_torchscript, C_torchscript, W_torchscript, indices_A_torchscript, indices_W_1_torchscript, indices_W_2_torchscript, indices_output_1_torchscript, indices_output_2_torchscript, output_size)
+    def fn(
+        A,
+        B,
+        C,
+        W,
+        indices_A,
+        indices_W_1,
+        indices_W_2,
+        indices_output_1,
+        indices_output_2,
+        output_size: int,
+    ):
+        return mops.torch.sparse_accumulation_scatter_add_with_weights(
+            A,
+            B,
+            C,
+            W,
+            indices_A,
+            indices_W_1,
+            indices_W_2,
+            indices_output_1,
+            indices_output_2,
+            output_size,
+        )
+
+    scripted_fn = torch.jit.script(fn)
+    result_torchscript = scripted_fn(
+        A_torchscript,
+        B_torchscript,
+        C_torchscript,
+        W_torchscript,
+        indices_A_torchscript,
+        indices_W_1_torchscript,
+        indices_W_2_torchscript,
+        indices_output_1_torchscript,
+        indices_output_2_torchscript,
+        output_size,
+    )
     torch.sum(result_torchscript).backward()
 
     assert torch.allclose(result_torch, result_torchscript)
