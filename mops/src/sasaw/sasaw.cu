@@ -25,9 +25,6 @@ __global__ __launch_bounds__(WARP_SIZE* NWARPS_PER_BLOCK) void sparse_accumulati
     Tensor<int32_t, 1> first_occurences
 ) {
 
-    int laneID = threadIdx.x % WARP_SIZE;
-    int warpID = threadIdx.x / WARP_SIZE;
-
     extern __shared__ char buffer[];
 
     void* sptr = buffer;
@@ -43,6 +40,9 @@ __global__ __launch_bounds__(WARP_SIZE* NWARPS_PER_BLOCK) void sparse_accumulati
     int8_t* buffer_indices_A = shared_array<int8_t>(indices_A.shape[0], sptr, &space);
     int8_t* buffer_indices_W_2 = shared_array<int8_t>(indices_W_2.shape[0], sptr, &space);
     int8_t* buffer_indices_output_2 = shared_array<int8_t>(indices_output_2.shape[0], sptr, &space);
+
+    int laneID = threadIdx.x % WARP_SIZE;
+    int warpID = threadIdx.x / WARP_SIZE;
 
     int32_t sample_start = first_occurences.data[blockIdx.x];
     int32_t sample_end = -1;
@@ -67,7 +67,7 @@ __global__ __launch_bounds__(WARP_SIZE* NWARPS_PER_BLOCK) void sparse_accumulati
         buffer_indices_A[tid] = (int8_t)indices_A.data[tid];
         buffer_indices_W_2[tid] = (int8_t)indices_W_2.data[tid];
         buffer_C[tid] = C.data[tid];
-        buffer_indices_output_2[tid] = indices_output_2.data[tid];
+        buffer_indices_output_2[tid] = (int8_t)indices_output_2.data[tid];
     }
 
     for (int tid = threadIdx.x; tid < output.shape[1] * output.shape[2]; tid += blockDim.x) {
@@ -80,7 +80,7 @@ __global__ __launch_bounds__(WARP_SIZE* NWARPS_PER_BLOCK) void sparse_accumulati
 
         int sample = sample_start + sample_idx + warpID;
 
-        if (sample > nsamples) {
+        if (sample >= sample_end) {
             break;
         }
 
