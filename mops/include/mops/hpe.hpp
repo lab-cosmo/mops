@@ -64,7 +64,6 @@ extern template void homogeneous_polynomial_evaluation(
     Tensor<double, 1> output, Tensor<double, 2> A, Tensor<double, 1> C, Tensor<int32_t, 2> indices_A
 );
 
-/// CUDA version of mops::homogeneous_polynomial_evaluation_vjp
 template <typename scalar_t>
 void MOPS_EXPORT homogeneous_polynomial_evaluation_vjp(
     Tensor<scalar_t, 2> grad_A,
