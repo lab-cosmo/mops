@@ -104,9 +104,9 @@ def test_sap_cupy(valid_arguments):
         indices_output,
         output_size,
     )
-    with pytest.raises(
-        mops.status.MopsError, match="CUDA implementation does not exist yet"
-    ):
-        actual = sap(  # noqa: F841
-            A, B, C, indices_A, indices_B, indices_output, output_size
-        )
+
+    actual = sap(  # noqa: F841
+        A, B, C, indices_A, indices_B, indices_output, output_size
+    )
+
+    assert cp.allclose(reference, actual)
