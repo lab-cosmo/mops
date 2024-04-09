@@ -1,8 +1,10 @@
 import mops.torch
 import pytest
 import torch
-
-from mops import reference_implementations as ref
+from mops.reference_implementations import outer_product_scatter_add as ref_opsa
+from mops.torch.reference_implementations import (
+    outer_product_scatter_add as ref_opsa_torch,
+)
 
 torch.manual_seed(0xDEADBEEF)
 
@@ -18,8 +20,8 @@ def test_opsa(dtype, device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
-    A = torch.rand(100, 20, dtype=torch.float64, device=device)
-    B = torch.rand(100, 5, dtype=torch.float64, device=device)
+    A = torch.rand(100, 20, dtype=dtype, device=device)
+    B = torch.rand(100, 5, dtype=dtype, device=device)
 
     output_size = 10
 
@@ -30,10 +32,10 @@ def test_opsa(dtype, device):
     indices_output[indices_output == 1] = 2
 
     reference = torch.tensor(
-        ref.outer_product_scatter_add(
+        ref_opsa(
             A.cpu().numpy(), B.cpu().numpy(), indices_output.cpu().numpy(), output_size
         ),
-        dtype=torch.float64,
+        dtype=dtype,
         device=device,
     )
 
@@ -64,3 +66,26 @@ def test_opsa_grad(dtype, device):
         atol=1e-3,
         nondet_tol=1e-5,
     )
+
+
+def test_opsa_ref():
+    A = torch.rand(100, 20)
+    B = torch.rand(100, 5)
+
+    output_size = 10
+
+    indices_output = torch.sort(
+        torch.randint(output_size, size=(100,), dtype=torch.int32)
+    ).values
+    # substitute all 1s by 2s so as to test the no-neighbor case
+    indices_output[indices_output == 1] = 2
+
+    reference = torch.tensor(
+        ref_opsa(
+            A.cpu().numpy(), B.cpu().numpy(), indices_output.cpu().numpy(), output_size
+        )
+    )
+
+    actual = ref_opsa_torch(A, B, indices_output, output_size)
+
+    assert torch.allclose(reference, actual)

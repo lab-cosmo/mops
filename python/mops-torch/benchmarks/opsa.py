@@ -1,6 +1,6 @@
+import mops.torch
 import torch
 from benchmark import benchmark, format_mean_std, initialize
-from mops.torch import outer_product_scatter_add as opsa
 from mops.torch.reference_implementations import outer_product_scatter_add as ref_opsa
 
 initialize()
@@ -15,7 +15,12 @@ mean_fwd_ref, std_fwd_ref, mean_bwd_ref, std_bwd_ref = benchmark(
     lambda: torch.sum(ref_opsa(A, B, indices, output_size))
 )
 
-# opsa = torch.jit.script(opsa)  # not working
+
+def opsa(A, B, indices, output_size: int):
+    return mops.torch.outer_product_scatter_add(A, B, indices, output_size)
+
+
+opsa = torch.jit.script(opsa)
 mean_fwd, std_fwd, mean_bwd, std_bwd = benchmark(
     lambda: torch.sum(opsa(A, B, indices, output_size))
 )

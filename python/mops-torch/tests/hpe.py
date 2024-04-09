@@ -2,6 +2,9 @@ import mops.torch
 import pytest
 import torch
 from mops.reference_implementations import homogeneous_polynomial_evaluation as ref_hpe
+from mops.torch.reference_implementations import (
+    homogeneous_polynomial_evaluation as ref_hpe_torch,
+)
 
 torch.manual_seed(0xDEADBEEF)
 
@@ -46,3 +49,15 @@ def test_hpe_grad(dtype, device):
         fast_mode=True,
         nondet_tol=1e-7,
     )
+
+
+def test_hpe_ref():
+    A = torch.rand(100, 20)
+    C = torch.rand(200)
+    indices_A = torch.randint(20, size=(200, 4), dtype=torch.int32)
+
+    reference = torch.tensor(
+        ref_hpe(A.cpu().numpy(), C.cpu().numpy(), indices_A.cpu().numpy())
+    )
+    actual = ref_hpe_torch(A, C, indices_A)
+    assert torch.allclose(reference, actual)

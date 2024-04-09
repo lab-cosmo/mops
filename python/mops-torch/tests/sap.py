@@ -2,6 +2,9 @@ import mops.torch
 import pytest
 import torch
 from mops.reference_implementations import sparse_accumulation_of_products as ref_sap
+from mops.torch.reference_implementations import (
+    sparse_accumulation_of_products as ref_sap_torch,
+)
 
 torch.manual_seed(0xDEADBEEF)
 
@@ -69,3 +72,27 @@ def test_sap_grad(dtype, device):
         atol=1e-3,
         nondet_tol=1e-5,
     )
+
+
+def test_sap_ref():
+    A = torch.rand(100, 20)
+    B = torch.rand(100, 6)
+    C = torch.rand(30)
+    indices_A = torch.randint(20, size=(30,), dtype=torch.int32)
+    indices_B = torch.randint(6, size=(30,), dtype=torch.int32)
+    output_size = 35
+    indices_output = torch.randint(output_size, size=(30,), dtype=torch.int32)
+
+    reference = torch.tensor(
+        ref_sap(
+            A.numpy(),
+            B.numpy(),
+            C.numpy(),
+            indices_A.numpy(),
+            indices_B.numpy(),
+            indices_output.numpy(),
+            output_size,
+        )
+    )
+    actual = ref_sap_torch(A, B, C, indices_A, indices_B, indices_output, output_size)
+    assert torch.allclose(reference, actual)
