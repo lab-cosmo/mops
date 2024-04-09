@@ -64,6 +64,16 @@ def outer_product_scatter_add_with_weights(A, B, W, indices_W, indices_output):
 
     return output
 
+# A = np.random.rand(60000, 13)
+# B = np.random.rand(60000, 32)
+# W = np.random.rand(1000, 7, 32)
+# C = np.random.rand(900)
+# indices_output_1 = np.random.randint(1000, size=(60000,))
+# indices_W_1 = np.random.randint(1000, size=(60000,))
+# output_size = 100
+# indices_A = np.random.randint(13, size=(900,))
+# indices_W_2 = np.random.randint(7, size=(900,))
+# indices_output_2 = np.random.randint(output_size, size=(900,))
 
 def sparse_accumulation_scatter_add_with_weights(
     A,
