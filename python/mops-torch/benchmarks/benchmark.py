@@ -42,9 +42,10 @@ def benchmark(function, repeats=1000, warmup=10, plot=True):
         # backward pass
         start = time.time()
         result.backward()
-        end = time.time()
         if result.device.type == "cuda":
             torch.cuda.synchronize()
+        end = time.time()
+
         timings_bwd.append(end - start)
 
     times_array_fwd = np.array(timings_fwd)

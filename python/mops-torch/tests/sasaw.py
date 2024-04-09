@@ -3,9 +3,10 @@ import torch
 from mops.reference_implementations import (
     sparse_accumulation_scatter_add_with_weights as ref_sasaw,
 )
-from mops.torch.reference_implementations import (
-    sparse_accumulation_scatter_add_with_weights as ref_sasaw_torch,
-)
+
+# from mops.torch.reference_implementations import (
+#    sparse_accumulation_scatter_add_with_weights as ref_sasaw_torch,
+# )
 
 torch.manual_seed(0xDEADBEEF)
 
