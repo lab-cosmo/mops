@@ -25,9 +25,7 @@ template void mops::homogeneous_polynomial_evaluation_vjp<double>(
     Tensor<int32_t, 2> indices_A
 );
 
-#ifdef MOPS_CUDA_ENABLED
-#include "cuda.tpp"
-#else
+#ifndef MOPS_CUDA_ENABLED
 template <typename scalar_t>
 void mops::cuda::
     homogeneous_polynomial_evaluation(Tensor<scalar_t, 1>, Tensor<scalar_t, 2>, Tensor<scalar_t, 1>, Tensor<int32_t, 2>) {
@@ -39,8 +37,6 @@ void mops::cuda::
     homogeneous_polynomial_evaluation_vjp(Tensor<scalar_t, 2>, Tensor<scalar_t, 1>, Tensor<scalar_t, 2>, Tensor<scalar_t, 1>, Tensor<int32_t, 2>) {
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
-
-#endif
 
 // explicit instantiations of CUDA templates
 template void mops::cuda::homogeneous_polynomial_evaluation<float>(
@@ -66,3 +62,5 @@ template void mops::cuda::homogeneous_polynomial_evaluation_vjp<double>(
     Tensor<double, 1> C,
     Tensor<int32_t, 2> indices_A
 );
+
+#endif

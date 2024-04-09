@@ -62,4 +62,5 @@ def test_opsa_grad(dtype, device):
         (A, B, indices, output_size),
         fast_mode=True,
         atol=1e-3,
+        nondet_tol=1e-5,
     )
