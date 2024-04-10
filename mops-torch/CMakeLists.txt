@@ -87,6 +87,7 @@ add_library(mops_torch SHARED
 
 if(CMAKE_CUDA_COMPILER)
     target_compile_definitions(mops_torch PUBLIC MOPS_CUDA_ENABLED)
+    set_target_properties(mops_torch PROPERTIES CUDA_NVCC_FLAGS "-lineinfo")
 endif()
 
 target_compile_features(mops_torch PUBLIC cxx_std_17)
