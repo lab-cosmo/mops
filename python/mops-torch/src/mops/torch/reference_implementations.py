@@ -20,14 +20,14 @@ def sparse_accumulation_of_products(
     sparse_A = A[:, indices_A]
     sparse_B = B[:, indices_B]
     product = C * sparse_A * sparse_B
-    output = torch.zeros(A.shape[0], output_size, device=A.device)
+    output = torch.zeros(A.shape[0], output_size, device=A.device, dtype=A.dtype)
     output.index_add_(1, indices_output, product)
 
     return output
 
 
 def outer_product_scatter_add_with_weights(A, B, W, indices_W, indices_output):
-    output = torch.zeros(W.shape[0], A.shape[1], B.shape[1], device=A.device)
+    output = torch.zeros(W.shape[0], A.shape[1], B.shape[1], device=A.device, dtype=A.dtype)
     indexed_W = W[indices_W]
     ABW = torch.einsum("ea,eb,eb->eab", A, B, indexed_W)
     output.index_add_(0, indices_output, ABW)

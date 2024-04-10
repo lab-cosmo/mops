@@ -159,7 +159,6 @@ __global__ void sparse_accumulation_of_products_vjp_kernel(
     /* shared buffers */
     scalar_t* buffer_gradout =
         shared_array<scalar_t>(WARP_SIZE * grad_output.shape[1], sptr, &space);
-    int32_t* packed_indices = shared_array<int32_t>(indices_A.shape[0], sptr, &space);
 
     scalar_t* buffer_A;
     scalar_t* buffer_B;
@@ -175,6 +174,8 @@ __global__ void sparse_accumulation_of_products_vjp_kernel(
         buffer_B = shared_array<scalar_t>(WARP_SIZE * B.shape[1], sptr, &space);
         buffer_gradA = shared_array<scalar_t>(WARP_SIZE * grad_A.shape[1], sptr, &space);
     }
+
+    int32_t* packed_indices = shared_array<int32_t>(indices_A.shape[0], sptr, &space);
 
     int32_t laneID = threadIdx.x % WARP_SIZE;
     int32_t rowID = threadIdx.x / WARP_SIZE;
