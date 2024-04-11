@@ -3,6 +3,9 @@ import torch
 from mops.reference_implementations import (
     outer_product_scatter_add_with_weights as ref_opsaw,
 )
+from mops.torch.reference_implementations import (
+    outer_product_scatter_add_with_weights as ref_opsaw_torch,
+)
 
 torch.manual_seed(0xDEADBEEF)
 
@@ -38,3 +41,19 @@ def test_opsaw_grad():
         (A, B, W, indices_W, indices_output),
         fast_mode=True,
     )
+
+
+def test_opsaw_ref():
+    A = torch.rand(100, 10)
+    B = torch.rand(100, 5)
+    W = torch.rand(20, 5)
+    indices_W = torch.randint(20, size=(100,), dtype=torch.int32)
+    indices_output = torch.randint(20, size=(100,), dtype=torch.int32)
+
+    reference = torch.tensor(
+        ref_opsaw(
+            A.numpy(), B.numpy(), W.numpy(), indices_W.numpy(), indices_output.numpy()
+        )
+    )
+    actual = ref_opsaw_torch(A, B, W, indices_W, indices_output)
+    assert torch.allclose(reference, actual)

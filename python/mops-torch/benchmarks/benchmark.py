@@ -26,6 +26,9 @@ def benchmark(function, repeats=1000, warmup=10, plot=True):
     for _ in range(warmup):
         result = function()
         result.backward()
+    device_is_cuda = result.device == "cuda"
+    if device_is_cuda:
+        torch.cuda.synchronize()
 
     timings_fwd = []
     timings_bwd = []
@@ -33,12 +36,17 @@ def benchmark(function, repeats=1000, warmup=10, plot=True):
         # forward pass
         start = time.time()
         result = function()
+        if device_is_cuda:
+            torch.cuda.synchronize()
         end = time.time()
         timings_fwd.append(end - start)
         # backward pass
         start = time.time()
         result.backward()
+        if device_is_cuda:
+            torch.cuda.synchronize()
         end = time.time()
+
         timings_bwd.append(end - start)
 
     times_array_fwd = np.array(timings_fwd)
