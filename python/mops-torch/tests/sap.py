@@ -49,9 +49,9 @@ def test_sap(dtype, device):
     assert torch.allclose(reference, actual)
 
 
-@pytest.mark.parametrize("dtype", [torch.float32, torch.float64])
+@pytest.mark.parametrize("dtype", [torch.float64])
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
-def test_sap_grad(dtype, device):
+def test_sap_grads(dtype, device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
@@ -68,10 +68,13 @@ def test_sap_grad(dtype, device):
     assert torch.autograd.gradcheck(
         mops.torch.sparse_accumulation_of_products,
         (A, B, C, indices_A, indices_B, indices_output, output_size),
-        fast_mode=True,
-        atol=1e-3,
-        nondet_tol=1e-5,
     )
+
+    if device != "cuda":  # not yet implemented
+        assert torch.autograd.gradgradcheck(
+            mops.torch.sparse_accumulation_of_products,
+            (A, B, C, indices_A, indices_B, indices_output, output_size),
+        )
 
 
 def test_sap_ref():

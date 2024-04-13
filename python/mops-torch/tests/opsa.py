@@ -44,10 +44,9 @@ def test_opsa(dtype, device):
     assert torch.allclose(reference, actual)
 
 
-# only test F64 here as numerical issues arise for F32.
 @pytest.mark.parametrize("dtype", [torch.float64])
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
-def test_opsa_grad(dtype, device):
+def test_opsa_grads(dtype, device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
@@ -62,10 +61,13 @@ def test_opsa_grad(dtype, device):
     assert torch.autograd.gradcheck(
         mops.torch.outer_product_scatter_add,
         (A, B, indices, output_size),
-        fast_mode=True,
-        atol=1e-3,
-        nondet_tol=1e-5,
     )
+
+    if device != "cuda":  # not yet implemented
+        assert torch.autograd.gradgradcheck(
+            mops.torch.outer_product_scatter_add,
+            (A, B, indices, output_size),
+        )
 
 
 def test_opsa_ref():

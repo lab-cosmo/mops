@@ -1,4 +1,5 @@
 import mops.torch
+import pytest
 import torch
 from mops.reference_implementations import (
     sparse_accumulation_scatter_add_with_weights as ref_sasaw,
@@ -51,34 +52,55 @@ def test_sasaw():
     assert torch.allclose(reference, actual)
 
 
-def test_sasaw_grad():
-    A = torch.rand(70, 10, dtype=torch.float64, requires_grad=True)
-    B = torch.rand(70, 50, dtype=torch.float64, requires_grad=True)
-    W = torch.rand(3, 5, 50, dtype=torch.float64, requires_grad=True)
-    C = torch.rand(50, dtype=torch.float64)
-    indices_output_1 = torch.randint(3, size=(70,), dtype=torch.int32)
-    indices_W_1 = torch.randint(3, size=(70,), dtype=torch.int32)
+@pytest.mark.parametrize("dtype", [torch.float64])
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_sasaw_grads(dtype, device):
+    A = torch.rand(70, 10, dtype=dtype, device=device, requires_grad=True)
+    B = torch.rand(70, 50, dtype=dtype, device=device, requires_grad=True)
+    W = torch.rand(3, 5, 50, dtype=dtype, device=device, requires_grad=True)
+    C = torch.rand(50, dtype=dtype, device=device)
+    indices_output_1 = torch.randint(3, size=(70,), dtype=torch.int32, device=device)
+    indices_W_1 = torch.randint(3, size=(70,), dtype=torch.int32, device=device)
     output_size_2 = 15
-    indices_A = torch.randint(10, size=(50,), dtype=torch.int32)
-    indices_W_2 = torch.randint(5, size=(50,), dtype=torch.int32)
-    indices_output_2 = torch.randint(output_size_2, size=(50,), dtype=torch.int32)
-
-    assert torch.autograd.gradcheck(
-        mops.torch.sparse_accumulation_scatter_add_with_weights,
-        (
-            A,
-            B,
-            C,
-            W,
-            indices_A,
-            indices_W_1,
-            indices_W_2,
-            indices_output_1,
-            indices_output_2,
-            output_size_2,
-        ),
-        fast_mode=True,
+    indices_A = torch.randint(10, size=(50,), dtype=torch.int32, device=device)
+    indices_W_2 = torch.randint(5, size=(50,), dtype=torch.int32, device=device)
+    indices_output_2 = torch.randint(
+        output_size_2, size=(50,), dtype=torch.int32, device=device
     )
+
+    if device != "cuda":  # not yet implemented
+        assert torch.autograd.gradcheck(
+            mops.torch.sparse_accumulation_scatter_add_with_weights,
+            (
+                A,
+                B,
+                C,
+                W,
+                indices_A,
+                indices_W_1,
+                indices_W_2,
+                indices_output_1,
+                indices_output_2,
+                output_size_2,
+            ),
+        )
+
+    if device != "cuda":  # not yet implemented
+        assert torch.autograd.gradgradcheck(
+            mops.torch.sparse_accumulation_scatter_add_with_weights,
+            (
+                A,
+                B,
+                C,
+                W,
+                indices_A,
+                indices_W_1,
+                indices_W_2,
+                indices_output_1,
+                indices_output_2,
+                output_size_2,
+            ),
+        )
 
 
 def test_sasaw_ref():
