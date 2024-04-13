@@ -102,6 +102,33 @@ std::vector<torch::Tensor> SparseAccumulationOfProducts::backward(
 
     auto grad_output = grad_outputs[0].contiguous();
 
+    auto results = SparseAccumulationOfProductsBackward::apply(
+        grad_output, A, B, C, indices_A, indices_B, indices_output
+    );
+    auto grad_A = results[0];
+    auto grad_B = results[1];
+
+    return {
+        grad_A,
+        grad_B,
+        torch::Tensor(),
+        torch::Tensor(),
+        torch::Tensor(),
+        torch::Tensor(),
+        torch::Tensor()
+    };
+}
+
+std::vector<torch::Tensor> SparseAccumulationOfProductsBackward::forward(
+    torch::autograd::AutogradContext* ctx,
+    torch::Tensor grad_output,
+    torch::Tensor A,
+    torch::Tensor B,
+    torch::Tensor C,
+    torch::Tensor indices_A,
+    torch::Tensor indices_B,
+    torch::Tensor indices_output
+) {
     if (C.requires_grad()) {
         C10_THROW_ERROR(
             ValueError,
@@ -172,13 +199,13 @@ std::vector<torch::Tensor> SparseAccumulationOfProducts::backward(
         );
     }
 
-    return {
-        grad_A,
-        grad_B,
-        torch::Tensor(),
-        torch::Tensor(),
-        torch::Tensor(),
-        torch::Tensor(),
-        torch::Tensor()
-    };
+    return {grad_A, grad_B};
+}
+
+std::vector<torch::Tensor> SparseAccumulationOfProductsBackward::backward(
+    torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_grad_outputs
+) {
+    C10_THROW_ERROR(
+        NotImplementedError, "second derivatives are not supported in sparse_accumulation_of_products"
+    );
 }

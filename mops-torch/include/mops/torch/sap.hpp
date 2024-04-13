@@ -37,6 +37,25 @@ class SparseAccumulationOfProducts
     );
 };
 
+class SparseAccumulationOfProductsBackward
+    : public torch::autograd::Function<mops_torch::SparseAccumulationOfProductsBackward> {
+  public:
+    static std::vector<torch::Tensor> forward(
+        torch::autograd::AutogradContext* ctx,
+        torch::Tensor grad_output,
+        torch::Tensor A,
+        torch::Tensor B,
+        torch::Tensor C,
+        torch::Tensor indices_A,
+        torch::Tensor indices_B,
+        torch::Tensor indices_output
+    );
+
+    static std::vector<torch::Tensor> backward(
+        torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_grad_outputs
+    );
+};
+
 } // namespace mops_torch
 
 #endif

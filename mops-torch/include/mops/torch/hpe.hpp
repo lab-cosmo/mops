@@ -24,6 +24,22 @@ class HomogeneousPolynomialEvaluation
     );
 };
 
+class HomogeneousPolynomialEvaluationBackward
+    : public torch::autograd::Function<mops_torch::HomogeneousPolynomialEvaluationBackward> {
+  public:
+    static torch::Tensor forward(
+        torch::autograd::AutogradContext* ctx,
+        torch::Tensor grad_output,
+        torch::Tensor A,
+        torch::Tensor C,
+        torch::Tensor indices_A
+    );
+
+    static std::vector<torch::Tensor> backward(
+        torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_grad_outputs
+    );
+};
+
 } // namespace mops_torch
 
 #endif

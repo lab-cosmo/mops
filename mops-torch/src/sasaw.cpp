@@ -121,6 +121,40 @@ std::vector<torch::Tensor> SparseAccumulationScatterAddWithWeights::backward(
 
     auto grad_output = grad_outputs[0].contiguous();
 
+    auto results = SparseAccumulationScatterAddWithWeightsBackward::apply(
+        grad_output, A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2
+    );
+    auto grad_A = results[0];
+    auto grad_B = results[1];
+    auto grad_W = results[2];
+
+    return {
+        grad_A,
+        grad_B,
+        torch::Tensor(),
+        grad_W,
+        torch::Tensor(),
+        torch::Tensor(),
+        torch::Tensor(),
+        torch::Tensor(),
+        torch::Tensor(),
+        torch::Tensor()
+    };
+}
+
+std::vector<torch::Tensor> SparseAccumulationScatterAddWithWeightsBackward::forward(
+    torch::autograd::AutogradContext* ctx,
+    torch::Tensor grad_output,
+    torch::Tensor A,
+    torch::Tensor B,
+    torch::Tensor C,
+    torch::Tensor W,
+    torch::Tensor indices_A,
+    torch::Tensor indices_W_1,
+    torch::Tensor indices_W_2,
+    torch::Tensor indices_output_1,
+    torch::Tensor indices_output_2
+) {
     if (C.requires_grad()) {
         C10_THROW_ERROR(
             ValueError,
@@ -182,16 +216,14 @@ std::vector<torch::Tensor> SparseAccumulationScatterAddWithWeights::backward(
         );
     }
 
-    return {
-        grad_A,
-        grad_B,
-        torch::Tensor(),
-        grad_W,
-        torch::Tensor(),
-        torch::Tensor(),
-        torch::Tensor(),
-        torch::Tensor(),
-        torch::Tensor(),
-        torch::Tensor()
-    };
+    return {grad_A, grad_B, grad_W};
+}
+
+std::vector<torch::Tensor> SparseAccumulationScatterAddWithWeightsBackward::backward(
+    torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
+) {
+    C10_THROW_ERROR(
+        NotImplementedError,
+        "second derivatives are not supported in sparse_accumulation_scatter_add_with_weights"
+    );
 }

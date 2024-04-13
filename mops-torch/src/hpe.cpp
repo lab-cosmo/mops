@@ -68,9 +68,20 @@ std::vector<torch::Tensor> HomogeneousPolynomialEvaluation::backward(
     auto A = saved_variables[0];
     auto C = saved_variables[1];
     auto indices_A = saved_variables[2];
-
     auto grad_output = grad_outputs[0].contiguous();
 
+    auto grad_A = HomogeneousPolynomialEvaluationBackward::apply(grad_output, A, C, indices_A);
+
+    return {grad_A, torch::Tensor(), torch::Tensor()};
+}
+
+torch::Tensor HomogeneousPolynomialEvaluationBackward::forward(
+    torch::autograd::AutogradContext* ctx,
+    torch::Tensor grad_output,
+    torch::Tensor A,
+    torch::Tensor C,
+    torch::Tensor indices_A
+) {
     if (C.requires_grad()) {
         C10_THROW_ERROR(
             ValueError,
@@ -120,5 +131,13 @@ std::vector<torch::Tensor> HomogeneousPolynomialEvaluation::backward(
         );
     }
 
-    return {grad_A, torch::Tensor(), torch::Tensor()};
+    return grad_A;
+}
+
+std::vector<torch::Tensor> HomogeneousPolynomialEvaluationBackward::backward(
+    torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_grad_outputs
+) {
+    C10_THROW_ERROR(
+        ValueError, "second derivatives are not supported in homogeneous_polynomial_evaluation"
+    );
 }
