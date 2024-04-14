@@ -144,9 +144,7 @@ def sparse_accumulation_of_products_vjp_vjp(
     indices_output = indices_output.astype(np.int32)
 
     if compute_grad_grad_output:
-        grad_grad_output = _dispatch.empty_like(
-            (grad_grad_A.shape[1], A.shape[1], B.shape[1]), grad_grad_A
-        )
+        grad_grad_output = _dispatch.empty_like((A.shape[0], grad_output.shape[1]), A)
         mops_grad_grad_output = mops_tensor(grad_grad_output)
     else:
         grad_grad_output = None
