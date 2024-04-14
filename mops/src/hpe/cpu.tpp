@@ -277,3 +277,17 @@ void mops::homogeneous_polynomial_evaluation_vjp(
 
     throw std::runtime_error("Only up to polynomial order 10 is supported at the moment. Please contact the developers for more");
 }
+
+
+template<typename scalar_t>
+void mops::homogeneous_polynomial_evaluation_vjp_vjp(
+    mops::Tensor<scalar_t, 1> grad_grad_output,
+    mops::Tensor<scalar_t, 2> grad_A_2,
+    mops::Tensor<scalar_t, 2> grad_grad_A,
+    mops::Tensor<scalar_t, 1> grad_output,
+    mops::Tensor<scalar_t, 2> A,
+    mops::Tensor<scalar_t, 1> C,
+    mops::Tensor<int32_t, 2> indices_A
+) {
+    throw std::runtime_error("Not implemented yet");
+}

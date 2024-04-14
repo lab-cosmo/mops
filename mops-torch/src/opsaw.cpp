@@ -150,7 +150,7 @@ std::vector<torch::Tensor> OuterProductScatterAddWithWeightsBackward::forward(
 }
 
 std::vector<torch::Tensor> OuterProductScatterAddWithWeightsBackward::backward(
-    torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_grad_outputs
+    torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
 ) {
     C10_THROW_ERROR(
         ValueError, "second derivatives are not supported in outer_product_scatter_add_with_weights"

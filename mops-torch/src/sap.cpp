@@ -203,7 +203,7 @@ std::vector<torch::Tensor> SparseAccumulationOfProductsBackward::forward(
 }
 
 std::vector<torch::Tensor> SparseAccumulationOfProductsBackward::backward(
-    torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_grad_outputs
+    torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
 ) {
     C10_THROW_ERROR(
         NotImplementedError, "second derivatives are not supported in sparse_accumulation_of_products"

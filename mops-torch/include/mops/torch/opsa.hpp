@@ -49,7 +49,7 @@ class OuterProductScatterAddBackward
     );
 
     static std::vector<torch::Tensor> backward(
-        torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_grad_outputs
+        torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
     );
 };
 
