@@ -105,86 +105,140 @@ def sparse_accumulation_scatter_add_with_weights(
     return output
 
 
-def homogeneous_polynomial_evaluation_vjp(grad_output, A, C, indices_A):
+def homogeneous_polynomial_evaluation_vjp(
+    grad_output, A, C, indices_A, compute_grad_A=True
+):
     _check_hpe_vjp(grad_output, A, C, indices_A)
 
-    grad_A = _dispatch.zeros_like(A.shape, grad_output)
-    max_j = indices_A.shape[0]
-    max_k = indices_A.shape[1]
-    for j in range(max_j):
-        base_product = C[j] * grad_output
-        for k in range(max_k):
-            temp = base_product
-            for l in range(max_k):
-                if l == k:
-                    continue
-                temp = temp * A[:, indices_A[j, l]]
-            grad_A[:, indices_A[j, k]] += temp
+    if compute_grad_A:
+        grad_A = _dispatch.zeros_like(A.shape, grad_output)
+        max_j = indices_A.shape[0]
+        max_k = indices_A.shape[1]
+        for j in range(max_j):
+            base_product = C[j] * grad_output
+            for k in range(max_k):
+                temp = base_product
+                for l in range(max_k):
+                    if l == k:
+                        continue
+                    temp = temp * A[:, indices_A[j, l]]
+                grad_A[:, indices_A[j, k]] += temp
+    else:
+        grad_A = None
 
     return grad_A
 
 
 def sparse_accumulation_of_products_vjp(
-    grad_output, A, B, C, indices_A, indices_B, indices_output
+    grad_output,
+    A,
+    B,
+    C,
+    indices_A,
+    indices_B,
+    indices_output,
+    compute_grad_A=True,
+    compute_grad_B=True,
 ):
     _check_sap_vjp(
         grad_output, A, B, C, indices_A, indices_B, indices_output, grad_output.shape[1]
     )
 
-    grad_A = _dispatch.zeros_like(A.shape, grad_output)
-    grad_B = _dispatch.zeros_like(B.shape, grad_output)
+    if compute_grad_A:
+        grad_A = _dispatch.zeros_like(A.shape, grad_output)
+    else:
+        grad_A = None
+    if compute_grad_B:
+        grad_B = _dispatch.zeros_like(B.shape, grad_output)
+    else:
+        grad_B = None
+
     K = C.shape[0]
     for k in range(K):
-        grad_A[:, indices_A[k]] += (
-            grad_output[:, indices_output[k]] * C[k] * B[:, indices_B[k]]
-        )
-        grad_B[:, indices_B[k]] += (
-            grad_output[:, indices_output[k]] * C[k] * A[:, indices_A[k]]
-        )
+        if compute_grad_A:
+            grad_A[:, indices_A[k]] += (
+                grad_output[:, indices_output[k]] * C[k] * B[:, indices_B[k]]
+            )
+        if compute_grad_B:
+            grad_B[:, indices_B[k]] += (
+                grad_output[:, indices_output[k]] * C[k] * A[:, indices_A[k]]
+            )
 
     return grad_A, grad_B
 
 
-def outer_product_scatter_add_vjp(grad_output, A, B, indices_output):
+def outer_product_scatter_add_vjp(
+    grad_output, A, B, indices_output, compute_grad_A=True, compute_grad_B=True
+):
     _check_opsa_vjp(grad_output, A, B, indices_output, grad_output.shape[0])
 
-    grad_A = _dispatch.zeros_like(A.shape, A)
-    grad_B = _dispatch.zeros_like(B.shape, B)
+    if compute_grad_A:
+        grad_A = _dispatch.zeros_like(A.shape, A)
+    else:
+        grad_A = None
+    if compute_grad_B:
+        grad_B = _dispatch.zeros_like(B.shape, B)
+    else:
+        grad_B = None
+
     J = indices_output.shape[0]
     for j in range(J):
-        grad_A[j, :] += (grad_output[indices_output[j], :, :] * B[j, None, :]).sum(
-            axis=1
-        )
-        grad_B[j, :] += (grad_output[indices_output[j], :, :] * A[j, :, None]).sum(
-            axis=0
-        )
+        if compute_grad_A:
+            grad_A[j, :] += (grad_output[indices_output[j], :, :] * B[j, None, :]).sum(
+                axis=1
+            )
+        if compute_grad_B:
+            grad_B[j, :] += (grad_output[indices_output[j], :, :] * A[j, :, None]).sum(
+                axis=0
+            )
 
     return grad_A, grad_B
 
 
 def outer_product_scatter_add_with_weights_vjp(
-    grad_output, A, B, W, indices_W, indices_output
+    grad_output,
+    A,
+    B,
+    W,
+    indices_W,
+    indices_output,
+    compute_grad_A=True,
+    compute_grad_B=True,
+    compute_grad_W=True,
 ):
     _check_opsaw_vjp(grad_output, A, B, W, indices_W, indices_output)
 
-    grad_A = _dispatch.zeros_like(A.shape, A)
-    grad_B = _dispatch.zeros_like(B.shape, B)
-    grad_W = _dispatch.zeros_like(W.shape, W)
+    if compute_grad_A:
+        grad_A = _dispatch.zeros_like(A.shape, A)
+    else:
+        grad_A = None
+    if compute_grad_B:
+        grad_B = _dispatch.zeros_like(B.shape, B)
+    else:
+        grad_B = None
+    if compute_grad_W:
+        grad_W = _dispatch.zeros_like(W.shape, W)
+    else:
+        grad_W = None
+
     max_e = indices_output.shape[0]
     for e in range(max_e):
-        grad_A[e, :] += (
-            grad_output[indices_output[e], :, :]
-            * B[e, None, :]
-            * W[indices_W[e], None, :]
-        ).sum(axis=1)
-        grad_B[e, :] += (
-            grad_output[indices_output[e], :, :]
-            * A[e, :, None]
-            * W[indices_W[e], None, :]
-        ).sum(axis=0)
-        grad_W[indices_W[e], :] += (
-            grad_output[indices_output[e], :, :] * A[e, :, None] * B[e, None, :]
-        ).sum(axis=0)
+        if compute_grad_A:
+            grad_A[e, :] += (
+                grad_output[indices_output[e], :, :]
+                * B[e, None, :]
+                * W[indices_W[e], None, :]
+            ).sum(axis=1)
+        if compute_grad_B:
+            grad_B[e, :] += (
+                grad_output[indices_output[e], :, :]
+                * A[e, :, None]
+                * W[indices_W[e], None, :]
+            ).sum(axis=0)
+        if compute_grad_W:
+            grad_W[indices_W[e], :] += (
+                grad_output[indices_output[e], :, :] * A[e, :, None] * B[e, None, :]
+            ).sum(axis=0)
 
     return grad_A, grad_B, grad_W
 
@@ -200,6 +254,9 @@ def sparse_accumulation_scatter_add_with_weights_vjp(
     indices_W_2,
     indices_output_1,
     indices_output_2,
+    compute_grad_A=True,
+    compute_grad_B=True,
+    compute_grad_W=True,
 ):
     _check_sasaw_vjp(
         grad_output,
@@ -215,30 +272,43 @@ def sparse_accumulation_scatter_add_with_weights_vjp(
         grad_output.shape[1],
     )
 
-    grad_A = _dispatch.zeros_like(A.shape, A)
-    grad_B = _dispatch.zeros_like(B.shape, B)
-    grad_W = _dispatch.zeros_like(W.shape, W)
+    if compute_grad_A:
+        grad_A = _dispatch.zeros_like(A.shape, A)
+    else:
+        grad_A = None
+    if compute_grad_B:
+        grad_B = _dispatch.zeros_like(B.shape, B)
+    else:
+        grad_B = None
+    if compute_grad_W:
+        grad_W = _dispatch.zeros_like(W.shape, W)
+    else:
+        grad_W = None
+
     E = indices_output_1.shape[0]
     N = C.shape[0]
     for e in range(E):
         for n in range(N):
-            grad_A[e, indices_A[n]] += (
-                grad_output[indices_output_1[e], indices_output_2[n], :]
-                * B[e, :]
-                * C[n]
-                * W[indices_W_1[e], indices_W_2[n], :]
-            ).sum()
-            grad_B[e, :] += (
-                grad_output[indices_output_1[e], indices_output_2[n], :]
-                * A[e, indices_A[n]]
-                * C[n]
-                * W[indices_W_1[e], indices_W_2[n], :]
-            )
-            grad_W[indices_W_1[e], indices_W_2[n], :] += (
-                grad_output[indices_output_1[e], indices_output_2[n], :]
-                * A[e, indices_A[n]]
-                * B[e, :]
-                * C[n]
-            )
+            if compute_grad_A:
+                grad_A[e, indices_A[n]] += (
+                    grad_output[indices_output_1[e], indices_output_2[n], :]
+                    * B[e, :]
+                    * C[n]
+                    * W[indices_W_1[e], indices_W_2[n], :]
+                ).sum()
+            if compute_grad_B:
+                grad_B[e, :] += (
+                    grad_output[indices_output_1[e], indices_output_2[n], :]
+                    * A[e, indices_A[n]]
+                    * C[n]
+                    * W[indices_W_1[e], indices_W_2[n], :]
+                )
+            if compute_grad_W:
+                grad_W[indices_W_1[e], indices_W_2[n], :] += (
+                    grad_output[indices_output_1[e], indices_output_2[n], :]
+                    * A[e, indices_A[n]]
+                    * B[e, :]
+                    * C[n]
+                )
 
     return grad_A, grad_B, grad_W
