@@ -3,7 +3,7 @@
 
 #include "mops/sap.hpp"
 
-#include "internal/checks.hpp"
+#include "internal/checks/sap.hpp"
 #include "internal/utils.hpp"
 
 
@@ -17,14 +17,7 @@ void mops::sparse_accumulation_of_products(
     Tensor<int32_t, 1> indices_B,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_sizes(A, "A", 0, B, "B", 0, "sap");
-    check_sizes(A, "A", 0, output, "output", 0, "sap");
-    check_sizes(C, "C", 0, indices_A, "indices_A", 0, "sap");
-    check_sizes(C, "C", 0, indices_B, "indices_B", 0, "sap");
-    check_sizes(C, "C", 0, indices_output, "indices_output", 0, "sap");
-    check_index_tensor(indices_A, "indices_A", A.shape[1], "sap");
-    check_index_tensor(indices_B, "indices_B", B.shape[1], "sap");
-    check_index_tensor(indices_output, "indices_output", output.shape[1], "sap");
+    check_sap(output, A, B, C, indices_A, indices_B, indices_output);
 
     scalar_t* c_ptr = C.data;
     int32_t* indices_A_ptr = indices_A.data;
@@ -111,26 +104,12 @@ void mops::sparse_accumulation_of_products_vjp(
     Tensor<int32_t, 1> indices_B,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_sizes(A, "A", 0, B, "B", 0, "sap_vjp");
-    check_sizes(A, "A", 0, grad_output, "grad_output", 0, "sap_vjp");
-    check_sizes(C, "C", 0, indices_A, "indices_A", 0, "sap_vjp");
-    check_sizes(C, "C", 0, indices_B, "indices_B", 0, "sap_vjp");
-    check_sizes(C, "C", 0, indices_output, "indices_output", 0, "sap_vjp");
-    check_index_tensor(indices_A, "indices_A", A.shape[1], "sap_vjp");
-    check_index_tensor(indices_B, "indices_B", B.shape[1], "sap_vjp");
-    check_index_tensor(indices_output, "indices_output", grad_output.shape[1], "sap_vjp");
+    check_sap_vjp(grad_A, grad_B, grad_output, A, B, C, indices_A, indices_B, indices_output);
 
     bool calculate_grad_A = grad_A.data != nullptr;
     bool calculate_grad_B = grad_B.data != nullptr;
 
     if (calculate_grad_A || calculate_grad_B) {
-
-        if (calculate_grad_A) {
-            check_same_shape(grad_A, "grad_A", A, "A", "sap_vjp");
-        }
-        if (calculate_grad_B) {
-            check_same_shape(grad_B, "grad_B", B, "B", "sap_vjp");
-        }
 
         scalar_t* c_ptr = C.data;
         int32_t* p_a_ptr = indices_A.data;

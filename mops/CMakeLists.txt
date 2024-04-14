@@ -83,7 +83,12 @@ add_library(mops
     "src/sasaw/sasaw.cpp"
     "src/sasaw/capi.cpp"
 
-    "src/internal/checks.hpp"
+    "src/internal/checks/utils.hpp"
+    "src/internal/checks/hpe.hpp"
+    "src/internal/checks/opsa.hpp"
+    "src/internal/checks/sap.hpp"
+    "src/internal/checks/opsaw.hpp"
+    "src/internal/checks/sasaw.hpp"
     "src/internal/utils.hpp"
     "src/internal/utils.cpp"
 

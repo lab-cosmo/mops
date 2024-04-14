@@ -1,6 +1,6 @@
 #include "mops/sap.hpp"
 
-#include "internal/checks.hpp"
+#include "internal/checks/sap.hpp"
 #include "internal/cuda_utils.cuh"
 
 using namespace mops;
@@ -97,6 +97,7 @@ void mops::cuda::sparse_accumulation_of_products(
     Tensor<int32_t, 1> indices_B,
     Tensor<int32_t, 1> indices_output
 ) {
+    check_sap(output, A, B, C, indices_A, indices_B, indices_output);
 
     dim3 block_dim(find_integer_divisor(A.shape[0], WARP_SIZE));
 
@@ -280,6 +281,8 @@ void mops::cuda::sparse_accumulation_of_products_vjp(
     Tensor<int32_t, 1> indices_B,
     Tensor<int32_t, 1> indices_output
 ) {
+    check_sap_vjp(grad_A, grad_B, grad_output, A, B, C, indices_A, indices_B, indices_output);
+
     dim3 block_dim(find_integer_divisor(grad_A.shape[0], WARP_SIZE));
 
     dim3 thread_block(WARP_SIZE * NWARPS_PER_BLOCK, 1, 1);

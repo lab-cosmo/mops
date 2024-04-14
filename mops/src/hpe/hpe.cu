@@ -1,6 +1,6 @@
 #include "mops/hpe.hpp"
 
-#include "internal/checks.hpp"
+#include "internal/checks/hpe.hpp"
 #include "internal/cuda_utils.cuh"
 
 using namespace mops;
@@ -110,6 +110,7 @@ template <typename scalar_t>
 void mops::cuda::homogeneous_polynomial_evaluation(
     Tensor<scalar_t, 1> output, Tensor<scalar_t, 2> A, Tensor<scalar_t, 1> C, Tensor<int32_t, 2> indices_A
 ) {
+    check_hpe(output, A, C, indices_A);
 
     int32_t nbatch = output.shape[0];
     int32_t nnu1 = A.shape[1];
@@ -293,6 +294,7 @@ void mops::cuda::homogeneous_polynomial_evaluation_vjp(
     Tensor<scalar_t, 1> C,
     Tensor<int32_t, 2> indices_A
 ) {
+    check_hpe_vjp(grad_A, grad_output, A, C, indices_A);
 
     int32_t nbatch = grad_output.shape[0];
     int32_t nnu1 = A.shape[1];

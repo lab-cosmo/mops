@@ -5,7 +5,7 @@
 
 #include "mops/hpe.hpp"
 
-#include "internal/checks.hpp"
+#include "internal/checks/hpe.hpp"
 #include "internal/utils.hpp"
 
 
@@ -80,9 +80,7 @@ void mops::homogeneous_polynomial_evaluation(
     Tensor<scalar_t, 1> C,
     Tensor<int32_t, 2> indices_A
 ) {
-    check_sizes(A, "A", 0, output, "grad_output", 0, "hpe");
-    check_sizes(C, "C", 0, indices_A,  "indices_A", 0, "hpe");
-    check_index_tensor(indices_A, "indices_A", A.shape[1], "hpe");
+    check_hpe(output, A, C, indices_A);
 
     size_t polynomial_order = indices_A.shape[1];
 
@@ -139,13 +137,7 @@ void _homogeneous_polynomial_evaluation_vjp_templated_polynomial_order(
     mops::Tensor<scalar_t, 1> C,
     mops::Tensor<int32_t, 2> indices_A
 ) {
-    check_sizes(A, "A", 0, grad_output, "grad_output", 0, "hpe_vjp");
-    check_sizes(C, "C", 0, indices_A,  "indices_A", 0, "hpe_vjp");
-    check_index_tensor(indices_A, "indices_A", A.shape[1], "hpe_vjp");
-
     if (grad_A.data != nullptr) {
-
-        check_same_shape(grad_A, "grad_A", A, "A", "hpe_vjp");
 
         scalar_t* grad_o_ptr = grad_output.data;
         scalar_t* a_ptr = A.data;
@@ -232,6 +224,8 @@ void mops::homogeneous_polynomial_evaluation_vjp(
     Tensor<scalar_t, 1> C,
     Tensor<int32_t, 2> indices_A
 ) {
+    check_hpe_vjp(grad_A, grad_output, A, C, indices_A);
+
     size_t polynomial_order = indices_A.shape[1];
 
     if (polynomial_order <= 10) {
