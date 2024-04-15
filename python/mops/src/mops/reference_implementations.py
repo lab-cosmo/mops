@@ -351,26 +351,27 @@ def homogeneous_polynomial_evaluation_vjp_vjp(
     for j in range(max_j):
         if grad_grad_A is not None:
             if compute_grad_grad_output:
-                base_product = C[j] * grad_grad_A
-                for k in range(max_k):
-                    temp = base_product
-                    for l in range(max_k):
-                        if l == k:
-                            continue
-                        temp = temp * A[:, indices_A[j, l]]
-                    grad_grad_output += temp
-            if compute_grad_A_2:
                 base = C[j]
                 for k in range(max_k):
                     temp = base * grad_grad_A[:, indices_A[j, k]]
                     for l in range(max_k):
                         if l == k:
                             continue
+                        temp = temp * A[:, indices_A[j, l]]
+                    grad_grad_output += temp
+            if compute_grad_A_2:
+                base_product = C[j] * grad_output
+                for l in range(max_k):
+                    temp = base_product
+                    for k in range(max_k):
+                        if k == l:
+                            continue
+                        temp_2 = temp * grad_grad_A[:, indices_A[j, k]]
                         for m in range(max_k):
                             if m == k or m == l:
                                 continue
-                            temp = temp * A[:, indices_A[j, m]]
-                        grad_A_2[:, indices_A[j, l]] += temp
+                            temp_2 = temp_2 * A[:, indices_A[j, m]]
+                        grad_A_2[:, indices_A[j, l]] += temp_2
 
     return grad_grad_output, grad_A_2
 

@@ -107,7 +107,7 @@ int MOPS_EXPORT mops_cuda_outer_product_scatter_add_vjp_f64(
 );
 
 /// CUDA version of mops::outer_product_scatter_add_vjp_vjp for 32-bit floats
-int MOPS_EXPORT mops_outer_product_scatter_add_vjp_vjp_f32(
+int MOPS_EXPORT mops_cuda_outer_product_scatter_add_vjp_vjp_f32(
     mops_tensor_3d_f32_t grad_grad_output,
     mops_tensor_2d_f32_t grad_A_2,
     mops_tensor_2d_f32_t grad_B_2,
@@ -120,7 +120,7 @@ int MOPS_EXPORT mops_outer_product_scatter_add_vjp_vjp_f32(
 );
 
 /// CUDA version of mops::outer_product_scatter_add_vjp_vjp for 64-bit floats
-int MOPS_EXPORT mops_outer_product_scatter_add_vjp_vjp_f64(
+int MOPS_EXPORT mops_cuda_outer_product_scatter_add_vjp_vjp_f64(
     mops_tensor_3d_f64_t grad_grad_output,
     mops_tensor_2d_f64_t grad_A_2,
     mops_tensor_2d_f64_t grad_B_2,

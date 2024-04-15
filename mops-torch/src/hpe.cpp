@@ -131,13 +131,60 @@ torch::Tensor HomogeneousPolynomialEvaluationBackward::forward(
         );
     }
 
+    if (A.requires_grad()) {
+        ctx->save_for_backward({grad_output, A, C, indices_A});
+    }
+
     return grad_A;
 }
 
 std::vector<torch::Tensor> HomogeneousPolynomialEvaluationBackward::backward(
     torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
 ) {
-    C10_THROW_ERROR(
-        ValueError, "second derivatives are not supported in homogeneous_polynomial_evaluation"
-    );
+    auto saved_variables = ctx->get_saved_variables();
+    auto grad_output = saved_variables[0];
+    auto A = saved_variables[1];
+    auto C = saved_variables[2];
+    auto indices_A = saved_variables[3];
+    auto grad_grad_A = grad_outputs[0].contiguous();
+
+    auto grad_grad_output = torch::Tensor();
+    auto grad_A_2 = torch::Tensor();
+
+    if (A.device().is_cpu()) {
+        AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "homogeneous_polynomial_evaluation_vjp_vjp", [&]() {
+            auto mops_grad_grad_output = mops::Tensor<scalar_t, 1>{nullptr, {0}};
+            auto mops_grad_A_2 = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (grad_output.requires_grad()) {
+                grad_grad_output = torch::empty_like(grad_output);
+                mops_grad_grad_output = details::torch_to_mops_1d<scalar_t>(grad_grad_output);
+            }
+            if (A.requires_grad()) {
+                grad_A_2 = torch::empty_like(A);
+                mops_grad_A_2 = details::torch_to_mops_2d<scalar_t>(grad_A_2);
+            }
+
+            mops::homogeneous_polynomial_evaluation_vjp_vjp<scalar_t>(
+                mops_grad_grad_output,
+                mops_grad_A_2,
+                details::torch_to_mops_2d<scalar_t>(grad_grad_A),
+                details::torch_to_mops_1d<scalar_t>(grad_output),
+                details::torch_to_mops_2d<scalar_t>(A),
+                details::torch_to_mops_1d<scalar_t>(C),
+                details::torch_to_mops_2d<int32_t>(indices_A)
+            );
+        });
+    } else if (A.device().is_cuda()) {
+        C10_THROW_ERROR(
+            ValueError, "homogeneous_polynomial_evaluation_vjp_vjp is not implemented for CUDA yet"
+        );
+    } else {
+        C10_THROW_ERROR(
+            ValueError,
+            "homogeneous_polynomial_evaluation_vjp_vjp is not implemented for device " +
+                A.device().str()
+        );
+    }
+
+    return {grad_grad_output, grad_A_2, torch::Tensor(), torch::Tensor()};
 }
