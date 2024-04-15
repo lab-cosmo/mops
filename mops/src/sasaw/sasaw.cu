@@ -33,7 +33,8 @@ __global__ __launch_bounds__(WARP_SIZE* NWARPS_PER_BLOCK) void sparse_accumulati
     scalar_t* buffer_out = shared_array<scalar_t>(output.shape[1] * output.shape[2], sptr, &space);
     scalar_t* buffer_A = shared_array<scalar_t>(NWARPS_PER_BLOCK * A.shape[1], sptr, &space);
     scalar_t* buffer_B = shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
-    shared_array<scalar_t>(NWARPS_PER_BLOCK * *W.shape[1] * W.shape[2], sptr, &space);
+    scalar_t* buffer_W =
+        shared_array<scalar_t>(NWARPS_PER_BLOCK * *W.shape[1] * W.shape[2], sptr, &space);
 
     scalar_t* buffer_C = shared_array<scalar_t>(C.shape[0], sptr, &space);
     int8_t* buffer_indices_A = shared_array<int8_t>(indices_A.shape[0], sptr, &space);
