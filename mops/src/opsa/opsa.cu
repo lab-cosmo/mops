@@ -26,22 +26,21 @@ __global__ __launch_bounds__(WARP_SIZE* NWARPS_PER_BLOCK) void outer_product_sca
     const int32_t threadRow = threadIdx.x / WARP_SIZE;
     const int32_t nThreadRow = (blockDim.x + WARP_SIZE - 1) / WARP_SIZE;
 
-    int32_t sample_start = first_occurences.data[blockIdx.x];
-    int32_t sample_end = -1;
-    int32_t node_index = -1;
+    int32_t* first_occurences_start = first_occurences.data;
+    int32_t* first_occurences_end = first_occurences.data + output.shape[0];
 
-    if (sample_start != -1) {
-        node_index = indices_output.data[sample_start];
-        sample_end = (blockIdx.x == first_occurences.shape[0] - 1)
-                         ? indices_output.shape[0]
-                         : (first_occurences.data[blockIdx.x + 1] == -1
-                                ? indices_output.shape[0]
-                                : first_occurences.data[blockIdx.x + 1]);
-    }
+    int32_t sample_start = first_occurences_start[blockIdx.x];
+    int32_t sample_end = first_occurences_end[blockIdx.x];
 
     int32_t nsamples = sample_end - sample_start;
 
     if (nsamples == 0) {
+        // fill tensor with zeros instead
+        for (int i = threadRow; i < A.shape[1]; i += nThreadRow) {
+            for (int j = threadCol; j < B.shape[1]; j += WARP_SIZE) {
+                output.data[blockIdx.x * A.shape[1] * B.shape[1] + i * B.shape[1] + j] = 0.0;
+            }
+        }
         return;
     }
 
@@ -57,7 +56,7 @@ __global__ __launch_bounds__(WARP_SIZE* NWARPS_PER_BLOCK) void outer_product_sca
                 reg_output += A.data[sample * A.shape[1] + i] * B.data[sample * B.shape[1] + j];
             }
 
-            output.data[node_index * A.shape[1] * B.shape[1] + i * B.shape[1] + j] = reg_output;
+            output.data[blockIdx.x * A.shape[1] * B.shape[1] + i * B.shape[1] + j] = reg_output;
         }
     }
 }
@@ -80,7 +79,7 @@ void mops::cuda::outer_product_scatter_add(
     dim3 blockDim(WARP_SIZE * NWARPS_PER_BLOCK, 1, 1);
 
     outer_product_scatter_add_kernel<scalar_t><<<gridDim, blockDim, 0>>>(
-        A, B, mops::Tensor<int32_t, 1>{first_occurences, {output.shape[0]}}, indices_output, output
+        A, B, mops::Tensor<int32_t, 1>{first_occurences, {output.shape[0] * 2}}, indices_output, output
     );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
@@ -133,18 +132,11 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK* WARP_SIZE) outer_product_sca
         buffer_grad_B = shared_array<scalar_t>(nThreadRow * B.shape[1], sptr, &space);
     }
 
-    int32_t sample_start = first_occurences.data[blockIdx.x];
-    int32_t sample_end = -1;
-    int32_t node_index = -1;
+    int32_t* first_occurences_start = first_occurences.data;
+    int32_t* first_occurences_end = first_occurences.data + grad_in.shape[0];
 
-    if (sample_start != -1) {
-        node_index = indices_output.data[sample_start];
-        sample_end = (blockIdx.x == first_occurences.shape[0] - 1)
-                         ? indices_output.shape[0]
-                         : (first_occurences.data[blockIdx.x + 1] == -1
-                                ? indices_output.shape[0]
-                                : first_occurences.data[blockIdx.x + 1]);
-    }
+    int32_t sample_start = first_occurences_start[blockIdx.x];
+    int32_t sample_end = first_occurences_end[blockIdx.x];
 
     int32_t nsamples = sample_end - sample_start;
 
@@ -157,7 +149,7 @@ __global__ void __launch_bounds__(NWARPS_PER_BLOCK* WARP_SIZE) outer_product_sca
      */
 
     for (int tid = threadIdx.x; tid < A.shape[1] * B.shape[1]; tid += blockDim.x) {
-        buffer_grad_in[tid] = grad_in.data[node_index * A.shape[1] * B.shape[1] + tid];
+        buffer_grad_in[tid] = grad_in.data[blockIdx.x * A.shape[1] * B.shape[1] + tid];
     }
 
     __syncthreads();
