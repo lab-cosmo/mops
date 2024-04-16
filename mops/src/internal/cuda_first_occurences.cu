@@ -72,7 +72,7 @@ __global__ void calculate_first_occurences_kernel(
         }
     }
 
-    // deal with 0th element specifically, so we dont need to use torch::zeros
+    // deal with 0th and last element specifically, so we dont need to use torch::zeros
     if (blockIdx.x == 0 && threadIdx.x == 0) {
         first_occurences_start[receiver_list[0]] = 0;
         first_occurences_end[receiver_list[nelements_input - 1]] = nelements_input;
