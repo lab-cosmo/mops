@@ -21,9 +21,9 @@ except ImportError:
 
 @pytest.fixture
 def valid_arguments():
-    grad_output = np.random.rand(100, 35)
-    A = np.random.rand(100, 20)
-    B = np.random.rand(100, 6)
+    grad_output = np.random.rand(99, 35)
+    A = np.random.rand(99, 20)
+    B = np.random.rand(99, 6)
     C = np.random.rand(30)
     indices_A = np.random.randint(20, size=(30,))
     indices_B = np.random.randint(6, size=(30,))

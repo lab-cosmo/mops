@@ -20,7 +20,7 @@ def test_hpe(dtype, device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
-    A = torch.rand(100, 20, dtype=dtype, device=device)
+    A = torch.rand(99, 20, dtype=dtype, device=device)
     C = torch.rand(200, dtype=dtype, device=device)
     indices_A = torch.randint(20, size=(200, 4), dtype=torch.int32, device=device)
 
@@ -39,7 +39,7 @@ def test_hpe_grads(dtype, device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
-    A = torch.rand(100, 20, dtype=dtype, device=device, requires_grad=True)
+    A = torch.rand(99, 20, dtype=dtype, device=device, requires_grad=True)
     C = torch.rand(200, dtype=dtype, device=device)
     indices_A = torch.randint(20, size=(200, 4), dtype=torch.int32, device=device)
 
@@ -57,7 +57,7 @@ def test_hpe_grads(dtype, device):
 
 
 def test_hpe_ref():
-    A = torch.rand(100, 20)
+    A = torch.rand(99, 20)
     C = torch.rand(200)
     indices_A = torch.randint(20, size=(200, 4), dtype=torch.int32)
 

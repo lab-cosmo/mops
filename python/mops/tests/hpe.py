@@ -19,7 +19,7 @@ except ImportError:
 
 @pytest.fixture
 def valid_arguments():
-    A = np.random.rand(100, 20)
+    A = np.random.rand(99, 20)
     C = np.random.rand(200)
     indices_A = np.random.randint(20, size=(200, 4))
     return A, C, indices_A
