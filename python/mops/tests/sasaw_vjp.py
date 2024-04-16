@@ -220,7 +220,8 @@ def test_sasaw_vjp_size_mismatch(valid_arguments):
     with pytest.raises(
         mops.status.MopsError,
         match="Dimension mismatch: the sizes of A along "
-        "dimension 0 and indices_output_1 along dimension 0 must match in sasaw_vjp",
+        "dimension 0 and indices_output_1 along dimension 0 must match in "
+        "cpu_sparse_accumulation_scatter_add_with_weights_vjp",
     ):
         sasaw_vjp(
             grad_output,
@@ -254,7 +255,8 @@ def test_sasaw_vjp_out_of_bounds(valid_arguments):
     with pytest.raises(
         mops.status.MopsError,
         match="Index array indices_output_1 in operation "
-        "sasaw_vjp contains elements up to 25; "
+        "cpu_sparse_accumulation_scatter_add_with_weights_vjp "
+        "contains elements up to 25; "
         "this would cause out-of-bounds accesses. With the provided "
         "parameters, it can only contain elements up to 24",
     ):

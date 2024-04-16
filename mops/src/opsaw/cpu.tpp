@@ -15,7 +15,7 @@ void mops::outer_product_scatter_add_with_weights(
     Tensor<int32_t, 1> indices_W,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_opsaw(output, A, B, W, indices_W, indices_output);   
+    check_opsaw(output, A, B, W, indices_W, indices_output, "cpu_outer_product_scatter_add_with_weights");   
 
     scalar_t* o_ptr = output.data;
     scalar_t* a_ptr = A.data;
@@ -66,7 +66,7 @@ void mops::outer_product_scatter_add_with_weights_vjp(
     Tensor<int32_t, 1> indices_W,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_opsaw_vjp(grad_A, grad_B, grad_W, grad_output, A, B, W, indices_W, indices_output);
+    check_opsaw_vjp(grad_A, grad_B, grad_W, grad_output, A, B, W, indices_W, indices_output, "cpu_outer_product_scatter_add_with_weights_vjp");
 
     bool calculate_grad_A = grad_A.data != nullptr;
     bool calculate_grad_B = grad_B.data != nullptr;

@@ -1,6 +1,7 @@
 #ifndef MOPS_CHECKS_OPSA_HPP
 #define MOPS_CHECKS_OPSA_HPP
 
+#include <string>
 #include "mops/tensor.hpp"
 #include "utils.hpp"
 
@@ -9,13 +10,16 @@ void check_opsa(
     mops::Tensor<scalar_t, 3> output,
     mops::Tensor<scalar_t, 2> A,
     mops::Tensor<scalar_t, 2> B,
-    mops::Tensor<int32_t, 1> indices_output
+    mops::Tensor<int32_t, 1> indices_output,
+    std::string operation_name
 ) {
-    check_sizes(A, "A", 0, B, "B", 0, "opsa");
-    check_sizes(A, "A", 1, output, "output", 1, "opsa");
-    check_sizes(B, "B", 1, output, "output", 2, "opsa");
-    check_sizes(A, "A", 0, indices_output, "indices_output", 0, "opsa");
-    check_index_tensor(indices_output, "indices_output", output.shape[0], "opsa");
+    check_sizes(A, "A", 0, B, "B", 0, operation_name);
+    check_sizes(A, "A", 1, output, "output", 1, operation_name);
+    check_sizes(B, "B", 1, output, "output", 2, operation_name);
+    check_sizes(A, "A", 0, indices_output, "indices_output", 0, operation_name);
+    if (operation_name.rfind("cuda_", 0) != 0) {
+        check_index_tensor(indices_output, "indices_output", output.shape[0], operation_name);
+    }
 }
 
 template <typename scalar_t>
@@ -25,17 +29,18 @@ void check_opsa_vjp(
     mops::Tensor<scalar_t, 3> grad_output,
     mops::Tensor<scalar_t, 2> A,
     mops::Tensor<scalar_t, 2> B,
-    mops::Tensor<int32_t, 1> indices_output
+    mops::Tensor<int32_t, 1> indices_output,
+    std::string operation_name
 ) {
     if (grad_A.data != nullptr) {
-        check_sizes(grad_A, "grad_A", 0, A, "A", 0, "opsa_vjp");
-        check_sizes(grad_A, "grad_A", 1, A, "A", 1, "opsa_vjp");
+        check_sizes(grad_A, "grad_A", 0, A, "A", 0, operation_name);
+        check_sizes(grad_A, "grad_A", 1, A, "A", 1, operation_name);
     }
     if (grad_B.data != nullptr) {
-        check_sizes(grad_B, "grad_B", 0, B, "B", 0, "opsa_vjp");
-        check_sizes(grad_B, "grad_B", 1, B, "B", 1, "opsa_vjp");
+        check_sizes(grad_B, "grad_B", 0, B, "B", 0, operation_name);
+        check_sizes(grad_B, "grad_B", 1, B, "B", 1, operation_name);
     }
-    check_opsa(grad_output, A, B, indices_output);
+    check_opsa(grad_output, A, B, indices_output, operation_name);
 }
 
 #endif

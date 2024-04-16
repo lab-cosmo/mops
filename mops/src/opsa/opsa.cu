@@ -69,7 +69,7 @@ void mops::cuda::outer_product_scatter_add(
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_opsa(output, A, B, indices_output);
+    check_opsa(output, A, B, indices_output, "cuda_outer_product_scatter_add");
 
     int32_t* first_occurences = calculate_first_occurences_cuda(
         indices_output.data, indices_output.shape[0], output.shape[0]
@@ -250,7 +250,9 @@ void mops::cuda::outer_product_scatter_add_vjp(
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_opsa_vjp(grad_A, grad_B, grad_output, A, B, indices_output);
+    check_opsa_vjp(
+        grad_A, grad_B, grad_output, A, B, indices_output, "cuda_outer_product_scatter_add_vjp"
+    );
 
     int32_t* first_occurences = calculate_first_occurences_cuda(
         indices_output.data, indices_output.shape[0], grad_output.shape[0]

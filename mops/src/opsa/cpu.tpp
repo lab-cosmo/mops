@@ -13,7 +13,7 @@ void mops::outer_product_scatter_add(
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_opsa(output, A, B, indices_output);
+    check_opsa(output, A, B, indices_output, "cpu_outer_product_scatter_add");
 
     size_t size_output = output.shape[0];
     size_t size_output_inner = output.shape[1] * output.shape[2];
@@ -61,7 +61,7 @@ void mops::outer_product_scatter_add_vjp(
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_opsa_vjp(grad_A, grad_B, grad_output, A, B, indices_output);
+    check_opsa_vjp(grad_A, grad_B, grad_output, A, B, indices_output, "cpu_outer_product_scatter_add_vjp");
 
     bool calculate_grad_A = grad_A.data != nullptr;
     bool calculate_grad_B = grad_B.data != nullptr;

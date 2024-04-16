@@ -18,7 +18,7 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     Tensor<int32_t, 1> indices_output_1,
     Tensor<int32_t, 1> indices_output_2
 ) {
-    check_sasaw(output, A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2);
+    check_sasaw(output, A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2, "cpu_sparse_accumulation_scatter_add_with_weights");
 
     scalar_t* o_ptr = output.data;
     scalar_t* a_ptr = A.data;
@@ -88,7 +88,7 @@ void mops::sparse_accumulation_scatter_add_with_weights_vjp(
     Tensor<int32_t, 1> indices_output_1,
     Tensor<int32_t, 1> indices_output_2
 ) {
-    check_sasaw_vjp(grad_A, grad_B, grad_W, grad_output, A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2);
+    check_sasaw_vjp(grad_A, grad_B, grad_W, grad_output, A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2, "cpu_sparse_accumulation_scatter_add_with_weights_vjp");
 
     bool calculate_grad_A = grad_A.data != nullptr;
     bool calculate_grad_B = grad_B.data != nullptr;
