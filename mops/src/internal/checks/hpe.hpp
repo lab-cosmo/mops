@@ -61,7 +61,7 @@ void check_hpe_vjp_vjp(
         check_sizes(grad_grad_A, "grad_grad_A", 0, A, "A", 0, operation_name);
         check_sizes(grad_grad_A, "grad_grad_A", 1, A, "A", 1, operation_name);
     }
-    check_hpe_vjp(grad_A_2, grad_output, A, C, indices_A, operation_name);
+    check_hpe_vjp(grad_grad_A, grad_output, A, C, indices_A, operation_name);
 }
 
 #endif

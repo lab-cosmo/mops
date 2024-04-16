@@ -97,7 +97,9 @@ void mops::cuda::sparse_accumulation_of_products(
     Tensor<int32_t, 1> indices_B,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_sap(output, A, B, C, indices_A, indices_B, indices_output);
+    check_sap(
+        output, A, B, C, indices_A, indices_B, indices_output, "cuda_sparse_accumulation_of_products"
+    );
 
     dim3 block_dim(find_integer_divisor(A.shape[0], WARP_SIZE));
 
@@ -281,7 +283,18 @@ void mops::cuda::sparse_accumulation_of_products_vjp(
     Tensor<int32_t, 1> indices_B,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_sap_vjp(grad_A, grad_B, grad_output, A, B, C, indices_A, indices_B, indices_output);
+    check_sap_vjp(
+        grad_A,
+        grad_B,
+        grad_output,
+        A,
+        B,
+        C,
+        indices_A,
+        indices_B,
+        indices_output,
+        "cuda_sparse_accumulation_of_products_vjp"
+    );
 
     dim3 block_dim(find_integer_divisor(grad_A.shape[0], WARP_SIZE));
 

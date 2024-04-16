@@ -20,8 +20,8 @@ def test_sap(dtype, device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
-    A = torch.rand(100, 20, device=device, dtype=dtype)
-    B = torch.rand(100, 6, device=device, dtype=dtype)
+    A = torch.rand(99, 20, device=device, dtype=dtype)
+    B = torch.rand(99, 6, device=device, dtype=dtype)
     C = torch.rand(30, device=device, dtype=dtype)
     indices_A = torch.randint(20, size=(30,), dtype=torch.int32, device=device)
     indices_B = torch.randint(6, size=(30,), dtype=torch.int32, device=device)
@@ -55,8 +55,8 @@ def test_sap_grads(dtype, device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
-    A = torch.rand(100, 20, device=device, dtype=dtype, requires_grad=True)
-    B = torch.rand(100, 6, device=device, dtype=dtype, requires_grad=True)
+    A = torch.rand(99, 20, device=device, dtype=dtype, requires_grad=True)
+    B = torch.rand(99, 6, device=device, dtype=dtype, requires_grad=True)
     C = torch.rand(30, device=device, dtype=dtype)
     indices_A = torch.randint(20, size=(30,), dtype=torch.int32, device=device)
     indices_B = torch.randint(6, size=(30,), dtype=torch.int32, device=device)
@@ -78,8 +78,8 @@ def test_sap_grads(dtype, device):
 
 
 def test_sap_ref():
-    A = torch.rand(100, 20)
-    B = torch.rand(100, 6)
+    A = torch.rand(99, 20)
+    B = torch.rand(99, 6)
     C = torch.rand(30)
     indices_A = torch.randint(20, size=(30,), dtype=torch.int32)
     indices_B = torch.randint(6, size=(30,), dtype=torch.int32)

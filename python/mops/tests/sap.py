@@ -19,8 +19,8 @@ except ImportError:
 
 @pytest.fixture
 def valid_arguments():
-    A = np.random.rand(100, 20)
-    B = np.random.rand(100, 6)
+    A = np.random.rand(99, 20)
+    B = np.random.rand(99, 6)
     C = np.random.rand(30)
     indices_A = np.random.randint(20, size=(30,))
     indices_B = np.random.randint(6, size=(30,))
@@ -67,7 +67,8 @@ def test_sap_size_mismatch(valid_arguments):
     with pytest.raises(
         mops.status.MopsError,
         match="Dimension mismatch: the sizes of C along "
-        "dimension 0 and indices_A along dimension 0 must match in sap",
+        "dimension 0 and indices_A along dimension 0 must match in "
+        "cpu_sparse_accumulation_of_products",
     ):
         sap(A, B, C, indices_A, indices_B, indices_output, output_size)
 
@@ -78,7 +79,8 @@ def test_sap_out_of_bounds(valid_arguments):
 
     with pytest.raises(
         mops.status.MopsError,
-        match="Index array indices_A in operation sap contains elements up to 20; "
+        match="Index array indices_A in operation "
+        "cpu_sparse_accumulation_of_products contains elements up to 20; "
         "this would cause out-of-bounds accesses. With the provided "
         "parameters, it can only contain elements up to 19",
     ):

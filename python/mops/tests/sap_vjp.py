@@ -49,7 +49,7 @@ def test_sap_vjp_wrong_type(valid_arguments):
 
     with pytest.raises(
         TypeError,
-        match="Wrong dtype for A in " "sparse_accumulation_of_products: got int32",
+        match="Wrong dtype for A in sparse_accumulation_of_products: got int32",
     ):
         sap_vjp(grad_output, A, B, C, indices_A, indices_B, indices_output)
 
@@ -73,7 +73,8 @@ def test_sap_vjp_size_mismatch(valid_arguments):
     with pytest.raises(
         mops.status.MopsError,
         match="Dimension mismatch: the sizes of C along "
-        "dimension 0 and indices_A along dimension 0 must match in sap_vjp",
+        "dimension 0 and indices_A along dimension 0 must match in "
+        "cpu_sparse_accumulation_of_products_vjp",
     ):
         sap_vjp(grad_output, A, B, C, indices_A, indices_B, indices_output)
 
@@ -84,7 +85,8 @@ def test_sap_vjp_out_of_bounds(valid_arguments):
 
     with pytest.raises(
         mops.status.MopsError,
-        match="Index array indices_A in operation sap_vjp contains elements up to 20; "
+        match="Index array indices_A in operation "
+        "cpu_sparse_accumulation_of_products_vjp contains elements up to 20; "
         "this would cause out-of-bounds accesses. With the provided "
         "parameters, it can only contain elements up to 19",
     ):

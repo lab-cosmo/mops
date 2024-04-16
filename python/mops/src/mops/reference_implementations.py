@@ -490,7 +490,9 @@ def sparse_accumulation_of_products_vjp_vjp(
                 )
             if compute_grad_B_2:
                 grad_B_2[:, indices_B[k]] += (
-                    grad_grad_A[:, indices_output[k]] * A[:, indices_A[k]] * C[k]
+                    grad_grad_A[:, indices_A[k]]
+                    * grad_output[:, indices_output[k]]
+                    * C[k]
                 )
         if grad_grad_B is not None:
             if compute_grad_grad_output:
@@ -499,7 +501,9 @@ def sparse_accumulation_of_products_vjp_vjp(
                 )
             if compute_grad_A_2:
                 grad_A_2[:, indices_A[k]] += (
-                    grad_grad_B[:, indices_output[k]] * B[:, indices_B[k]] * C[k]
+                    grad_grad_B[:, indices_B[k]]
+                    * grad_output[:, indices_output[k]]
+                    * C[k]
                 )
 
     return grad_grad_output, grad_A_2, grad_B_2

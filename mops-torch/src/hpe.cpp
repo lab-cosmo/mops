@@ -131,7 +131,7 @@ torch::Tensor HomogeneousPolynomialEvaluationBackward::forward(
         );
     }
 
-    if (A.requires_grad()) {
+    if (grad_output.requires_grad() || A.requires_grad()) {
         ctx->save_for_backward({grad_output, A, C, indices_A});
     }
 
@@ -154,20 +154,24 @@ std::vector<torch::Tensor> HomogeneousPolynomialEvaluationBackward::backward(
     if (A.device().is_cpu()) {
         AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "homogeneous_polynomial_evaluation_vjp_vjp", [&]() {
             auto mops_grad_grad_output = mops::Tensor<scalar_t, 1>{nullptr, {0}};
-            auto mops_grad_A_2 = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
             if (grad_output.requires_grad()) {
                 grad_grad_output = torch::empty_like(grad_output);
                 mops_grad_grad_output = details::torch_to_mops_1d<scalar_t>(grad_grad_output);
             }
+            auto mops_grad_A_2 = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
             if (A.requires_grad()) {
                 grad_A_2 = torch::empty_like(A);
                 mops_grad_A_2 = details::torch_to_mops_2d<scalar_t>(grad_A_2);
+            }
+            auto mops_grad_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (grad_grad_A.defined()) {
+                mops_grad_grad_A = details::torch_to_mops_2d<scalar_t>(grad_grad_A);
             }
 
             mops::homogeneous_polynomial_evaluation_vjp_vjp<scalar_t>(
                 mops_grad_grad_output,
                 mops_grad_A_2,
-                details::torch_to_mops_2d<scalar_t>(grad_grad_A),
+                mops_grad_grad_A,
                 details::torch_to_mops_1d<scalar_t>(grad_output),
                 details::torch_to_mops_2d<scalar_t>(A),
                 details::torch_to_mops_1d<scalar_t>(C),
