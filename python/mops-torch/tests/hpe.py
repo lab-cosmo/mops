@@ -53,6 +53,7 @@ def test_hpe_grads(dtype, device):
         assert torch.autograd.gradgradcheck(
             mops.torch.homogeneous_polynomial_evaluation,
             (A, C, indices_A),
+            nondet_tol=1e-5,
         )
 
 

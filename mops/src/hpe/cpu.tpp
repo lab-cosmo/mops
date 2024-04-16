@@ -189,25 +189,25 @@ void _homogeneous_polynomial_evaluation_vjp_templated_polynomial_order(
             }
         }
 
-        grad_o_ptr += size_first_dimension_interleft*simd_element_count;  // shift grad_o to the remainder values
-        for (size_t i = 0; i < size_remainder; i++) {
-            scalar_t grad_output_i = grad_o_ptr[i];
-            size_t i_shift = i * n_possible_factors;
-            scalar_t* a_ptr_i = remainder_a_ptr + i_shift;
-            scalar_t* grad_a_ptr_i = remainder_grad_a_ptr + i_shift;
-            int32_t* indices_a_ptr_j = indices_a_ptr;
-            for (size_t j = 0; j < n_monomials; j++) {
-                scalar_t base_multiplier = grad_output_i*c_ptr[j];
-                for (uint8_t i_factor = 0; i_factor < polynomial_order; i_factor++) {
-                    scalar_t temp = base_multiplier;
-                    for (uint8_t j_factor = 0; j_factor < polynomial_order; j_factor++) {
-                        if (j_factor == i_factor) continue;
-                        temp *= a_ptr_i[indices_a_ptr_j[j_factor]];
-                    }
-                    grad_a_ptr_i[indices_a_ptr_j[i_factor]] += temp;
+        scalar_t* grad_o_ptr_i = grad_o_ptr + size_first_dimension_interleft*simd_element_count;  // shift grad_o to the remainder values
+        scalar_t* a_ptr_i = remainder_a_ptr;
+        scalar_t* grad_a_ptr_i = remainder_grad_a_ptr;
+        int32_t* indices_a_ptr_j = indices_a_ptr;
+        for (size_t j = 0; j < n_monomials; j++) {
+            std::vector<scalar_t> base_multiplier(size_remainder);
+            for (size_t l = 0; l < size_remainder; l++) base_multiplier[l] = c_ptr[j] * grad_o_ptr_i[l];
+            for (uint8_t i_factor = 0; i_factor < polynomial_order; i_factor++) {
+                std::vector<scalar_t> temp(size_remainder);
+                for (size_t l = 0; l < size_remainder; l++) temp[l] = base_multiplier[l];
+                for (uint8_t j_factor = 0; j_factor < polynomial_order; j_factor++) {
+                    if (j_factor == i_factor) continue;
+                    scalar_t* a_ptr_i_j_factor = a_ptr_i + indices_a_ptr_j[j_factor] * size_remainder;
+                    for (size_t l = 0; l < size_remainder; l++) temp[l] *= a_ptr_i_j_factor[l];
                 }
-                indices_a_ptr_j += polynomial_order;
+                scalar_t* grad_a_ptr_i_i_factor = grad_a_ptr_i + indices_a_ptr_j[i_factor] * size_remainder;
+                for (size_t l = 0; l < size_remainder; l++) grad_a_ptr_i_i_factor[l] += temp[l];
             }
+            indices_a_ptr_j += polynomial_order;
         }
 
         un_interleave_tensor<scalar_t, simd_element_count>(grad_A, interleft_grad_a_ptr, remainder_grad_a_ptr);
@@ -288,7 +288,6 @@ void _homogeneous_polynomial_evaluation_vjp_vjp_templated_polynomial_order(
 
     scalar_t* grad_grad_o_ptr = grad_grad_output.data;
     scalar_t* grad_o_ptr = grad_output.data;
-    scalar_t* a_ptr = A.data;
     scalar_t* c_ptr = C.data;
     int32_t* indices_a_ptr = indices_A.data;
 
@@ -399,51 +398,56 @@ void _homogeneous_polynomial_evaluation_vjp_vjp_templated_polynomial_order(
         }
     }
 
+    grad_o_ptr_i = grad_o_ptr + size_first_dimension_interleft*simd_element_count;
+    a_ptr_i = remainder_a_ptr;
     if (compute_grad_grad_output) {
-        grad_grad_o_ptr += size_first_dimension_interleft*simd_element_count;
+        grad_grad_o_ptr_i = grad_grad_o_ptr + size_first_dimension_interleft*simd_element_count;
     }
-    grad_o_ptr += size_first_dimension_interleft*simd_element_count;
-    for (size_t i = 0; i < size_remainder; i++) {
-        scalar_t grad_output_i = grad_o_ptr[i];
-        size_t i_shift = i * n_possible_factors;
-        scalar_t* a_ptr_i = remainder_a_ptr + i_shift;
-        if (grad_grad_A_is_available) {
-            grad_grad_a_ptr_i = remainder_grad_grad_a_ptr + i_shift;
-        }
-        if (compute_grad_A_2) {
-            grad_a_2_ptr_i = remainder_grad_a_2_ptr + i_shift;
-        }
-        int32_t* indices_a_ptr_j = indices_a_ptr;
-        for (size_t j = 0; j < n_monomials; j++) {
+    grad_grad_a_ptr_i = remainder_grad_grad_a_ptr;
+    grad_a_2_ptr_i = remainder_grad_a_2_ptr;
+    int32_t* indices_a_ptr_j = indices_a_ptr;
+    for (size_t j = 0; j < n_monomials; j++) {
+        if (compute_grad_grad_output) {
             scalar_t C_j = c_ptr[j];
             if (compute_grad_grad_output) {
-                scalar_t base_multiplier = grad_output_i * C_j;
+                std::vector<scalar_t> base_multiplier(size_remainder);
+                for (size_t l = 0; l < size_remainder; l++) base_multiplier[l] = C_j;
                 for (uint8_t i_factor = 0; i_factor < polynomial_order; i_factor++) {
-                    scalar_t temp = base_multiplier * grad_grad_a_ptr_i[indices_a_ptr_j[i_factor]];
+                    scalar_t* grad_grad_a_ptr_i_i_factor = grad_grad_a_ptr_i + indices_a_ptr_j[i_factor] * size_remainder;
+                    std::vector<scalar_t> temp(size_remainder);
+                    for (size_t l = 0; l < size_remainder; l++) temp[l] = base_multiplier[l] * grad_grad_a_ptr_i_i_factor[l];
                     for (uint8_t j_factor = 0; j_factor < polynomial_order; j_factor++) {
                         if (j_factor == i_factor) continue;
-                        temp *= a_ptr_i[indices_a_ptr_j[j_factor]];
+                        scalar_t* a_ptr_i_j_factor = a_ptr_i + indices_a_ptr_j[j_factor] * size_remainder;
+                        for (size_t l = 0; l < size_remainder; l++) temp[l] *= a_ptr_i_j_factor[l];
                     }
-                    grad_grad_o_ptr[i] += temp;
+                    for (size_t l = 0; l < size_remainder; l++) grad_grad_o_ptr_i[l] += temp[l];
                 }
             }
-            if (compute_grad_A_2) {
-                for (uint8_t j_factor = 0; j_factor < polynomial_order; j_factor++) {
-                    scalar_t base_multiplier = grad_output_i * C_j;
-                    scalar_t temp = base_multiplier;
-                    for (uint8_t i_factor = 0; i_factor < polynomial_order; i_factor++) {
-                        if (i_factor == j_factor) continue;
-                        scalar_t temp2 = temp * grad_grad_a_ptr_i[indices_a_ptr_j[i_factor]];
-                        for (uint8_t k_factor = 0; k_factor < polynomial_order; k_factor++) {
-                            if (k_factor == i_factor || k_factor == j_factor) continue;
-                            temp2 *= a_ptr_i[indices_a_ptr_j[k_factor]];
-                        }
-                        grad_a_2_ptr_i[indices_a_ptr_j[j_factor]] += temp2;
-                    }
-                }
-            }
-            indices_a_ptr_j += polynomial_order;
         }
+        if (compute_grad_A_2) {
+            scalar_t C_j = c_ptr[j];
+            std::vector<scalar_t> base_multiplier(size_remainder);
+            for (size_t l = 0; l < size_remainder; l++) base_multiplier[l] = C_j * grad_o_ptr_i[l];
+            for (uint8_t j_factor = 0; j_factor < polynomial_order; j_factor++) {
+                std::vector<scalar_t> temp(size_remainder);
+                for (size_t l = 0; l < size_remainder; l++) temp[l] = base_multiplier[l];
+                for (uint8_t i_factor = 0; i_factor < polynomial_order; i_factor++) {
+                    if (i_factor == j_factor) continue;
+                    scalar_t* grad_grad_a_ptr_i_i_factor = grad_grad_a_ptr_i + indices_a_ptr_j[i_factor] * size_remainder;
+                    std::vector<scalar_t> temp2(size_remainder);
+                    for (size_t l = 0; l < size_remainder; l++) temp2[l] = temp[l] * grad_grad_a_ptr_i_i_factor[l];
+                    for (uint8_t k_factor = 0; k_factor < polynomial_order; k_factor++) {
+                        if (k_factor == i_factor || k_factor == j_factor) continue;
+                        scalar_t* a_ptr_i_k_factor = a_ptr_i + indices_a_ptr_j[k_factor] * size_remainder;
+                        for (size_t l = 0; l < size_remainder; l++) temp2[l] *= a_ptr_i_k_factor[l];
+                    }
+                    scalar_t* grad_a_2_ptr_i_j_factor = grad_a_2_ptr_i + indices_a_ptr_j[j_factor] * size_remainder;
+                    for (size_t l = 0; l < size_remainder; l++) grad_a_2_ptr_i_j_factor[l] += temp2[l];
+                }
+            }
+        }
+        indices_a_ptr_j += polynomial_order;
     }
 
     if (compute_grad_A_2) {
