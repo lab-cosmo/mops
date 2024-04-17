@@ -102,7 +102,7 @@ def test_sap_vjp_cupy(valid_arguments):
     indices_B = cp.array(indices_B)
     indices_output = cp.array(indices_output)
 
-    ref_grad_A, ref_grad_B = ref_sap_vjp(  # noqa: F841
+    grad_A, grad_B = ref_sap_vjp(  # noqa: F841
         grad_output,
         A,
         B,
@@ -111,16 +111,9 @@ def test_sap_vjp_cupy(valid_arguments):
         indices_B,
         indices_output,
     )
-
-    grad_A, grad_B = sap_vjp(
-        grad_output,
-        A,
-        B,
-        C,
-        indices_A,
-        indices_B,
-        indices_output,
-    )
-
-    assert cp.allclose(ref_grad_A, grad_A)
-    assert cp.allclose(ref_grad_B, grad_B)
+    with pytest.raises(
+        mops.status.MopsError, match="CUDA implementation does not exist yet"
+    ):
+        grad_A, grad_B = sap_vjp(  # noqa: F841
+            grad_output, A, B, C, indices_A, indices_B, indices_output
+        )
