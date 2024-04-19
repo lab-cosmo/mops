@@ -282,6 +282,26 @@ void _homogeneous_polynomial_evaluation_vjp_vjp_templated_polynomial_order(
     mops::Tensor<scalar_t, 1> C,
     mops::Tensor<int32_t, 2> indices_A
 ) {
+    // This function computes the vjp of homogeneous_polynomial_evaluation_vjp.
+    // Therefore, its aim is to compute the gradient of the outputs of
+    // homogeneous_polynomial_evaluation_vjp, that is grad_A, with respect to its
+    // differentiable inputs, that is grad_output and A. Hence, the inputs of this
+    // function are the same as those to homogeneous_polynomial_evaluation_vjp
+    // (A, C, indices_A, grad_output) plus the gradient of the scalar objective with
+    // respect to its output grad_A, that is, grad_grad_A. Our objective is to fill
+    // the derivatives of the scalar objective with respect to the differentiable inputs 
+    // of homogeneous_polynomial_evaluation_vjp, which are represented by grad_A_2
+    // (derivative of A, not to be confused with grad_A, which is the output of
+    // the function homogeneous_polynomial_evaluation_vjp), and grad_grad_output
+    // (derivative of the scalar objective with respect to grad_output).
+
+    // First, we interleave the inputs to facilitate SIMD operations (similar to
+    // homogeneous_polynomial_evaluation_vjp). Then, we compute the derivatives.
+    // The many branches of the code take into account whether grad_grad_A is available
+    // (it might not be if grad_A was not computed in homogeneous_polynomial_evaluation_vjp),
+    // and whether the user wants to compute grad_A_2 and/or grad_grad_output.
+    // Finally, we un-interleave the results to return the outputs in the correct format.
+
     bool grad_grad_A_is_available = (grad_grad_A.data != nullptr);
     bool compute_grad_grad_output = (grad_grad_output.data != nullptr);
     bool compute_grad_A_2 = (grad_A_2.data != nullptr);

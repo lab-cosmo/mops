@@ -14,14 +14,13 @@ else:
     HAS_CUDA = False
 
 
-@pytest.mark.parametrize("dtype", [torch.float64])
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
-def test_hpe(dtype, device):
+def test_hpe(device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
-    A = torch.rand(99, 20, dtype=dtype, device=device)
-    C = torch.rand(200, dtype=dtype, device=device)
+    A = torch.rand(99, 20, dtype=torch.float64, device=device)
+    C = torch.rand(200, dtype=torch.float64, device=device)
     indices_A = torch.randint(20, size=(200, 4), dtype=torch.int32, device=device)
 
     reference = torch.tensor(
@@ -33,14 +32,13 @@ def test_hpe(dtype, device):
     assert torch.allclose(reference, actual)
 
 
-@pytest.mark.parametrize("dtype", [torch.float64])
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
-def test_hpe_grads(dtype, device):
+def test_hpe_grads(device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
-    A = torch.rand(99, 20, dtype=dtype, device=device, requires_grad=True)
-    C = torch.rand(200, dtype=dtype, device=device)
+    A = torch.rand(99, 20, dtype=torch.float64, device=device, requires_grad=True)
+    C = torch.rand(200, dtype=torch.float64, device=device)
     indices_A = torch.randint(20, size=(200, 4), dtype=torch.int32, device=device)
 
     assert torch.autograd.gradcheck(

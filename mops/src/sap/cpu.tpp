@@ -218,37 +218,6 @@ void mops::sparse_accumulation_of_products_vjp(
             }
         }
 
-        // // Handle the remainder, i.e., the elements that do not fit inside a multiple of simd_element_count
-        // scalar_t* grad_output_i = remainder_grad_o_ptr;
-        // scalar_t* grad_a_i = remainder_grad_a_ptr;
-        // scalar_t* grad_b_i = remainder_grad_b_ptr;
-        // scalar_t* a_i = remainder_a_ptr;
-        // scalar_t* b_i = remainder_b_ptr;
-        // for (size_t i = 0; i < size_remainder; i++){
-        //     for (size_t j = 0; j < c_size; j++) {
-        //         scalar_t grad_output_j = grad_output_i[p_o_ptr[j]];
-        //         scalar_t common_factor = grad_output_j * c_ptr[j];
-
-        //         if (calculate_grad_A) {
-        //             grad_a_i[p_a_ptr[j]] += common_factor * b_i[p_b_ptr[j]];
-        //         }
-
-        //         if (calculate_grad_B) {
-        //             grad_b_i[p_b_ptr[j]] += common_factor * a_i[p_a_ptr[j]];
-        //         }
-
-        //     }
-        //     grad_output_i += size_second_dimension_o;
-        //     if (calculate_grad_A) {
-        //         grad_a_i += size_second_dimension_a;
-        //     }
-        //     if (calculate_grad_B) {
-        //         grad_b_i += size_second_dimension_b;
-        //     }
-        //     a_i += size_second_dimension_a;
-        //     b_i += size_second_dimension_b;
-        // }
-
         // Handle the remainder, i.e., the elements that do not fit inside a multiple of simd_element_count
         for (size_t j = 0; j < c_size; j++) {
             scalar_t* grad_output_j = remainder_grad_o_ptr + p_o_ptr[j] * size_remainder;
@@ -300,6 +269,26 @@ void mops::sparse_accumulation_of_products_vjp_vjp(
     Tensor<int32_t, 1> indices_B,
     Tensor<int32_t, 1> indices_output
 ) {
+    // This function computes the vjp of sparse_accumulation_of_products_vjp.
+    // Therefore, its aim is to compute the gradient of the outputs of
+    // sparse_accumulation_of_products_vjp, that is grad_A and grad_B, with respect to its
+    // differentiable inputs, that is grad_output, A and B. Hence, the inputs of this
+    // function are the same as those to sparse_accumulation_of_products_vjp
+    // (A, B, C, indices_A, indices_B, indices_output, grad_output) plus the gradient of
+    // the scalar objective with respect to its outputs grad_A and grad_B, that is,
+    // grad_grad_A and grad_grad_B. Our objective is to fill the derivatives of the scalar
+    // objective with respect to the differentiable inputs of sparse_accumulation_of_products_vjp,
+    // which are represented by grad_A_2 and grad_B_2 (derivative of A and B, not to be confused
+    // with grad_A and grad_B, which is the outputs of the function sparse_accumulation_of_products_vjp),
+    // as well as grad_grad_output(derivative of the scalar objective with respect to grad_output).
+
+    // First, we interleave the inputs to facilitate SIMD operations (similar to
+    // sparse_accumulation_of_products_vjp). Then, we compute the derivatives.
+    // The many branches of the code take into account whether grad_grad_A and grad_grad_B are available
+    // (they might not be if grad_A/grad_B was not computed in sparse_accumulation_of_products_vjp),
+    // and whether the user wants to compute grad_A_2. grad_B_2 and/or grad_grad_output.
+    // Finally, we un-interleave the results to return the outputs in the correct format.
+
     check_sap_vjp_vjp(grad_grad_output, grad_A_2, grad_B_2, grad_grad_A, grad_grad_B, grad_output, A, B, C, indices_A, indices_B, indices_output, "cpu_sparse_accumulation_of_products_vjp_vjp");
 
     bool grad_grad_A_is_available = (grad_grad_A.data != nullptr);

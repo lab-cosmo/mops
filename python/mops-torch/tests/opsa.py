@@ -20,8 +20,8 @@ def test_opsa(dtype, device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
-    A = torch.rand(100, 20, dtype=dtype, device=device)
-    B = torch.rand(100, 5, dtype=dtype, device=device)
+    A = torch.rand(100, 20, dtype=torch.float64, device=device)
+    B = torch.rand(100, 5, dtype=torch.float64, device=device)
 
     output_size = 10
 
@@ -35,7 +35,7 @@ def test_opsa(dtype, device):
         ref_opsa(
             A.cpu().numpy(), B.cpu().numpy(), indices_output.cpu().numpy(), output_size
         ),
-        dtype=dtype,
+        dtype=torch.float64,
         device=device,
     )
 
@@ -44,14 +44,13 @@ def test_opsa(dtype, device):
     assert torch.allclose(reference, actual)
 
 
-@pytest.mark.parametrize("dtype", [torch.float64])
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
-def test_opsa_grads(dtype, device):
+def test_opsa_grads(device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
-    A = torch.rand(100, 20, dtype=dtype, requires_grad=True, device=device)
-    B = torch.rand(100, 5, dtype=dtype, requires_grad=True, device=device)
+    A = torch.rand(100, 20, dtype=torch.float64, requires_grad=True, device=device)
+    B = torch.rand(100, 5, dtype=torch.float64, requires_grad=True, device=device)
 
     output_size = 10
     indices = torch.sort(

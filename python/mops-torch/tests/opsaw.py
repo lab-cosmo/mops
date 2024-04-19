@@ -34,16 +34,15 @@ def test_opsaw():
     assert torch.allclose(reference, actual)
 
 
-@pytest.mark.parametrize("dtype", [torch.float64])
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
-def test_opsaw_grads(dtype, device):
+def test_opsaw_grads(device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
-    A = torch.rand(100, 10, dtype=dtype, device=device, requires_grad=True)
-    B = torch.rand(100, 5, dtype=dtype, device=device, requires_grad=True)
+    A = torch.rand(100, 10, dtype=torch.float64, device=device, requires_grad=True)
+    B = torch.rand(100, 5, dtype=torch.float64, device=device, requires_grad=True)
     n_O = 20
-    W = torch.rand(n_O, 5, dtype=dtype, device=device, requires_grad=True)
+    W = torch.rand(n_O, 5, dtype=torch.float64, device=device, requires_grad=True)
     indices_W = torch.randint(20, size=(100,), device=device, dtype=torch.int32)
     indices_output = torch.randint(20, size=(100,), device=device, dtype=torch.int32)
 
