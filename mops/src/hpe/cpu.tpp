@@ -339,7 +339,10 @@ void _homogeneous_polynomial_evaluation_vjp_vjp_templated_polynomial_order(
     scalar_t* grad_grad_a_ptr_i = nullptr;
     scalar_t* grad_o_ptr_i = nullptr;
     scalar_t* a_ptr_i = nullptr;
-    #pragma omp parallel for
+    // #pragma omp parallel for
+    // Enabling parallelism here leads to non-reentrant gradients of gradients on
+    // the GitHub CI. Not clear what the problem is. To be investigated, possibly with
+    // thread sanitizer.
     for (size_t i = 0; i < size_first_dimension_interleft; i++) {
         if (compute_grad_grad_output) {
             grad_grad_o_ptr_i = grad_grad_o_ptr + i * simd_element_count;
