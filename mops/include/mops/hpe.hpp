@@ -10,6 +10,10 @@ namespace mops {
 /**
  * @brief Computes a homogeneous polynomial on a set of n_batch points.
  *
+ * The operation can be described by the following pseudocode:
+ * for j in range(J):
+ *      O[:] += C[j] * A[:, P_1[j, 1]] * A[:, P_2[j, 2]] * ...
+ *
  * @param[out] output The output tensor of shape [n_batch] where the result will be stored.
  * @param[in] A The input tensor of shape [n_batch, n_factors] containing the individual
  *      input factors that will be multiplied into the monomials.
@@ -32,11 +36,13 @@ extern template void homogeneous_polynomial_evaluation(
 );
 
 /**
- * @brief Computes the vjp of the homogeneous polynomial evaluation with respect to A.
+ * @brief Computes the vector-Jacobian product (vjp) of homogeneous_polynomial_evaluation with
+ * respect to A.
  *
- * @param[out] grad_A The gradient of the output with respect to A, of shape [n_batch, n_factors].
+ * @param[out] grad_A The gradient of the scalar objective with respect to A, of shape [n_batch,
+ * n_factors].
  * @param[in] grad_output The gradient of the scalar objective with respect to the output, of shape
- * [n_batch].
+ *      [n_batch].
  * @param[in] A See homogeneous_polynomial_evaluation.
  * @param[in] C See homogeneous_polynomial_evaluation.
  * @param[in] indices_A See homogeneous_polynomial_evaluation.
@@ -68,14 +74,14 @@ extern template void homogeneous_polynomial_evaluation_vjp(
 );
 
 /**
- * @brief Computes the vjp of the vjp of the homogeneous polynomial evaluation with respect to A.
+ * @brief Computes the vjp of the vjp of homogeneous_polynomial_evaluation with respect to A.
  *
  * @param[out] grad_grad_output The gradient of the scalar objective with respect to grad_output, of
- * shape [n_batch].
- * @param[out] grad_A_2 The gradient of the output with respect to A, of shape [n_batch, n_factors].
- * Not to be confused with grad_A in homogeneous_polynomial_evaluation_vjp.
+ *      shape [n_batch].
+ * @param[out] grad_A_2 The gradient of the scalar objective with respect to A, of shape [n_batch,
+ * n_factors]. Not to be confused with grad_A in homogeneous_polynomial_evaluation_vjp.
  * @param[in] grad_grad_A The gradient of the scalar objective with respect to grad_A, of shape
- * [n_batch, n_factors].
+ *      [n_batch, n_factors].
  * @param[in] grad_output See homogeneous_polynomial_evaluation_vjp.
  * @param[in] A See homogeneous_polynomial_evaluation_vjp.
  * @param[in] C See homogeneous_polynomial_evaluation_vjp.
