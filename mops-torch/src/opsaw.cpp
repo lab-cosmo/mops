@@ -78,6 +78,25 @@ std::vector<torch::Tensor> OuterProductScatterAddWithWeights::backward(
 
     auto grad_output = grad_outputs[0].contiguous();
 
+    auto results = OuterProductScatterAddWithWeightsBackward::apply(
+        grad_output, A, B, W, indices_W, indices_output
+    );
+    auto grad_A = results[0];
+    auto grad_B = results[1];
+    auto grad_W = results[2];
+
+    return {grad_A, grad_B, grad_W, torch::Tensor(), torch::Tensor()};
+}
+
+std::vector<torch::Tensor> OuterProductScatterAddWithWeightsBackward::forward(
+    torch::autograd::AutogradContext* ctx,
+    torch::Tensor grad_output,
+    torch::Tensor A,
+    torch::Tensor B,
+    torch::Tensor W,
+    torch::Tensor indices_W,
+    torch::Tensor indices_output
+) {
     auto grad_A = torch::Tensor();
     auto grad_B = torch::Tensor();
     auto grad_W = torch::Tensor();
@@ -127,5 +146,13 @@ std::vector<torch::Tensor> OuterProductScatterAddWithWeights::backward(
         );
     }
 
-    return {grad_A, grad_B, grad_W, torch::Tensor(), torch::Tensor()};
+    return {grad_A, grad_B, grad_W};
+}
+
+std::vector<torch::Tensor> OuterProductScatterAddWithWeightsBackward::backward(
+    torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
+) {
+    C10_THROW_ERROR(
+        ValueError, "second derivatives are not supported in outer_product_scatter_add_with_weights"
+    );
 }

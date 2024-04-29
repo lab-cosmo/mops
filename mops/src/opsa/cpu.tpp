@@ -1,8 +1,9 @@
 #include <algorithm>
+#include <vector>
 
 #include "mops/opsa.hpp"
 
-#include "internal/checks.hpp"
+#include "internal/checks/opsa.hpp"
 #include "internal/utils.hpp"
 
 template <typename scalar_t>
@@ -12,11 +13,7 @@ void mops::outer_product_scatter_add(
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_sizes(A, "A", 0, B, "B", 0, "opsa");
-    check_sizes(A, "A", 1, output, "output", 1, "opsa");
-    check_sizes(B, "B", 1, output, "output", 2, "opsa");
-    check_sizes(A, "A", 0, indices_output, "indices_output", 0, "opsa");
-    check_index_tensor(indices_output, "indices_output", output.shape[0], "opsa");
+    check_opsa(output, A, B, indices_output, "cpu_outer_product_scatter_add");
 
     size_t size_output = output.shape[0];
     size_t size_output_inner = output.shape[1] * output.shape[2];
@@ -64,11 +61,7 @@ void mops::outer_product_scatter_add_vjp(
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_sizes(A, "A", 0, B, "B", 0, "opsa_vjp");
-    check_sizes(A, "A", 1, grad_output, "grad_output", 1, "opsa_vjp");
-    check_sizes(B, "B", 1, grad_output, "grad_output", 2, "opsa_vjp");
-    check_sizes(A, "A", 0, indices_output, "indices_output", 0, "opsa_vjp");
-    check_index_tensor(indices_output, "indices_output", grad_output.shape[0], "opsa_vjp");
+    check_opsa_vjp(grad_A, grad_B, grad_output, A, B, indices_output, "cpu_outer_product_scatter_add_vjp");
 
     bool calculate_grad_A = grad_A.data != nullptr;
     bool calculate_grad_B = grad_B.data != nullptr;
@@ -80,11 +73,9 @@ void mops::outer_product_scatter_add_vjp(
         size_t size_b = B.shape[1];
 
         if (calculate_grad_A) {
-            check_same_shape(grad_A, "grad_A", A, "A", "opsa_vjp");
             std::fill(grad_A.data, grad_A.data + size_ab * size_a, static_cast<scalar_t>(0.0));
         }
         if (calculate_grad_B) {
-            check_same_shape(grad_B, "grad_B", B, "B", "opsa_vjp");
             std::fill(grad_B.data, grad_B.data + size_ab * size_b, static_cast<scalar_t>(0.0));
         }
 
@@ -118,4 +109,19 @@ void mops::outer_product_scatter_add_vjp(
             }
         }
     }
+}
+
+template<typename scalar_t>
+void mops::outer_product_scatter_add_vjp_vjp(
+    Tensor<scalar_t, 3> /*grad_grad_output*/,
+    Tensor<scalar_t, 2> /*grad_A_2*/,
+    Tensor<scalar_t, 2> /*grad_B_2*/,
+    Tensor<scalar_t, 2> /*grad_grad_A*/,
+    Tensor<scalar_t, 2> /*grad_grad_B*/,
+    Tensor<scalar_t, 3> /*grad_output*/,
+    Tensor<scalar_t, 2> /*A*/,
+    Tensor<scalar_t, 2> /*B*/,
+    Tensor<int32_t, 1> /*indices_output*/
+) {
+    throw std::runtime_error("Not implemented yet.");
 }

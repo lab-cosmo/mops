@@ -215,7 +215,8 @@ def test_sasaw_size_mismatch(valid_arguments):
     with pytest.raises(
         mops.status.MopsError,
         match="Dimension mismatch: the sizes of A along "
-        "dimension 0 and indices_output_1 along dimension 0 must match in sasaw",
+        "dimension 0 and indices_output_1 along dimension 0 must match in "
+        "cpu_sparse_accumulation_scatter_add_with_weights",
     ):
         sasaw(
             A,
@@ -249,9 +250,9 @@ def test_sasaw_out_of_bounds(valid_arguments):
     with pytest.raises(
         mops.status.MopsError,
         match="Index array indices_output_1 in operation "
-        "sasaw contains elements up to 25; "
-        "this would cause out-of-bounds accesses. With the provided "
-        "parameters, it can only contain elements up to 24",
+        "cpu_sparse_accumulation_scatter_add_with_weights contains elements "
+        "up to 25; this would cause out-of-bounds accesses. With the "
+        "provided parameters, it can only contain elements up to 24",
     ):
         sasaw(
             A,

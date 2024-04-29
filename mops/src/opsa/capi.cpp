@@ -100,6 +100,74 @@ extern "C" int mops_outer_product_scatter_add_vjp_f64(
     MOPS_CATCH_EXCEPTIONS_END
 }
 
+extern "C" int mops_outer_product_scatter_add_vjp_vjp_f32(
+    mops_tensor_3d_f32_t grad_grad_output,
+    mops_tensor_2d_f32_t grad_A_2,
+    mops_tensor_2d_f32_t grad_B_2,
+    mops_tensor_2d_f32_t grad_grad_A,
+    mops_tensor_2d_f32_t grad_grad_B,
+    mops_tensor_3d_f32_t grad_output,
+    mops_tensor_2d_f32_t A,
+    mops_tensor_2d_f32_t B,
+    mops_tensor_1d_i32_t indices_output
+) {
+    MOPS_CATCH_EXCEPTIONS_BEGIN
+        mops::outer_product_scatter_add_vjp_vjp<float>(
+            {grad_grad_output.data,
+             {checked_cast(grad_grad_output.shape[0]),
+              checked_cast(grad_grad_output.shape[1]),
+              checked_cast(grad_grad_output.shape[2])}},
+            {grad_A_2.data, {checked_cast(grad_A_2.shape[0]), checked_cast(grad_A_2.shape[1])}},
+            {grad_B_2.data, {checked_cast(grad_B_2.shape[0]), checked_cast(grad_B_2.shape[1])}},
+            {grad_grad_A.data,
+             {checked_cast(grad_grad_A.shape[0]), checked_cast(grad_grad_A.shape[1])}},
+            {grad_grad_B.data,
+             {checked_cast(grad_grad_B.shape[0]), checked_cast(grad_grad_B.shape[1])}},
+            {grad_output.data,
+             {checked_cast(grad_output.shape[0]),
+              checked_cast(grad_output.shape[1]),
+              checked_cast(grad_output.shape[2])}},
+            {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
+            {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
+            {indices_output.data, {checked_cast(indices_output.shape[0])}}
+        );
+    MOPS_CATCH_EXCEPTIONS_END
+}
+
+extern "C" int mops_outer_product_scatter_add_vjp_vjp_f64(
+    mops_tensor_3d_f64_t grad_grad_output,
+    mops_tensor_2d_f64_t grad_A_2,
+    mops_tensor_2d_f64_t grad_B_2,
+    mops_tensor_2d_f64_t grad_grad_A,
+    mops_tensor_2d_f64_t grad_grad_B,
+    mops_tensor_3d_f64_t grad_output,
+    mops_tensor_2d_f64_t A,
+    mops_tensor_2d_f64_t B,
+    mops_tensor_1d_i32_t indices_output
+) {
+    MOPS_CATCH_EXCEPTIONS_BEGIN
+        mops::outer_product_scatter_add_vjp_vjp<double>(
+            {grad_grad_output.data,
+             {checked_cast(grad_grad_output.shape[0]),
+              checked_cast(grad_grad_output.shape[1]),
+              checked_cast(grad_grad_output.shape[2])}},
+            {grad_A_2.data, {checked_cast(grad_A_2.shape[0]), checked_cast(grad_A_2.shape[1])}},
+            {grad_B_2.data, {checked_cast(grad_B_2.shape[0]), checked_cast(grad_B_2.shape[1])}},
+            {grad_grad_A.data,
+             {checked_cast(grad_grad_A.shape[0]), checked_cast(grad_grad_A.shape[1])}},
+            {grad_grad_B.data,
+             {checked_cast(grad_grad_B.shape[0]), checked_cast(grad_grad_B.shape[1])}},
+            {grad_output.data,
+             {checked_cast(grad_output.shape[0]),
+              checked_cast(grad_output.shape[1]),
+              checked_cast(grad_output.shape[2])}},
+            {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
+            {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
+            {indices_output.data, {checked_cast(indices_output.shape[0])}}
+        );
+    MOPS_CATCH_EXCEPTIONS_END
+}
+
 extern "C" int mops_cuda_outer_product_scatter_add_f32(
     mops_tensor_3d_f32_t output,
     mops_tensor_2d_f32_t A,
@@ -173,6 +241,74 @@ extern "C" int mops_cuda_outer_product_scatter_add_vjp_f64(
         mops::cuda::outer_product_scatter_add_vjp<double>(
             {grad_A.data, {checked_cast(grad_A.shape[0]), checked_cast(grad_A.shape[1])}},
             {grad_B.data, {checked_cast(grad_B.shape[0]), checked_cast(grad_B.shape[1])}},
+            {grad_output.data,
+             {checked_cast(grad_output.shape[0]),
+              checked_cast(grad_output.shape[1]),
+              checked_cast(grad_output.shape[2])}},
+            {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
+            {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
+            {indices_output.data, {checked_cast(indices_output.shape[0])}}
+        );
+    MOPS_CATCH_EXCEPTIONS_END
+}
+
+extern "C" int mops_cuda_outer_product_scatter_add_vjp_vjp_f32(
+    mops_tensor_3d_f32_t grad_grad_output,
+    mops_tensor_2d_f32_t grad_A_2,
+    mops_tensor_2d_f32_t grad_B_2,
+    mops_tensor_2d_f32_t grad_grad_A,
+    mops_tensor_2d_f32_t grad_grad_B,
+    mops_tensor_3d_f32_t grad_output,
+    mops_tensor_2d_f32_t A,
+    mops_tensor_2d_f32_t B,
+    mops_tensor_1d_i32_t indices_output
+) {
+    MOPS_CATCH_EXCEPTIONS_BEGIN
+        mops::cuda::outer_product_scatter_add_vjp_vjp<float>(
+            {grad_grad_output.data,
+             {checked_cast(grad_grad_output.shape[0]),
+              checked_cast(grad_grad_output.shape[1]),
+              checked_cast(grad_grad_output.shape[2])}},
+            {grad_A_2.data, {checked_cast(grad_A_2.shape[0]), checked_cast(grad_A_2.shape[1])}},
+            {grad_B_2.data, {checked_cast(grad_B_2.shape[0]), checked_cast(grad_B_2.shape[1])}},
+            {grad_grad_A.data,
+             {checked_cast(grad_grad_A.shape[0]), checked_cast(grad_grad_A.shape[1])}},
+            {grad_grad_B.data,
+             {checked_cast(grad_grad_B.shape[0]), checked_cast(grad_grad_B.shape[1])}},
+            {grad_output.data,
+             {checked_cast(grad_output.shape[0]),
+              checked_cast(grad_output.shape[1]),
+              checked_cast(grad_output.shape[2])}},
+            {A.data, {checked_cast(A.shape[0]), checked_cast(A.shape[1])}},
+            {B.data, {checked_cast(B.shape[0]), checked_cast(B.shape[1])}},
+            {indices_output.data, {checked_cast(indices_output.shape[0])}}
+        );
+    MOPS_CATCH_EXCEPTIONS_END
+}
+
+extern "C" int mops_cuda_outer_product_scatter_add_vjp_vjp_f64(
+    mops_tensor_3d_f64_t grad_grad_output,
+    mops_tensor_2d_f64_t grad_A_2,
+    mops_tensor_2d_f64_t grad_B_2,
+    mops_tensor_2d_f64_t grad_grad_A,
+    mops_tensor_2d_f64_t grad_grad_B,
+    mops_tensor_3d_f64_t grad_output,
+    mops_tensor_2d_f64_t A,
+    mops_tensor_2d_f64_t B,
+    mops_tensor_1d_i32_t indices_output
+) {
+    MOPS_CATCH_EXCEPTIONS_BEGIN
+        mops::cuda::outer_product_scatter_add_vjp_vjp<double>(
+            {grad_grad_output.data,
+             {checked_cast(grad_grad_output.shape[0]),
+              checked_cast(grad_grad_output.shape[1]),
+              checked_cast(grad_grad_output.shape[2])}},
+            {grad_A_2.data, {checked_cast(grad_A_2.shape[0]), checked_cast(grad_A_2.shape[1])}},
+            {grad_B_2.data, {checked_cast(grad_B_2.shape[0]), checked_cast(grad_B_2.shape[1])}},
+            {grad_grad_A.data,
+             {checked_cast(grad_grad_A.shape[0]), checked_cast(grad_grad_A.shape[1])}},
+            {grad_grad_B.data,
+             {checked_cast(grad_grad_B.shape[0]), checked_cast(grad_grad_B.shape[1])}},
             {grad_output.data,
              {checked_cast(grad_output.shape[0]),
               checked_cast(grad_output.shape[1]),

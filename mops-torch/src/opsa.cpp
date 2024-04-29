@@ -86,6 +86,20 @@ std::vector<torch::Tensor> OuterProductScatterAdd::backward(
 
     auto grad_output = grad_outputs[0].contiguous();
 
+    auto results = OuterProductScatterAddBackward::apply(grad_output, A, B, indices_output);
+    auto grad_A = results[0];
+    auto grad_B = results[1];
+
+    return {grad_A, grad_B, torch::Tensor(), torch::Tensor()};
+}
+
+std::vector<torch::Tensor> OuterProductScatterAddBackward::forward(
+    torch::autograd::AutogradContext* ctx,
+    torch::Tensor grad_output,
+    torch::Tensor A,
+    torch::Tensor B,
+    torch::Tensor indices_output
+) {
     auto grad_A = torch::Tensor();
     auto grad_B = torch::Tensor();
 
@@ -146,5 +160,11 @@ std::vector<torch::Tensor> OuterProductScatterAdd::backward(
         );
     }
 
-    return {grad_A, grad_B, torch::Tensor(), torch::Tensor()};
+    return {grad_A, grad_B};
+}
+
+std::vector<torch::Tensor> OuterProductScatterAddBackward::backward(
+    torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
+) {
+    C10_THROW_ERROR(ValueError, "second derivatives are not supported in outer_product_scatter_add");
 }

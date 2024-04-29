@@ -1,6 +1,6 @@
 #include "mops/sap.hpp"
 
-#include "internal/checks.hpp"
+#include "internal/checks/sap.hpp"
 #include "internal/cuda_utils.cuh"
 
 using namespace mops;
@@ -97,6 +97,9 @@ void mops::cuda::sparse_accumulation_of_products(
     Tensor<int32_t, 1> indices_B,
     Tensor<int32_t, 1> indices_output
 ) {
+    check_sap(
+        output, A, B, C, indices_A, indices_B, indices_output, "cuda_sparse_accumulation_of_products"
+    );
 
     dim3 block_dim(find_integer_divisor(A.shape[0], WARP_SIZE));
 
@@ -280,6 +283,19 @@ void mops::cuda::sparse_accumulation_of_products_vjp(
     Tensor<int32_t, 1> indices_B,
     Tensor<int32_t, 1> indices_output
 ) {
+    check_sap_vjp(
+        grad_A,
+        grad_B,
+        grad_output,
+        A,
+        B,
+        C,
+        indices_A,
+        indices_B,
+        indices_output,
+        "cuda_sparse_accumulation_of_products_vjp"
+    );
+
     dim3 block_dim(find_integer_divisor(grad_A.shape[0], WARP_SIZE));
 
     dim3 thread_block(WARP_SIZE * NWARPS_PER_BLOCK, 1, 1);
@@ -324,6 +340,55 @@ template void mops::cuda::sparse_accumulation_of_products_vjp<float>(
 template void mops::cuda::sparse_accumulation_of_products_vjp<double>(
     Tensor<double, 2> grad_A,
     Tensor<double, 2> grad_B,
+    Tensor<double, 2> grad_output,
+    Tensor<double, 2> A,
+    Tensor<double, 2> B,
+    Tensor<double, 1> C,
+    Tensor<int32_t, 1> indices_A,
+    Tensor<int32_t, 1> indices_B,
+    Tensor<int32_t, 1> indices_output
+);
+
+template <typename scalar_t>
+void mops::cuda::sparse_accumulation_of_products_vjp_vjp(
+    Tensor<scalar_t, 2> grad_grad_output,
+    Tensor<scalar_t, 2> grad_A_2,
+    Tensor<scalar_t, 2> grad_B_2,
+    Tensor<scalar_t, 2> grad_grad_A,
+    Tensor<scalar_t, 2> grad_grad_B,
+    Tensor<scalar_t, 2> grad_output,
+    Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B,
+    Tensor<scalar_t, 1> C,
+    Tensor<int32_t, 1> indices_A,
+    Tensor<int32_t, 1> indices_B,
+    Tensor<int32_t, 1> indices_output
+) {
+    throw std::runtime_error("Not implemented");
+}
+
+// explicit instanciations of CUDA templates
+template void mops::cuda::sparse_accumulation_of_products_vjp_vjp<float>(
+    Tensor<float, 2> grad_grad_output,
+    Tensor<float, 2> grad_A_2,
+    Tensor<float, 2> grad_B_2,
+    Tensor<float, 2> grad_grad_A,
+    Tensor<float, 2> grad_grad_B,
+    Tensor<float, 2> grad_output,
+    Tensor<float, 2> A,
+    Tensor<float, 2> B,
+    Tensor<float, 1> C,
+    Tensor<int32_t, 1> indices_A,
+    Tensor<int32_t, 1> indices_B,
+    Tensor<int32_t, 1> indices_output
+);
+
+template void mops::cuda::sparse_accumulation_of_products_vjp_vjp<double>(
+    Tensor<double, 2> grad_grad_output,
+    Tensor<double, 2> grad_A_2,
+    Tensor<double, 2> grad_B_2,
+    Tensor<double, 2> grad_grad_A,
+    Tensor<double, 2> grad_grad_B,
     Tensor<double, 2> grad_output,
     Tensor<double, 2> A,
     Tensor<double, 2> B,

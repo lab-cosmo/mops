@@ -21,8 +21,8 @@ except ImportError:
 
 @pytest.fixture
 def valid_arguments():
-    grad_output = np.random.rand(100)
-    A = np.random.rand(100, 20)
+    grad_output = np.random.rand(99)
+    A = np.random.rand(99, 20)
     C = np.random.rand(200)
     indices_A = np.random.randint(20, size=(200, 4))
     return grad_output, A, C, indices_A
@@ -66,7 +66,8 @@ def test_hpe_vjp_size_mismatch(valid_arguments):
     with pytest.raises(
         mops.status.MopsError,
         match="Dimension mismatch: the sizes of C along "
-        "dimension 0 and indices_A along dimension 0 must match in hpe_vjp",
+        "dimension 0 and indices_A along dimension 0 must match in "
+        "cpu_homogeneous_polynomial_evaluation_vjp",
     ):
         hpe_vjp(grad_output, A, C, indices_A)
 
@@ -77,7 +78,8 @@ def test_hpe_vjp_out_of_bounds(valid_arguments):
 
     with pytest.raises(
         mops.status.MopsError,
-        match="Index array indices_A in operation hpe_vjp contains elements up to 20; "
+        match="Index array indices_A in operation "
+        "cpu_homogeneous_polynomial_evaluation_vjp contains elements up to 20; "
         "this would cause out-of-bounds accesses. With the provided "
         "parameters, it can only contain elements up to 19",
     ):
