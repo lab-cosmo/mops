@@ -275,7 +275,7 @@ def _check_opsa_vjp_vjp(
     if grad_grad_B is not None:
         _check_array_dtype(grad_grad_B, np.floating, function, "grad_grad_B")
 
-    _check_opsa_vjp(A, B, indices_output, grad_output, output_size)
+    _check_opsa_vjp(grad_output, A, B, indices_output, output_size)
 
 
 def _check_opsaw_vjp_vjp(

@@ -72,6 +72,9 @@ void check_sap_vjp_vjp(
         check_sizes(
             grad_grad_output, "grad_grad_output", 0, grad_output, "grad_output", 0, operation_name
         );
+        check_sizes(
+            grad_grad_output, "grad_grad_output", 1, grad_output, "grad_output", 1, operation_name
+        );
     }
     if (grad_A_2.data != nullptr) {
         check_sizes(grad_A_2, "grad_A_2", 0, A, "A", 0, operation_name);
