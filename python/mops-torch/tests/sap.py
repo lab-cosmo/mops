@@ -54,8 +54,10 @@ def test_sap_grads(device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
-    A = torch.rand(99, 20, device=device, dtype=torch.float64, requires_grad=True)
-    B = torch.rand(99, 6, device=device, dtype=torch.float64, requires_grad=True)
+    A = torch.rand(99, 20, device=device,
+                   dtype=torch.float64, requires_grad=True)
+    B = torch.rand(99, 6, device=device,
+                   dtype=torch.float64, requires_grad=True)
     C = torch.rand(30, device=device, dtype=torch.float64)
     indices_A = torch.randint(20, size=(30,), dtype=torch.int32, device=device)
     indices_B = torch.randint(6, size=(30,), dtype=torch.int32, device=device)
@@ -69,11 +71,10 @@ def test_sap_grads(device):
         (A, B, C, indices_A, indices_B, indices_output, output_size),
     )
 
-    if device != "cuda":  # not yet implemented
-        assert torch.autograd.gradgradcheck(
-            mops.torch.sparse_accumulation_of_products,
-            (A, B, C, indices_A, indices_B, indices_output, output_size),
-        )
+    assert torch.autograd.gradgradcheck(
+        mops.torch.sparse_accumulation_of_products,
+        (A, B, C, indices_A, indices_B, indices_output, output_size),
+    )
 
 
 def test_sap_ref():
@@ -96,5 +97,6 @@ def test_sap_ref():
             output_size,
         )
     )
-    actual = ref_sap_torch(A, B, C, indices_A, indices_B, indices_output, output_size)
+    actual = ref_sap_torch(A, B, C, indices_A, indices_B,
+                           indices_output, output_size)
     assert torch.allclose(reference, actual)
