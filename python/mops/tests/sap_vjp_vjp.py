@@ -237,7 +237,7 @@ def test_sap_vjp_vjp_cupy(valid_arguments):
     indices_B = cp.array(indices_B)
     indices_output = cp.array(indices_output)
 
-    _ = ref_sap_vjp_vjp(  # noqa: F841
+    reference = ref_sap_vjp_vjp(
         grad_grad_A,
         grad_grad_B,
         grad_output,
@@ -249,18 +249,17 @@ def test_sap_vjp_vjp_cupy(valid_arguments):
         indices_output,
     )
 
-    with pytest.raises(
-        mops.status.MopsError,
-        match="Not implemented",
-    ):
-        _ = sap_vjp_vjp(
-            grad_grad_A,
-            grad_grad_B,
-            grad_output,
-            A,
-            B,
-            C,
-            indices_A,
-            indices_B,
-            indices_output,
-        )
+    actual = sap_vjp_vjp(
+        grad_grad_A,
+        grad_grad_B,
+        grad_output,
+        A,
+        B,
+        C,
+        indices_A,
+        indices_B,
+        indices_output,
+    )
+
+    for i in range(len(reference)):
+        assert cp.allclose(reference[i], actual[i])

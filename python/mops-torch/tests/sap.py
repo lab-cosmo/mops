@@ -69,11 +69,10 @@ def test_sap_grads(device):
         (A, B, C, indices_A, indices_B, indices_output, output_size),
     )
 
-    if device != "cuda":  # not yet implemented
-        assert torch.autograd.gradgradcheck(
-            mops.torch.sparse_accumulation_of_products,
-            (A, B, C, indices_A, indices_B, indices_output, output_size),
-        )
+    assert torch.autograd.gradgradcheck(
+        mops.torch.sparse_accumulation_of_products,
+        (A, B, C, indices_A, indices_B, indices_output, output_size),
+    )
 
 
 def test_sap_ref():

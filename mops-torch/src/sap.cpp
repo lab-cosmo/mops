@@ -273,9 +273,54 @@ std::vector<torch::Tensor> SparseAccumulationOfProductsBackward::backward(
             );
         });
     } else if (A.device().is_cuda()) {
-        C10_THROW_ERROR(
-            ValueError, "sparse_accumulation_of_products_vjp_vjp is not implemented for CUDA yet"
-        );
+#ifndef MOPS_CUDA_ENABLED
+        C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " + A.device().str());
+#else
+        AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "sparse_accumulation_of_products_vjp_vjp", [&]() {
+            auto mops_grad_grad_output = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (grad_output.requires_grad()) {
+                grad_grad_output = torch::empty_like(grad_output);
+                mops_grad_grad_output = details::torch_to_mops_2d<scalar_t>(grad_grad_output);
+            }
+
+            auto mops_grad_A_2 = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (A.requires_grad()) {
+                grad_A_2 = torch::empty_like(A);
+                mops_grad_A_2 = details::torch_to_mops_2d<scalar_t>(grad_A_2);
+            }
+
+            auto mops_grad_B_2 = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (B.requires_grad()) {
+                grad_B_2 = torch::empty_like(B);
+                mops_grad_B_2 = details::torch_to_mops_2d<scalar_t>(grad_B_2);
+            }
+
+            auto mops_grad_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (grad_grad_A.defined()) {
+                mops_grad_grad_A = details::torch_to_mops_2d<scalar_t>(grad_grad_A);
+            }
+
+            auto mops_grad_grad_B = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (grad_grad_B.defined()) {
+                mops_grad_grad_B = details::torch_to_mops_2d<scalar_t>(grad_grad_B);
+            }
+
+            mops::cuda::sparse_accumulation_of_products_vjp_vjp<scalar_t>(
+                mops_grad_grad_output,
+                mops_grad_A_2,
+                mops_grad_B_2,
+                mops_grad_grad_A,
+                mops_grad_grad_B,
+                details::torch_to_mops_2d<scalar_t>(grad_output),
+                details::torch_to_mops_2d<scalar_t>(A),
+                details::torch_to_mops_2d<scalar_t>(B),
+                details::torch_to_mops_1d<scalar_t>(C),
+                details::torch_to_mops_1d<int32_t>(indices_A),
+                details::torch_to_mops_1d<int32_t>(indices_B),
+                details::torch_to_mops_1d<int32_t>(indices_output)
+            );
+        });
+#endif
     } else {
         C10_THROW_ERROR(
             ValueError,
