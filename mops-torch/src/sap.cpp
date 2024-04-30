@@ -273,6 +273,9 @@ std::vector<torch::Tensor> SparseAccumulationOfProductsBackward::backward(
             );
         });
     } else if (A.device().is_cuda()) {
+#ifndef MOPS_CUDA_ENABLED
+        C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " + A.device().str());
+#else
         AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "sparse_accumulation_of_products_vjp_vjp", [&]() {
             auto mops_grad_grad_output = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
             if (grad_output.requires_grad()) {
@@ -317,6 +320,7 @@ std::vector<torch::Tensor> SparseAccumulationOfProductsBackward::backward(
                 details::torch_to_mops_1d<int32_t>(indices_output)
             );
         });
+#endif
     } else {
         C10_THROW_ERROR(
             ValueError,
