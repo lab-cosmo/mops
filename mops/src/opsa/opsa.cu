@@ -71,6 +71,14 @@ void mops::cuda::outer_product_scatter_add(
 ) {
     check_opsa(output, A, B, indices_output, "cuda_outer_product_scatter_add");
 
+    cudaPointerAttributes attributes;
+    CUDA_CHECK_ERROR(cudaPointerGetAttributes(&attributes, A.data));
+    int current_device;
+    CUDA_CHECK_ERROR(cudaGetDevice(&current_device));
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(attributes.device));
+    }
+
     cudaStream_t cstream = reinterpret_cast<cudaStream_t>(cuda_stream);
 
     int32_t* first_occurences = calculate_first_occurences_cuda(
@@ -86,8 +94,11 @@ void mops::cuda::outer_product_scatter_add(
     );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
-
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(current_device));
+    }
 }
 
 // explicit instantiations of CUDA templates
@@ -258,6 +269,14 @@ void mops::cuda::outer_product_scatter_add_vjp(
         grad_A, grad_B, grad_output, A, B, indices_output, "cuda_outer_product_scatter_add_vjp"
     );
 
+    cudaPointerAttributes attributes;
+    CUDA_CHECK_ERROR(cudaPointerGetAttributes(&attributes, A.data));
+    int current_device;
+    CUDA_CHECK_ERROR(cudaGetDevice(&current_device));
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(attributes.device));
+    }
+
     cudaStream_t cstream = reinterpret_cast<cudaStream_t>(cuda_stream);
 
     int32_t* first_occurences = calculate_first_occurences_cuda(
@@ -282,7 +301,7 @@ void mops::cuda::outer_product_scatter_add_vjp(
         shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
     }
 
-    outer_product_scatter_add_vjp_kernel<scalar_t><<<gridDim, blockDim, space>>>(
+    outer_product_scatter_add_vjp_kernel<scalar_t><<<gridDim, blockDim, space, cstream>>>(
         A,
         B,
         mops::Tensor<int32_t, 1>{first_occurences, {grad_output.shape[0]}},
@@ -293,8 +312,11 @@ void mops::cuda::outer_product_scatter_add_vjp(
     );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
-
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(current_device));
+    }
 }
 
 // these templates will be precompiled and provided in the mops library
