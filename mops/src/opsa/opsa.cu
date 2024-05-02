@@ -94,7 +94,7 @@ void mops::cuda::outer_product_scatter_add(
     );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
-    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+    CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
 
     if (current_device != attributes.device) {
         CUDA_CHECK_ERROR(cudaSetDevice(current_device));
@@ -312,7 +312,7 @@ void mops::cuda::outer_product_scatter_add_vjp(
     );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
-    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+    CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
 
     if (current_device != attributes.device) {
         CUDA_CHECK_ERROR(cudaSetDevice(current_device));

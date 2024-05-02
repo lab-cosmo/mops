@@ -95,11 +95,22 @@ void mops::cuda::sparse_accumulation_of_products(
     Tensor<scalar_t, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 ) {
     check_sap(
         output, A, B, C, indices_A, indices_B, indices_output, "cuda_sparse_accumulation_of_products"
     );
+
+    cudaPointerAttributes attributes;
+    CUDA_CHECK_ERROR(cudaPointerGetAttributes(&attributes, A.data));
+    int current_device;
+    CUDA_CHECK_ERROR(cudaGetDevice(&current_device));
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(attributes.device));
+    }
+
+    cudaStream_t cstream = reinterpret_cast<cudaStream_t>(cuda_stream);
 
     dim3 block_dim(find_integer_divisor(A.shape[0], WARP_SIZE));
 
@@ -117,8 +128,11 @@ void mops::cuda::sparse_accumulation_of_products(
         <<<block_dim, thread_block, space>>>(output, A, B, C, indices_A, indices_B, indices_output);
 
     CUDA_CHECK_ERROR(cudaGetLastError());
+    CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
 
-    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(current_device));
+    }
 }
 
 // explicit instanciations of CUDA templates
@@ -129,7 +143,8 @@ template void mops::cuda::sparse_accumulation_of_products<float>(
     Tensor<float, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template void mops::cuda::sparse_accumulation_of_products<double>(
@@ -139,7 +154,8 @@ template void mops::cuda::sparse_accumulation_of_products<double>(
     Tensor<double, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template <typename scalar_t>
@@ -282,7 +298,8 @@ void mops::cuda::sparse_accumulation_of_products_vjp(
     Tensor<scalar_t, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 ) {
     check_sap_vjp(
         grad_A,
@@ -296,6 +313,16 @@ void mops::cuda::sparse_accumulation_of_products_vjp(
         indices_output,
         "cuda_sparse_accumulation_of_products_vjp"
     );
+
+    cudaPointerAttributes attributes;
+    CUDA_CHECK_ERROR(cudaPointerGetAttributes(&attributes, A.data));
+    int current_device;
+    CUDA_CHECK_ERROR(cudaGetDevice(&current_device));
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(attributes.device));
+    }
+
+    cudaStream_t cstream = reinterpret_cast<cudaStream_t>(cuda_stream);
 
     dim3 block_dim(find_integer_divisor(grad_A.shape[0], WARP_SIZE));
 
@@ -322,8 +349,11 @@ void mops::cuda::sparse_accumulation_of_products_vjp(
     );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
+    CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
 
-    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(current_device));
+    }
 }
 
 template void mops::cuda::sparse_accumulation_of_products_vjp<float>(
@@ -335,7 +365,8 @@ template void mops::cuda::sparse_accumulation_of_products_vjp<float>(
     Tensor<float, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template void mops::cuda::sparse_accumulation_of_products_vjp<double>(
@@ -347,7 +378,8 @@ template void mops::cuda::sparse_accumulation_of_products_vjp<double>(
     Tensor<double, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template <typename scalar_t>
@@ -586,7 +618,8 @@ void mops::cuda::sparse_accumulation_of_products_vjp_vjp(
     Tensor<scalar_t, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 ) {
     check_sap_vjp_vjp(
         grad_grad_output,
@@ -603,6 +636,16 @@ void mops::cuda::sparse_accumulation_of_products_vjp_vjp(
         indices_output,
         "cuda_sparse_accumulation_of_products_vjp_vjp"
     );
+
+    cudaPointerAttributes attributes;
+    CUDA_CHECK_ERROR(cudaPointerGetAttributes(&attributes, A.data));
+    int current_device;
+    CUDA_CHECK_ERROR(cudaGetDevice(&current_device));
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(attributes.device));
+    }
+
+    cudaStream_t cstream = reinterpret_cast<cudaStream_t>(cuda_stream);
 
     dim3 block_dim(find_integer_divisor(grad_A_2.shape[0], WARP_SIZE));
 
@@ -674,8 +717,11 @@ void mops::cuda::sparse_accumulation_of_products_vjp_vjp(
     );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
+    CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
 
-    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(current_device));
+    }
 }
 
 // explicit instanciations of CUDA templates
@@ -691,7 +737,8 @@ template void mops::cuda::sparse_accumulation_of_products_vjp_vjp<float>(
     Tensor<float, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template void mops::cuda::sparse_accumulation_of_products_vjp_vjp<double>(
@@ -706,5 +753,6 @@ template void mops::cuda::sparse_accumulation_of_products_vjp_vjp<double>(
     Tensor<double, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );

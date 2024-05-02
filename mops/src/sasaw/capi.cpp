@@ -276,7 +276,8 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_f32(
     mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2,
     mops_tensor_1d_i32_t indices_output_1,
-    mops_tensor_1d_i32_t indices_output_2
+    mops_tensor_1d_i32_t indices_output_2,
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::sparse_accumulation_scatter_add_with_weights<float>(
@@ -292,7 +293,8 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_f32(
             {indices_W_1.data, {checked_cast(indices_W_1.shape[0])}},
             {indices_W_2.data, {checked_cast(indices_W_2.shape[0])}},
             {indices_output_1.data, {checked_cast(indices_output_1.shape[0])}},
-            {indices_output_2.data, {checked_cast(indices_output_2.shape[0])}}
+            {indices_output_2.data, {checked_cast(indices_output_2.shape[0])}},
+            cuda_stream
         );
     MOPS_CATCH_EXCEPTIONS_END
 }
@@ -307,7 +309,8 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_f64(
     mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2,
     mops_tensor_1d_i32_t indices_output_1,
-    mops_tensor_1d_i32_t indices_output_2
+    mops_tensor_1d_i32_t indices_output_2,
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::sparse_accumulation_scatter_add_with_weights<double>(
@@ -323,7 +326,8 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_f64(
             {indices_W_1.data, {checked_cast(indices_W_1.shape[0])}},
             {indices_W_2.data, {checked_cast(indices_W_2.shape[0])}},
             {indices_output_1.data, {checked_cast(indices_output_1.shape[0])}},
-            {indices_output_2.data, {checked_cast(indices_output_2.shape[0])}}
+            {indices_output_2.data, {checked_cast(indices_output_2.shape[0])}},
+            cuda_stream
         );
     MOPS_CATCH_EXCEPTIONS_END
 }
@@ -341,7 +345,8 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_vjp_f32(
     mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2,
     mops_tensor_1d_i32_t indices_output_1,
-    mops_tensor_1d_i32_t indices_output_2
+    mops_tensor_1d_i32_t indices_output_2,
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::sparse_accumulation_scatter_add_with_weights_vjp<float>(
@@ -362,7 +367,8 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_vjp_f32(
             {indices_W_1.data, {checked_cast(indices_W_1.shape[0])}},
             {indices_W_2.data, {checked_cast(indices_W_2.shape[0])}},
             {indices_output_1.data, {checked_cast(indices_output_1.shape[0])}},
-            {indices_output_2.data, {checked_cast(indices_output_2.shape[0])}}
+            {indices_output_2.data, {checked_cast(indices_output_2.shape[0])}},
+            cuda_stream
         );
     MOPS_CATCH_EXCEPTIONS_END
 }
@@ -380,7 +386,8 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_vjp_f64(
     mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2,
     mops_tensor_1d_i32_t indices_output_1,
-    mops_tensor_1d_i32_t indices_output_2
+    mops_tensor_1d_i32_t indices_output_2,
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::sparse_accumulation_scatter_add_with_weights_vjp<double>(
@@ -401,7 +408,8 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_vjp_f64(
             {indices_W_1.data, {checked_cast(indices_W_1.shape[0])}},
             {indices_W_2.data, {checked_cast(indices_W_2.shape[0])}},
             {indices_output_1.data, {checked_cast(indices_output_1.shape[0])}},
-            {indices_output_2.data, {checked_cast(indices_output_2.shape[0])}}
+            {indices_output_2.data, {checked_cast(indices_output_2.shape[0])}},
+            cuda_stream
         );
     MOPS_CATCH_EXCEPTIONS_END
 }
@@ -423,7 +431,8 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_vjp_vjp_f3
     mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2,
     mops_tensor_1d_i32_t indices_output_1,
-    mops_tensor_1d_i32_t indices_output_2
+    mops_tensor_1d_i32_t indices_output_2,
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::sparse_accumulation_scatter_add_with_weights_vjp_vjp<float>(
@@ -457,7 +466,8 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_vjp_vjp_f3
             {indices_W_1.data, {checked_cast(indices_W_1.shape[0])}},
             {indices_W_2.data, {checked_cast(indices_W_2.shape[0])}},
             {indices_output_1.data, {checked_cast(indices_output_1.shape[0])}},
-            {indices_output_2.data, {checked_cast(indices_output_2.shape[0])}}
+            {indices_output_2.data, {checked_cast(indices_output_2.shape[0])}},
+            cuda_stream
         );
     MOPS_CATCH_EXCEPTIONS_END
 }
@@ -479,7 +489,8 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_vjp_vjp_f6
     mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2,
     mops_tensor_1d_i32_t indices_output_1,
-    mops_tensor_1d_i32_t indices_output_2
+    mops_tensor_1d_i32_t indices_output_2,
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::sparse_accumulation_scatter_add_with_weights_vjp_vjp<double>(
@@ -513,7 +524,8 @@ extern "C" int mops_cuda_sparse_accumulation_scatter_add_with_weights_vjp_vjp_f6
             {indices_W_1.data, {checked_cast(indices_W_1.shape[0])}},
             {indices_W_2.data, {checked_cast(indices_W_2.shape[0])}},
             {indices_output_1.data, {checked_cast(indices_output_1.shape[0])}},
-            {indices_output_2.data, {checked_cast(indices_output_2.shape[0])}}
+            {indices_output_2.data, {checked_cast(indices_output_2.shape[0])}},
+            cuda_stream
         );
     MOPS_CATCH_EXCEPTIONS_END
 }

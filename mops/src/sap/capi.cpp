@@ -191,7 +191,8 @@ extern "C" int mops_cuda_sparse_accumulation_of_products_f32(
     mops_tensor_1d_f32_t C,
     mops_tensor_1d_i32_t indices_A,
     mops_tensor_1d_i32_t indices_B,
-    mops_tensor_1d_i32_t indices_output
+    mops_tensor_1d_i32_t indices_output,
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::sparse_accumulation_of_products<float>(
@@ -201,7 +202,8 @@ extern "C" int mops_cuda_sparse_accumulation_of_products_f32(
             {C.data, {checked_cast(C.shape[0])}},
             {indices_A.data, {checked_cast(indices_A.shape[0])}},
             {indices_B.data, {checked_cast(indices_B.shape[0])}},
-            {indices_output.data, {checked_cast(indices_output.shape[0])}}
+            {indices_output.data, {checked_cast(indices_output.shape[0])}},
+            cuda_stream
         );
     MOPS_CATCH_EXCEPTIONS_END
 }
@@ -213,7 +215,8 @@ extern "C" int mops_cuda_sparse_accumulation_of_products_f64(
     mops_tensor_1d_f64_t C,
     mops_tensor_1d_i32_t indices_A,
     mops_tensor_1d_i32_t indices_B,
-    mops_tensor_1d_i32_t indices_output
+    mops_tensor_1d_i32_t indices_output,
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::sparse_accumulation_of_products<double>(
@@ -223,7 +226,8 @@ extern "C" int mops_cuda_sparse_accumulation_of_products_f64(
             {C.data, {checked_cast(C.shape[0])}},
             {indices_A.data, {checked_cast(indices_A.shape[0])}},
             {indices_B.data, {checked_cast(indices_B.shape[0])}},
-            {indices_output.data, {checked_cast(indices_output.shape[0])}}
+            {indices_output.data, {checked_cast(indices_output.shape[0])}},
+            cuda_stream
         );
     MOPS_CATCH_EXCEPTIONS_END
 }
@@ -237,7 +241,8 @@ extern "C" int mops_cuda_sparse_accumulation_of_products_vjp_f32(
     mops_tensor_1d_f32_t C,
     mops_tensor_1d_i32_t indices_A,
     mops_tensor_1d_i32_t indices_B,
-    mops_tensor_1d_i32_t indices_output
+    mops_tensor_1d_i32_t indices_output,
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::sparse_accumulation_of_products_vjp<float>(
@@ -250,7 +255,8 @@ extern "C" int mops_cuda_sparse_accumulation_of_products_vjp_f32(
             {C.data, {checked_cast(C.shape[0])}},
             {indices_A.data, {checked_cast(indices_A.shape[0])}},
             {indices_B.data, {checked_cast(indices_B.shape[0])}},
-            {indices_output.data, {checked_cast(indices_output.shape[0])}}
+            {indices_output.data, {checked_cast(indices_output.shape[0])}},
+            cuda_stream
         );
     MOPS_CATCH_EXCEPTIONS_END
 }
@@ -264,7 +270,8 @@ extern "C" int mops_cuda_sparse_accumulation_of_products_vjp_f64(
     mops_tensor_1d_f64_t C,
     mops_tensor_1d_i32_t indices_A,
     mops_tensor_1d_i32_t indices_B,
-    mops_tensor_1d_i32_t indices_output
+    mops_tensor_1d_i32_t indices_output,
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::sparse_accumulation_of_products_vjp<double>(
@@ -277,7 +284,8 @@ extern "C" int mops_cuda_sparse_accumulation_of_products_vjp_f64(
             {C.data, {checked_cast(C.shape[0])}},
             {indices_A.data, {checked_cast(indices_A.shape[0])}},
             {indices_B.data, {checked_cast(indices_B.shape[0])}},
-            {indices_output.data, {checked_cast(indices_output.shape[0])}}
+            {indices_output.data, {checked_cast(indices_output.shape[0])}},
+            cuda_stream
         );
     MOPS_CATCH_EXCEPTIONS_END
 }
@@ -294,7 +302,8 @@ extern "C" int mops_cuda_sparse_accumulation_of_products_vjp_vjp_f32(
     mops_tensor_1d_f32_t C,
     mops_tensor_1d_i32_t indices_A,
     mops_tensor_1d_i32_t indices_B,
-    mops_tensor_1d_i32_t indices_output
+    mops_tensor_1d_i32_t indices_output,
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::sparse_accumulation_of_products_vjp_vjp<float>(
@@ -313,7 +322,8 @@ extern "C" int mops_cuda_sparse_accumulation_of_products_vjp_vjp_f32(
             {C.data, {checked_cast(C.shape[0])}},
             {indices_A.data, {checked_cast(indices_A.shape[0])}},
             {indices_B.data, {checked_cast(indices_B.shape[0])}},
-            {indices_output.data, {checked_cast(indices_output.shape[0])}}
+            {indices_output.data, {checked_cast(indices_output.shape[0])}},
+            cuda_stream
         );
     MOPS_CATCH_EXCEPTIONS_END
 }
@@ -330,7 +340,8 @@ extern "C" int mops_cuda_sparse_accumulation_of_products_vjp_vjp_f64(
     mops_tensor_1d_f64_t C,
     mops_tensor_1d_i32_t indices_A,
     mops_tensor_1d_i32_t indices_B,
-    mops_tensor_1d_i32_t indices_output
+    mops_tensor_1d_i32_t indices_output,
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::sparse_accumulation_of_products_vjp_vjp<double>(
@@ -349,7 +360,8 @@ extern "C" int mops_cuda_sparse_accumulation_of_products_vjp_vjp_f64(
             {C.data, {checked_cast(C.shape[0])}},
             {indices_A.data, {checked_cast(indices_A.shape[0])}},
             {indices_B.data, {checked_cast(indices_B.shape[0])}},
-            {indices_output.data, {checked_cast(indices_output.shape[0])}}
+            {indices_output.data, {checked_cast(indices_output.shape[0])}},
+            cuda_stream
         );
     MOPS_CATCH_EXCEPTIONS_END
 }

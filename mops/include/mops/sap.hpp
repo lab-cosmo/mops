@@ -191,7 +191,8 @@ void MOPS_EXPORT sparse_accumulation_of_products(
     Tensor<scalar_t, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream = nullptr
 );
 
 extern template void sparse_accumulation_of_products(
@@ -201,7 +202,8 @@ extern template void sparse_accumulation_of_products(
     Tensor<float, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 extern template void sparse_accumulation_of_products(
@@ -211,7 +213,8 @@ extern template void sparse_accumulation_of_products(
     Tensor<double, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 /// CUDA version of mops::sparse_accumulation_of_products_vjp
@@ -225,7 +228,8 @@ void MOPS_EXPORT sparse_accumulation_of_products_vjp(
     Tensor<scalar_t, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream = nullptr
 );
 
 extern template void sparse_accumulation_of_products_vjp(
@@ -237,7 +241,8 @@ extern template void sparse_accumulation_of_products_vjp(
     Tensor<float, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 extern template void sparse_accumulation_of_products_vjp(
@@ -249,7 +254,8 @@ extern template void sparse_accumulation_of_products_vjp(
     Tensor<double, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 /// TODO
@@ -266,7 +272,8 @@ void MOPS_EXPORT sparse_accumulation_of_products_vjp_vjp(
     Tensor<scalar_t, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream = nullptr
 );
 
 // these templates will be precompiled and provided in the mops library
@@ -282,7 +289,8 @@ extern template void sparse_accumulation_of_products_vjp_vjp(
     Tensor<float, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 extern template void sparse_accumulation_of_products_vjp_vjp(
@@ -297,7 +305,8 @@ extern template void sparse_accumulation_of_products_vjp_vjp(
     Tensor<double, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 } // namespace cuda

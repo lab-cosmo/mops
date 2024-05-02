@@ -108,10 +108,20 @@ __global__ void homogeneous_polynomial_evaluation_kernel(
 
 template <typename scalar_t>
 void mops::cuda::homogeneous_polynomial_evaluation(
-    Tensor<scalar_t, 1> output, Tensor<scalar_t, 2> A, Tensor<scalar_t, 1> C, Tensor<int32_t, 2> indices_A
+    Tensor<scalar_t, 1> output, Tensor<scalar_t, 2> A, Tensor<scalar_t, 1> C, Tensor<int32_t, 2> indices_A, void * cuda_stream
 ) {
 
     check_hpe(output, A, C, indices_A, "cuda_homogeneous_polynomial_evaluation");
+
+    cudaPointerAttributes attributes;
+    CUDA_CHECK_ERROR(cudaPointerGetAttributes(&attributes, A.data));
+    int current_device;
+    CUDA_CHECK_ERROR(cudaGetDevice(&current_device));
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(attributes.device));
+    }
+
+    cudaStream_t cstream = reinterpret_cast<cudaStream_t>(cuda_stream);
 
     int32_t nbatch = output.shape[0];
     int32_t nnu1 = A.shape[1];
@@ -180,17 +190,20 @@ void mops::cuda::homogeneous_polynomial_evaluation(
     }
 
     CUDA_CHECK_ERROR(cudaGetLastError());
+    CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
 
-    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(current_device));
+    }
 }
 
 // explicit instanciations of CUDA templates
 template void mops::cuda::homogeneous_polynomial_evaluation<float>(
-    Tensor<float, 1> output, Tensor<float, 2> A, Tensor<float, 1> C, Tensor<int32_t, 2> indices_A
+    Tensor<float, 1> output, Tensor<float, 2> A, Tensor<float, 1> C, Tensor<int32_t, 2> indices_A, void * cuda_stream
 );
 
 template void mops::cuda::homogeneous_polynomial_evaluation<double>(
-    Tensor<double, 1> output, Tensor<double, 2> A, Tensor<double, 1> C, Tensor<int32_t, 2> indices_A
+    Tensor<double, 1> output, Tensor<double, 2> A, Tensor<double, 1> C, Tensor<int32_t, 2> indices_A, void * cuda_stream
 );
 
 template <typename scalar_t, int32_t polynomial_order>
@@ -293,9 +306,20 @@ void mops::cuda::homogeneous_polynomial_evaluation_vjp(
     Tensor<scalar_t, 1> grad_output,
     Tensor<scalar_t, 2> A,
     Tensor<scalar_t, 1> C,
-    Tensor<int32_t, 2> indices_A
+    Tensor<int32_t, 2> indices_A,
+    void * cuda_stream
 ) {
     check_hpe_vjp(grad_A, grad_output, A, C, indices_A, "cuda_homogeneous_polynomial_evaluation_vjp");
+
+    cudaPointerAttributes attributes;
+    CUDA_CHECK_ERROR(cudaPointerGetAttributes(&attributes, A.data));
+    int current_device;
+    CUDA_CHECK_ERROR(cudaGetDevice(&current_device));
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(attributes.device));
+    }
+
+    cudaStream_t cstream = reinterpret_cast<cudaStream_t>(cuda_stream);
 
     int32_t nbatch = grad_output.shape[0];
     int32_t nnu1 = A.shape[1];
@@ -363,8 +387,11 @@ void mops::cuda::homogeneous_polynomial_evaluation_vjp(
     }
 
     CUDA_CHECK_ERROR(cudaGetLastError());
+    CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
 
-    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(current_device));
+    }
 }
 
 // explicit instanciations of CUDA templates
@@ -373,7 +400,8 @@ template void mops::cuda::homogeneous_polynomial_evaluation_vjp<float>(
     Tensor<float, 1> grad_output,
     Tensor<float, 2> A,
     Tensor<float, 1> C,
-    Tensor<int32_t, 2> indices_A
+    Tensor<int32_t, 2> indices_A,
+    void * cuda_stream
 );
 
 template void mops::cuda::homogeneous_polynomial_evaluation_vjp<double>(
@@ -381,7 +409,8 @@ template void mops::cuda::homogeneous_polynomial_evaluation_vjp<double>(
     Tensor<double, 1> grad_output,
     Tensor<double, 2> A,
     Tensor<double, 1> C,
-    Tensor<int32_t, 2> indices_A
+    Tensor<int32_t, 2> indices_A,
+    void * cuda_stream
 );
 
 template <typename scalar_t>
@@ -392,7 +421,8 @@ void mops::cuda::homogeneous_polynomial_evaluation_vjp_vjp(
     Tensor<scalar_t, 1> grad_output,
     Tensor<scalar_t, 2> A,
     Tensor<scalar_t, 1> C,
-    Tensor<int32_t, 2> indices_A
+    Tensor<int32_t, 2> indices_A,
+    void * cuda_stream
 ) {
     throw std::runtime_error("Not implemented");
 }
@@ -405,7 +435,8 @@ template void mops::cuda::homogeneous_polynomial_evaluation_vjp_vjp<float>(
     Tensor<float, 1> grad_output,
     Tensor<float, 2> A,
     Tensor<float, 1> C,
-    Tensor<int32_t, 2> indices_A
+    Tensor<int32_t, 2> indices_A,
+    void * cuda_stream
 );
 
 template void mops::cuda::homogeneous_polynomial_evaluation_vjp_vjp<double>(
@@ -415,5 +446,6 @@ template void mops::cuda::homogeneous_polynomial_evaluation_vjp_vjp<double>(
     Tensor<double, 1> grad_output,
     Tensor<double, 2> A,
     Tensor<double, 1> C,
-    Tensor<int32_t, 2> indices_A
+    Tensor<int32_t, 2> indices_A,
+    void * cuda_stream
 );
