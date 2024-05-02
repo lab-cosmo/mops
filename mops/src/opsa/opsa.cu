@@ -341,18 +341,15 @@ template void mops::cuda::outer_product_scatter_add_vjp<double>(
 );
 
 template <typename scalar_t>
-__global__ void __launch_bounds__(NWARPS_PER_BLOCK* WARP_SIZE)
-    outer_product_scatter_add_vjp_vjp_kernel(
-        Tensor<scalar_t, 2> A,
-        Tensor<scalar_t, 2> B,
-        Tensor<int32_t, 1> first_occurences,
-        Tensor<int32_t, 1> indices_output,
-        Tensor<scalar_t, 3> grad_in,
-        Tensor<scalar_t, 2> grad_A,
-        Tensor<scalar_t, 2> grad_B
-    ) {
-
-    }
+__global__ void __launch_bounds__(NWARPS_PER_BLOCK* WARP_SIZE) outer_product_scatter_add_vjp_kernel(
+    Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B,
+    Tensor<int32_t, 1> first_occurences,
+    Tensor<int32_t, 1> indices_output,
+    Tensor<scalar_t, 3> grad_in,
+    Tensor<scalar_t, 2> grad_A,
+    Tensor<scalar_t, 2> grad_B
+) {}
 
 template <typename scalar_t>
 void mops::cuda::outer_product_scatter_add_vjp_vjp(
