@@ -546,6 +546,8 @@ __global__ void outer_product_scatter_add_vjp_vjp_kernel(
         }
     }
 
+    __syncthreads();
+
     if (grad_grad_output.data != nullptr &&
         (grad_grad_A.data != nullptr || grad_grad_B.data != nullptr)) {
         for (int tid = threadIdx.x; tid < A.shape[1] * B.shape[1]; tid += blockDim.x) {
