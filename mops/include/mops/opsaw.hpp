@@ -194,7 +194,8 @@ void MOPS_EXPORT outer_product_scatter_add_with_weights(
     Tensor<scalar_t, 2> B,
     Tensor<scalar_t, 2> W,
     Tensor<int32_t, 1> indices_W,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream = nullptr
 );
 
 extern template void outer_product_scatter_add_with_weights(
@@ -203,7 +204,8 @@ extern template void outer_product_scatter_add_with_weights(
     Tensor<float, 2> B,
     Tensor<float, 2> W,
     Tensor<int32_t, 1> indices_W,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 extern template void outer_product_scatter_add_with_weights(
@@ -212,7 +214,8 @@ extern template void outer_product_scatter_add_with_weights(
     Tensor<double, 2> B,
     Tensor<double, 2> W,
     Tensor<int32_t, 1> indices_W,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 /// CUDA version of mops::outer_product_scatter_add_with_weights_vjp
@@ -226,7 +229,8 @@ void MOPS_EXPORT outer_product_scatter_add_with_weights_vjp(
     Tensor<scalar_t, 2> B,
     Tensor<scalar_t, 2> W,
     Tensor<int32_t, 1> indices_W,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream = nullptr
 );
 
 extern template void outer_product_scatter_add_with_weights_vjp(
@@ -238,7 +242,8 @@ extern template void outer_product_scatter_add_with_weights_vjp(
     Tensor<float, 2> B,
     Tensor<float, 2> W,
     Tensor<int32_t, 1> indices_W,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 extern template void outer_product_scatter_add_with_weights_vjp(
@@ -250,7 +255,8 @@ extern template void outer_product_scatter_add_with_weights_vjp(
     Tensor<double, 2> B,
     Tensor<double, 2> W,
     Tensor<int32_t, 1> indices_W,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 /// TODO
@@ -268,7 +274,8 @@ void MOPS_EXPORT outer_product_scatter_add_with_weights_vjp_vjp(
     Tensor<scalar_t, 2> B,
     Tensor<scalar_t, 2> W,
     Tensor<int32_t, 1> indices_W,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream = nullptr
 );
 
 // these templates will be precompiled and provided in the mops library
@@ -285,7 +292,8 @@ extern template void outer_product_scatter_add_with_weights_vjp_vjp(
     Tensor<float, 2> B,
     Tensor<float, 2> W,
     Tensor<int32_t, 1> indices_W,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 extern template void outer_product_scatter_add_with_weights_vjp_vjp(
@@ -301,7 +309,8 @@ extern template void outer_product_scatter_add_with_weights_vjp_vjp(
     Tensor<double, 2> B,
     Tensor<double, 2> W,
     Tensor<int32_t, 1> indices_W,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 } // namespace cuda

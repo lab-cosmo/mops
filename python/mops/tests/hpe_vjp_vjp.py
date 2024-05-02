@@ -36,8 +36,7 @@ def test_hpe_vjp_vjp(valid_arguments):
     reference = ref_hpe_vjp_vjp(grad_grad_A, grad_output, A, C, indices_A)
     actual = hpe_vjp_vjp(grad_grad_A, grad_output, A, C, indices_A)
     for i in range(len(reference)):
-        print(reference[i].shape)
-        print(actual[i])
+        assert np.allclose(reference[i], actual[i])
 
 
 def test_hpe_vjp_vjp_wrong_type(valid_arguments):
