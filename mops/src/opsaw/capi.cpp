@@ -211,7 +211,7 @@ extern "C" int mops_cuda_outer_product_scatter_add_with_weights_f32(
     mops_tensor_2d_f32_t W,
     mops_tensor_1d_i32_t indices_W,
     mops_tensor_1d_i32_t indices_output,
-    void * cuda_stream
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::outer_product_scatter_add_with_weights<float>(
@@ -236,7 +236,7 @@ extern "C" int mops_cuda_outer_product_scatter_add_with_weights_f64(
     mops_tensor_2d_f64_t W,
     mops_tensor_1d_i32_t indices_W,
     mops_tensor_1d_i32_t indices_output,
-    void * cuda_stream
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::outer_product_scatter_add_with_weights<double>(
@@ -264,7 +264,7 @@ extern "C" int mops_cuda_outer_product_scatter_add_with_weights_vjp_f32(
     mops_tensor_2d_f32_t W,
     mops_tensor_1d_i32_t indices_W,
     mops_tensor_1d_i32_t indices_output,
-    void * cuda_stream
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::outer_product_scatter_add_with_weights_vjp<float>(
@@ -295,7 +295,7 @@ extern "C" int mops_cuda_outer_product_scatter_add_with_weights_vjp_f64(
     mops_tensor_2d_f64_t W,
     mops_tensor_1d_i32_t indices_W,
     mops_tensor_1d_i32_t indices_output,
-    void * cuda_stream
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::outer_product_scatter_add_with_weights_vjp<double>(
@@ -330,7 +330,7 @@ extern "C" int mops_cuda_outer_product_scatter_add_with_weights_vjp_vjp_f32(
     mops_tensor_2d_f32_t W,
     mops_tensor_1d_i32_t indices_W,
     mops_tensor_1d_i32_t indices_output,
-    void * cuda_stream
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::outer_product_scatter_add_with_weights_vjp_vjp<float>(
@@ -375,7 +375,7 @@ extern "C" int mops_cuda_outer_product_scatter_add_with_weights_vjp_vjp_f64(
     mops_tensor_2d_f64_t W,
     mops_tensor_1d_i32_t indices_W,
     mops_tensor_1d_i32_t indices_output,
-    void * cuda_stream
+    void* cuda_stream
 ) {
     MOPS_CATCH_EXCEPTIONS_BEGIN
         mops::cuda::outer_product_scatter_add_with_weights_vjp_vjp<double>(
