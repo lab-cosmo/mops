@@ -175,11 +175,84 @@ std::vector<torch::Tensor> OuterProductScatterAddBackward::forward(
         );
     }
 
+    if (grad_output.requires_grad() || A.requires_grad() || B.requires_grad()) {
+        ctx->save_for_backward({grad_output, A, B, indices_output});
+    }
+
     return {grad_A, grad_B};
 }
 
 std::vector<torch::Tensor> OuterProductScatterAddBackward::backward(
     torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
 ) {
-    C10_THROW_ERROR(ValueError, "second derivatives are not supported in outer_product_scatter_add");
+    auto saved_variables = ctx->get_saved_variables();
+    auto grad_output = saved_variables[0];
+    auto A = saved_variables[1];
+    auto B = saved_variables[2];
+    auto indices_output = saved_variables[3];
+    auto grad_grad_A = grad_outputs[0];
+    auto grad_grad_B = grad_outputs[1];
+
+    auto grad_grad_output = torch::Tensor();
+    auto grad_A_2 = torch::Tensor();
+    auto grad_B_2 = torch::Tensor();
+
+    if (A.device().is_cpu()) {
+        AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "outer_product_scatter_add_vjp", [&]() {
+            auto mops_grad_grad_output = mops::Tensor<scalar_t, 3>{nullptr, {0, 0, 0}};
+            if (grad_output.requires_grad()) {
+                grad_grad_output = torch::empty_like(grad_output);
+                mops_grad_grad_output = details::torch_to_mops_3d<scalar_t>(grad_grad_output);
+            }
+
+            auto mops_grad_A_2 = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (A.requires_grad()) {
+                grad_A_2 = torch::empty_like(A);
+                mops_grad_A_2 = details::torch_to_mops_2d<scalar_t>(grad_A_2);
+            }
+
+            auto mops_grad_B_2 = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (B.requires_grad()) {
+                grad_B_2 = torch::empty_like(B);
+                mops_grad_B_2 = details::torch_to_mops_2d<scalar_t>(grad_B_2);
+            }
+
+            auto mops_grad_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (grad_grad_A.defined()) {
+                mops_grad_grad_A = details::torch_to_mops_2d<scalar_t>(grad_grad_A);
+            }
+
+            auto mops_grad_grad_B = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (grad_grad_B.defined()) {
+                mops_grad_grad_B = details::torch_to_mops_2d<scalar_t>(grad_grad_B);
+            }
+
+            mops::outer_product_scatter_add_vjp_vjp<scalar_t>(
+                mops_grad_grad_output,
+                mops_grad_A_2,
+                mops_grad_B_2,
+                mops_grad_grad_A,
+                mops_grad_grad_B,
+                details::torch_to_mops_3d<scalar_t>(grad_output),
+                details::torch_to_mops_2d<scalar_t>(A),
+                details::torch_to_mops_2d<scalar_t>(B),
+                details::torch_to_mops_1d<int32_t>(indices_output)
+            );
+        });
+    } else if (A.device().is_cuda()) {
+#ifndef MOPS_CUDA_ENABLED
+        C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " + A.device().str());
+#else
+        C10_THROW_ERROR(
+            ValueError, "outer_product_scatter_add_vjp_vjp is not implemented for CUDA yet"
+        );
+#endif
+    } else {
+        C10_THROW_ERROR(
+            ValueError,
+            "outer_product_scatter_add_vjp_vjp is not implemented for device " + A.device().str()
+        );
+    }
+
+    return {grad_grad_output, grad_A_2, grad_B_2, torch::Tensor()};
 }
