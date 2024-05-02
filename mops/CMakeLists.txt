@@ -110,7 +110,7 @@ add_library(mops
 
 if(CMAKE_CUDA_COMPILER AND MOPS_CUDA)
     target_compile_definitions(mops PUBLIC MOPS_CUDA_ENABLED)
-    set_target_properties(mops PROPERTIES CUDA_ARCHITECTURES native)
+    set_target_properties(mops PROPERTIES CUDA_ARCHITECTURES all)
     set_target_properties(mops PROPERTIES CUDA_NVCC_FLAGS "-lineinfo")
 
     target_sources(mops
