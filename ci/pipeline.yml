@@ -23,9 +23,10 @@ test_job:
     - export CUDA_HOME="/usr/local/cuda"
     - python3 -m pip install --upgrade pip
     - echo "Install Tox"
-    - python3 -m pip install tox
+    - python3 -m pip install too
     - echo "Run the Tox Script"
     - tox
+    - echo "Too script completed"
 
   variables:
     SLURM_JOB_NUM_NODES: 1
