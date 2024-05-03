@@ -372,36 +372,27 @@ __global__ void outer_product_scatter_add_vjp_vjp_kernel(
     scalar_t* buffer_grad_grad_A;
     scalar_t* buffer_grad_grad_B;
 
-    // if ((grad_grad_A.data != nullptr && grad_B_2.data != nullptr) ||
-    //     (grad_grad_B.data != nullptr && grad_A_2.data != nullptr)) {
-    buffer_grad_out = shared_array<scalar_t>(A.shape[1] * B.shape[1], sptr, &space);
-    //}
+    bool compute_grad_A_2 = grad_A_2.data != nullptr;
+    bool compute_grad_B_2 = grad_B_2.data != nullptr;
+    bool compute_grad_grad_output = (grad_grad_output.data != nullptr);
 
-    if (grad_grad_output.data != nullptr &&
-        (grad_grad_A.data != nullptr || grad_grad_B.data != nullptr)) {
+    buffer_grad_out = shared_array<scalar_t>(A.shape[1] * B.shape[1], sptr, &space);
+    buffer_A = shared_array<scalar_t>(NWARPS_PER_BLOCK * A.shape[1], sptr, &space);
+    buffer_B = shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
+
+    buffer_grad_grad_A = shared_array<scalar_t>(NWARPS_PER_BLOCK * A.shape[1], sptr, &space);
+    buffer_grad_grad_B = shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
+
+    if (compute_grad_grad_output) {
         buffer_grad_grad_out = shared_array<scalar_t>(A.shape[1] * B.shape[1], sptr, &space);
-        buffer_A = shared_array<scalar_t>(NWARPS_PER_BLOCK * A.shape[1], sptr, &space);
-        buffer_B = shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
     }
 
-    if (grad_A_2.data != nullptr) {
+    if (compute_grad_A_2) {
         buffer_grad_A_2 = shared_array<scalar_t>(NWARPS_PER_BLOCK * A.shape[1], sptr, &space);
     }
 
-    if (grad_B_2.data != nullptr) {
+    if (compute_grad_B_2) {
         buffer_grad_B_2 = shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
-    }
-
-    if (grad_grad_output.data != nullptr) {
-        if (grad_B_2.data != nullptr && grad_grad_A.data != nullptr) {
-            // initialise grad_grad_A buffer
-            buffer_grad_grad_A = shared_array<scalar_t>(NWARPS_PER_BLOCK * A.shape[1], sptr, &space);
-        }
-
-        if (grad_A_2.data != nullptr && grad_grad_B.data != nullptr) {
-            // initialise grad_grad_B buffer
-            buffer_grad_grad_B = shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
-        }
     }
 
     int32_t* first_occurences_start = first_occurences.data;
@@ -420,15 +411,11 @@ __global__ void outer_product_scatter_add_vjp_vjp_kernel(
      * initialise buffer_grad_in for this sub block
      */
 
-    if ((grad_grad_A.data != nullptr && grad_B_2.data != nullptr) ||
-        (grad_grad_B.data != nullptr && grad_A_2.data != nullptr)) {
-        for (int tid = threadIdx.x; tid < A.shape[1] * B.shape[1]; tid += blockDim.x) {
-            buffer_grad_out[tid] = grad_output.data[blockIdx.x * A.shape[1] * B.shape[1] + tid];
-        }
+    for (int tid = threadIdx.x; tid < A.shape[1] * B.shape[1]; tid += blockDim.x) {
+        buffer_grad_out[tid] = grad_output.data[blockIdx.x * A.shape[1] * B.shape[1] + tid];
     }
 
-    if (grad_grad_output.data != nullptr &&
-        (grad_grad_A.data != nullptr || grad_grad_B.data != nullptr)) {
+    if (compute_grad_grad_output) {
         for (int tid = threadIdx.x; tid < A.shape[1] * B.shape[1]; tid += blockDim.x) {
             buffer_grad_grad_out[tid] = 0.0;
         }
@@ -448,31 +435,27 @@ __global__ void outer_product_scatter_add_vjp_vjp_kernel(
 
         for (int tid = threadCol; tid < A.shape[1]; tid += WARP_SIZE) {
 
-            if (grad_A_2.data != nullptr) {
+            if (compute_grad_A_2) {
                 buffer_grad_A_2[threadRow * A.shape[1] + tid] = 0.0;
             }
-            if (grad_grad_output.data != nullptr && grad_grad_B.data != nullptr) {
-                buffer_A[threadRow * A.shape[1] + tid] = A.data[sample * A.shape[1] + tid];
-            }
 
-            if (grad_grad_output.data != nullptr && grad_B_2.data != nullptr &&
-                grad_grad_A.data != nullptr) {
+            buffer_A[threadRow * A.shape[1] + tid] = A.data[sample * A.shape[1] + tid];
+
+            if (grad_grad_A.data != nullptr) {
                 buffer_grad_grad_A[threadRow * A.shape[1] + tid] =
                     grad_grad_A.data[sample * A.shape[1] + tid];
             }
         }
 
         for (int tid = threadCol; tid < B.shape[1]; tid += WARP_SIZE) {
-            if (grad_B_2.data != nullptr) {
+
+            if (compute_grad_B_2) {
                 buffer_grad_B_2[threadRow * B.shape[1] + tid] = 0.0;
             }
 
-            if (grad_grad_output.data != nullptr && grad_grad_A.data != nullptr) {
-                buffer_B[threadRow * B.shape[1] + tid] = B.data[sample * B.shape[1] + tid];
-            }
-            if (grad_grad_output.data != nullptr && grad_A_2.data != nullptr &&
-                grad_grad_B.data != nullptr) {
-                // initialise grad_grad_B buffer
+            buffer_B[threadRow * B.shape[1] + tid] = B.data[sample * B.shape[1] + tid];
+
+            if (grad_grad_B.data != nullptr) {
                 buffer_grad_grad_B[threadRow * B.shape[1] + tid] =
                     grad_grad_B.data[sample * B.shape[1] + tid];
             }
@@ -489,39 +472,39 @@ __global__ void outer_product_scatter_add_vjp_vjp_kernel(
 
             for (int j = threadCol; j < B.shape[1]; j += WARP_SIZE) {
 
-                if (grad_A_2.data != nullptr && grad_grad_B.data != nullptr) {
+                if (compute_grad_A_2 && grad_grad_B.data != nullptr) {
                     grad_A2_tmp += buffer_grad_grad_B[threadRow * B.shape[1] + j] *
                                    buffer_grad_out[i * B.shape[1] + j];
                 }
 
-                if (grad_B_2.data != nullptr && grad_grad_A.data != nullptr) {
+                if (compute_grad_B_2 && grad_grad_A.data != nullptr) {
                     buffer_grad_B_2[threadRow * B.shape[1] + j] +=
                         buffer_grad_grad_A[threadRow * A.shape[1] + i] *
                         buffer_grad_out[i * B.shape[1] + j];
                 }
 
-                if (grad_grad_output.data != nullptr) {
+                if (compute_grad_grad_output && grad_grad_B.data != nullptr) {
+                    atomicAdd(
+                        &buffer_grad_grad_out[i * B.shape[1] + j],
+                        buffer_A[threadRow * A.shape[1] + i] *
+                            buffer_grad_grad_B[threadRow * B.shape[1] + j]
+                    );
+                }
 
-                    if (grad_grad_B.data != nullptr) {
-                        buffer_grad_grad_out[i * B.shape[1] + j] +=
-                            buffer_A[threadRow * A.shape[1] + i] *
-                            buffer_grad_grad_B[threadRow * B.shape[1] + j];
-                    }
-
-                    if (grad_grad_A.data != nullptr) {
-                        buffer_grad_grad_out[i * B.shape[1] + j] +=
-                            buffer_B[threadRow * B.shape[1] + j] *
-                            buffer_grad_grad_A[threadRow * A.shape[1] + i];
-                    }
+                if (compute_grad_grad_output && grad_grad_A.data != nullptr) {
+                    atomicAdd(
+                        &buffer_grad_grad_out[i * B.shape[1] + j],
+                        buffer_B[threadRow * B.shape[1] + j] *
+                            buffer_grad_grad_A[threadRow * A.shape[1] + i]
+                    );
                 }
             }
 
             // reduce across B dimension
-            if (grad_A_2.data != nullptr && grad_grad_B.data != nullptr) {
+            if (compute_grad_A_2) {
                 for (int offset = WARP_SIZE / 2; offset > 0; offset /= 2) {
                     grad_A2_tmp += __shfl_down_sync(FULL_MASK, grad_A2_tmp, offset, WARP_SIZE);
                 }
-
                 if (threadCol == 0) {
                     buffer_grad_A_2[i * NWARPS_PER_BLOCK + threadRow] = grad_A2_tmp;
                 }
@@ -530,14 +513,14 @@ __global__ void outer_product_scatter_add_vjp_vjp_kernel(
 
         __syncwarp();
 
-        if (grad_B_2.data != nullptr && grad_grad_A.data != nullptr) {
+        if (compute_grad_B_2) {
             // write gradB
             for (int j = threadCol; j < B.shape[1]; j += WARP_SIZE) {
                 grad_B_2.data[sample * B.shape[1] + j] = buffer_grad_B_2[threadRow * B.shape[1] + j];
             }
         }
 
-        if (grad_A_2.data != nullptr && grad_grad_B.data != nullptr) {
+        if (compute_grad_A_2) {
             // write gradA
             for (int i = threadCol; i < A.shape[1]; i += WARP_SIZE) {
                 grad_A_2.data[sample * A.shape[1] + i] =
@@ -548,8 +531,7 @@ __global__ void outer_product_scatter_add_vjp_vjp_kernel(
 
     __syncthreads();
 
-    if (grad_grad_output.data != nullptr &&
-        (grad_grad_A.data != nullptr || grad_grad_B.data != nullptr)) {
+    if (compute_grad_grad_output) {
         for (int tid = threadIdx.x; tid < A.shape[1] * B.shape[1]; tid += blockDim.x) {
             grad_grad_output.data[blockIdx.x * A.shape[1] * B.shape[1] + tid] =
                 buffer_grad_grad_out[tid];
@@ -617,33 +599,27 @@ void mops::cuda::outer_product_scatter_add_vjp_vjp(
     scalar_t* buffer_grad_grad_A;
     scalar_t* buffer_grad_grad_B;
 
-    buffer_grad_out = shared_array<scalar_t>(A.shape[1] * B.shape[1], sptr, &space);
+    bool compute_grad_A_2 = grad_A_2.data != nullptr;
+    bool compute_grad_B_2 = grad_B_2.data != nullptr;
+    bool compute_grad_grad_output = (grad_grad_output.data != nullptr);
 
-    if (grad_grad_output.data != nullptr &&
-        (grad_grad_A.data != nullptr || grad_grad_B.data != nullptr)) {
+    buffer_grad_out = shared_array<scalar_t>(A.shape[1] * B.shape[1], sptr, &space);
+    buffer_A = shared_array<scalar_t>(NWARPS_PER_BLOCK * A.shape[1], sptr, &space);
+    buffer_B = shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
+
+    buffer_grad_grad_A = shared_array<scalar_t>(NWARPS_PER_BLOCK * A.shape[1], sptr, &space);
+    buffer_grad_grad_B = shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
+
+    if (compute_grad_grad_output) {
         buffer_grad_grad_out = shared_array<scalar_t>(A.shape[1] * B.shape[1], sptr, &space);
-        buffer_A = shared_array<scalar_t>(NWARPS_PER_BLOCK * A.shape[1], sptr, &space);
-        buffer_B = shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
     }
 
-    if (grad_A_2.data != nullptr) {
+    if (compute_grad_A_2) {
         buffer_grad_A_2 = shared_array<scalar_t>(NWARPS_PER_BLOCK * A.shape[1], sptr, &space);
     }
 
-    if (grad_B_2.data != nullptr) {
+    if (compute_grad_B_2) {
         buffer_grad_B_2 = shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
-    }
-
-    if (grad_grad_output.data != nullptr) {
-        if (grad_B_2.data != nullptr && grad_grad_A.data != nullptr) {
-            // initialise grad_grad_A buffer
-            buffer_grad_grad_A = shared_array<scalar_t>(NWARPS_PER_BLOCK * A.shape[1], sptr, &space);
-        }
-
-        if (grad_A_2.data != nullptr && grad_grad_B.data != nullptr) {
-            // initialise grad_grad_B buffer
-            buffer_grad_grad_B = shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
-        }
     }
 
     outer_product_scatter_add_vjp_vjp_kernel<scalar_t><<<gridDim, blockDim, space, cstream>>>(

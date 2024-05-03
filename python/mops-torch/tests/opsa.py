@@ -58,15 +58,12 @@ def test_opsa_grads(device):
     ).values
 
     assert torch.autograd.gradcheck(
-        mops.torch.outer_product_scatter_add,
-        (A, B, indices, output_size),
+        mops.torch.outer_product_scatter_add, (A, B, indices, output_size)
     )
 
-    if device != "cuda":  # not yet implemented
-        assert torch.autograd.gradgradcheck(
-            mops.torch.outer_product_scatter_add,
-            (A, B, indices, output_size),
-        )
+    assert torch.autograd.gradgradcheck(
+        mops.torch.outer_product_scatter_add, (A, B, indices, output_size)
+    )
 
 
 def test_opsa_ref():
