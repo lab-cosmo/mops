@@ -124,6 +124,8 @@ if(CMAKE_CUDA_COMPILER AND MOPS_CUDA)
         "src/opsa/opsa.cu"
         "src/hpe/hpe.cu"
         "src/sap/sap.cu"
+        "src/sasaw/sasaw.cu"
+        "src/opsaw/opsaw.cu"
     )
     
 endif()
