@@ -22,7 +22,9 @@ test_job:
   script:
     - export CUDA_HOME="/usr/local/cuda"
     - python3 -m pip install --upgrade pip
+    - echo "Install Tox"
     - python3 -m pip install tox
+    - echo "Run the Tox Script"
     - tox
 
   variables:
