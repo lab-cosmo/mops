@@ -30,17 +30,18 @@ project(mops VERSION ${MOPS_VERSION} LANGUAGES CXX)
 include(CheckLanguage)
 check_language(CUDA)
 
-if(CMAKE_CUDA_COMPILER)
+option(BUILD_SHARED_LIBS "Build shared libraries instead of static ones" OFF)
+
+OPTION(MOPS_OPENMP "Try to use OpenMP when compiling MOPs" ON)
+OPTION(MOPS_ARCH_NATIVE "Try to use -march=native when compiling MOPs" ON)
+option(MOPS_CUDA "compile mops with CUDA support" ON)
+
+if(CMAKE_CUDA_COMPILER AND MOPS_CUDA)
     enable_language(CUDA)
     set(CUDA_USE_STATIC_CUDA_RUNTIME OFF CACHE BOOL "" FORCE)
 else()
     message(STATUS "Could not find a CUDA compiler")
 endif()
-
-option(BUILD_SHARED_LIBS "Build shared libraries instead of static ones" OFF)
-
-OPTION(MOPS_OPENMP "Try to use OpenMP when compiling MOPs" ON)
-OPTION(MOPS_ARCH_NATIVE "Try to use -march=native when compiling MOPs" ON)
 
 set(LIB_INSTALL_DIR "lib" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install libraries")
 set(BIN_INSTALL_DIR "bin" CACHE PATH "Path relative to CMAKE_INSTALL_PREFIX where to install DLL/binaries")
@@ -83,7 +84,12 @@ add_library(mops
     "src/sasaw/sasaw.cpp"
     "src/sasaw/capi.cpp"
 
-    "src/internal/checks.hpp"
+    "src/internal/checks/utils.hpp"
+    "src/internal/checks/hpe.hpp"
+    "src/internal/checks/opsa.hpp"
+    "src/internal/checks/sap.hpp"
+    "src/internal/checks/opsaw.hpp"
+    "src/internal/checks/sasaw.hpp"
     "src/internal/utils.hpp"
     "src/internal/utils.cpp"
 
@@ -102,7 +108,7 @@ add_library(mops
     "include/mops/sasaw.h"
 )
 
-if(CMAKE_CUDA_COMPILER)
+if(CMAKE_CUDA_COMPILER AND MOPS_CUDA)
     target_compile_definitions(mops PUBLIC MOPS_CUDA_ENABLED)
     set_target_properties(mops PROPERTIES CUDA_ARCHITECTURES native)
     set_target_properties(mops PROPERTIES CUDA_NVCC_FLAGS "-lineinfo")
@@ -130,7 +136,7 @@ set_target_properties(mops PROPERTIES
     CXX_VISIBILITY_PRESET hidden
 )
 
-if (CMAKE_CUDA_COMPILER)
+if(CMAKE_CUDA_COMPILER AND MOPS_CUDA)
     set_target_properties(mops PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
     set_target_properties(mops PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 endif()

@@ -3,7 +3,7 @@
 #include "mops/sasaw.hpp"
 
 #include "internal/utils.hpp"
-#include "internal/checks.hpp"
+#include "internal/checks/sasaw.hpp"
 
 template<typename scalar_t>
 void mops::sparse_accumulation_scatter_add_with_weights(
@@ -18,19 +18,7 @@ void mops::sparse_accumulation_scatter_add_with_weights(
     Tensor<int32_t, 1> indices_output_1,
     Tensor<int32_t, 1> indices_output_2
 ) {
-    check_sizes(A, "A", 0, B, "B", 0, "sasaw");
-    check_sizes(W, "W", 0, output, "output", 0, "sasaw");
-    check_sizes(B, "B", 1, W, "W", 2, "sasaw");
-    check_sizes(C, "C", 0, indices_A, "indices_A", 0, "sasaw");
-    check_sizes(C, "C", 0, indices_W_2, "indices_W_2", 0, "sasaw");
-    check_sizes(C, "C", 0, indices_output_2, "indices_output_2", 0, "sasaw");
-    check_sizes(A, "A", 0, indices_output_1, "indices_output_1", 0, "sasaw");
-    check_sizes(A, "A", 0, indices_W_1, "indices_W_1", 0, "sasaw");
-    check_index_tensor(indices_output_1, "indices_output_1", output.shape[0], "sasaw");
-    check_index_tensor(indices_W_1, "indices_W_1", output.shape[0], "sasaw");
-    check_index_tensor(indices_A, "indices_A", A.shape[1], "sasaw");
-    check_index_tensor(indices_W_2, "indices_W_2", B.shape[1], "sasaw");
-    check_index_tensor(indices_output_2, "indices_output_2", output.shape[1], "sasaw");
+    check_sasaw(output, A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2, "cpu_sparse_accumulation_scatter_add_with_weights");
 
     scalar_t* o_ptr = output.data;
     scalar_t* a_ptr = A.data;
@@ -100,19 +88,7 @@ void mops::sparse_accumulation_scatter_add_with_weights_vjp(
     Tensor<int32_t, 1> indices_output_1,
     Tensor<int32_t, 1> indices_output_2
 ) {
-    check_sizes(A, "A", 0, B, "B", 0, "sasaw_vjp");
-    check_sizes(W, "W", 0, grad_output, "grad_output", 0, "sasaw_vjp");
-    check_sizes(B, "B", 1, W, "W", 2, "sasaw_vjp");
-    check_sizes(C, "C", 0, indices_A, "indices_A", 0, "sasaw_vjp");
-    check_sizes(C, "C", 0, indices_W_2, "indices_W_2", 0, "sasaw_vjp");
-    check_sizes(C, "C", 0, indices_output_2, "indices_output_2", 0, "sasaw_vjp");
-    check_sizes(A, "A", 0, indices_output_1, "indices_output_1", 0, "sasaw_vjp");
-    check_sizes(A, "A", 0, indices_W_1, "indices_W_1", 0, "sasaw_vjp");
-    check_index_tensor(indices_output_1, "indices_output_1", grad_output.shape[0], "sasaw_vjp");
-    check_index_tensor(indices_W_1, "indices_W_1", grad_output.shape[0], "sasaw_vjp");
-    check_index_tensor(indices_A, "indices_A", A.shape[1], "sasaw_vjp");
-    check_index_tensor(indices_W_2, "indices_W_2", B.shape[1], "sasaw_vjp");
-    check_index_tensor(indices_output_2, "indices_output_2", grad_output.shape[1], "sasaw_vjp");
+    check_sasaw_vjp(grad_A, grad_B, grad_W, grad_output, A, B, C, W, indices_A, indices_W_1, indices_W_2, indices_output_1, indices_output_2, "cpu_sparse_accumulation_scatter_add_with_weights_vjp");
 
     bool calculate_grad_A = grad_A.data != nullptr;
     bool calculate_grad_B = grad_B.data != nullptr;
@@ -192,4 +168,27 @@ void mops::sparse_accumulation_scatter_add_with_weights_vjp(
         }
 
     }
+}
+
+template<typename scalar_t>
+void mops::sparse_accumulation_scatter_add_with_weights_vjp_vjp(
+    Tensor<scalar_t, 3> /*grad_grad_output*/,
+    Tensor<scalar_t, 2> /*grad_A_2*/,
+    Tensor<scalar_t, 2> /*grad_B_2*/,
+    Tensor<scalar_t, 3> /*grad_W_2*/,
+    Tensor<scalar_t, 2> /*grad_grad_A*/,
+    Tensor<scalar_t, 2> /*grad_grad_B*/,
+    Tensor<scalar_t, 3> /*grad_grad_W*/,
+    Tensor<scalar_t, 3> /*grad_output*/,
+    Tensor<scalar_t, 2> /*A*/,
+    Tensor<scalar_t, 2> /*B*/,
+    Tensor<scalar_t, 1> /*C*/,
+    Tensor<scalar_t, 3> /*W*/,
+    Tensor<int32_t, 1> /*indices_A*/,
+    Tensor<int32_t, 1> /*indices_W_1*/,
+    Tensor<int32_t, 1> /*indices_W_2*/,
+    Tensor<int32_t, 1> /*indices_output_1*/,
+    Tensor<int32_t, 1> /*indices_output_2*/
+) {
+    throw std::runtime_error("Not implemented");
 }

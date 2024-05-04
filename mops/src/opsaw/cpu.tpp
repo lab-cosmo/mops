@@ -2,7 +2,7 @@
 
 #include "mops/opsaw.hpp"
 
-#include "internal/checks.hpp"
+#include "internal/checks/opsaw.hpp"
 #include "internal/utils.hpp"
 
 
@@ -15,15 +15,7 @@ void mops::outer_product_scatter_add_with_weights(
     Tensor<int32_t, 1> indices_W,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_sizes(A, "A", 0, B, "B", 0, "opsaw");
-    check_sizes(A, "A", 1, output, "output", 1, "opsaw");
-    check_sizes(B, "B", 1, output, "output", 2, "opsaw");
-    check_sizes(A, "A", 0, indices_output, "indices_output", 0, "opsaw");
-    check_sizes(A, "A", 0, indices_W, "indices_W", 0, "opsaw");
-    check_sizes(W, "W", 0, output, "output", 0, "opsaw");
-    check_sizes(B, "B", 1, W, "W", 1, "opsaw");
-    check_index_tensor(indices_output, "indices_output", output.shape[0], "opsaw");
-    check_index_tensor(indices_W, "indices_W", output.shape[0], "opsaw");
+    check_opsaw(output, A, B, W, indices_W, indices_output, "cpu_outer_product_scatter_add_with_weights");   
 
     scalar_t* o_ptr = output.data;
     scalar_t* a_ptr = A.data;
@@ -74,15 +66,7 @@ void mops::outer_product_scatter_add_with_weights_vjp(
     Tensor<int32_t, 1> indices_W,
     Tensor<int32_t, 1> indices_output
 ) {
-    check_sizes(A, "A", 0, B, "B", 0, "opsaw_vjp");
-    check_sizes(A, "A", 1, grad_output, "grad_output", 1, "opsaw_vjp");
-    check_sizes(B, "B", 1, grad_output, "grad_output", 2, "opsaw_vjp");
-    check_sizes(A, "A", 0, indices_output, "indices_output", 0, "opsaw_vjp");
-    check_sizes(A, "A", 0, indices_W, "indices_W", 0, "opsaw_vjp");
-    check_sizes(W, "W", 0, grad_output, "grad_output", 0, "opsaw_vjp");
-    check_sizes(B, "B", 1, W, "W", 1, "opsaw_vjp");
-    check_index_tensor(indices_output, "indices_output", grad_output.shape[0], "opsaw_vjp");
-    check_index_tensor(indices_W, "indices_W", grad_output.shape[0], "opsaw_vjp");
+    check_opsaw_vjp(grad_A, grad_B, grad_W, grad_output, A, B, W, indices_W, indices_output, "cpu_outer_product_scatter_add_with_weights_vjp");
 
     bool calculate_grad_A = grad_A.data != nullptr;
     bool calculate_grad_B = grad_B.data != nullptr;
@@ -91,15 +75,12 @@ void mops::outer_product_scatter_add_with_weights_vjp(
     if (calculate_grad_A || calculate_grad_B || calculate_grad_W) {
 
         if (calculate_grad_A) {
-            check_same_shape(grad_A, "grad_A", A, "A", "opsaw_vjp");
             std::fill(grad_A.data, grad_A.data+A.shape[0]*A.shape[1], static_cast<scalar_t>(0.0));
         }
         if (calculate_grad_B) {
-            check_same_shape(grad_B, "grad_B", B, "B", "opsaw_vjp");
             std::fill(grad_B.data, grad_B.data+B.shape[0]*B.shape[1], static_cast<scalar_t>(0.0));
         }
         if (calculate_grad_W) {
-            check_same_shape(grad_W, "grad_W", W, "W", "opsaw_vjp");
             std::fill(grad_W.data, grad_W.data+W.shape[0]*W.shape[1], static_cast<scalar_t>(0.0));
         }
 
@@ -147,4 +128,23 @@ void mops::outer_product_scatter_add_with_weights_vjp(
             }
         }
     }
+}
+
+template<typename scalar_t>
+void mops::outer_product_scatter_add_with_weights_vjp_vjp(
+    Tensor<scalar_t, 3> /*grad_grad_output*/,
+    Tensor<scalar_t, 2> /*grad_A_2*/,
+    Tensor<scalar_t, 2> /*grad_B_2*/,
+    Tensor<scalar_t, 2> /*grad_W_2*/,
+    Tensor<scalar_t, 2> /*grad_grad_A*/,
+    Tensor<scalar_t, 2> /*grad_grad_B*/,
+    Tensor<scalar_t, 2> /*grad_grad_W*/,
+    Tensor<scalar_t, 3> /*grad_output*/,
+    Tensor<scalar_t, 2> /*A*/,
+    Tensor<scalar_t, 2> /*B*/,
+    Tensor<scalar_t, 2> /*W*/,
+    Tensor<int32_t, 1> /*indices_W*/,
+    Tensor<int32_t, 1> /*indices_output*/
+) {
+    throw std::runtime_error("Not implemented");
 }

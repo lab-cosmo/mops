@@ -87,7 +87,8 @@ def test_opsaw_vjp_size_mismatch(valid_arguments):
     with pytest.raises(
         mops.status.MopsError,
         match="Dimension mismatch: the sizes of A along "
-        "dimension 0 and indices_output along dimension 0 must match in opsaw_vjp",
+        "dimension 0 and indices_output along dimension 0 must match in "
+        "cpu_outer_product_scatter_add_with_weights_vjp",
     ):
         opsaw_vjp(grad_output, A, B, W, indices_W, indices_output)
 
@@ -98,7 +99,8 @@ def test_opsaw_vjp_out_of_bounds(valid_arguments):
 
     with pytest.raises(
         mops.status.MopsError,
-        match="Index array indices_output in operation opsaw_vjp "
+        match="Index array indices_output in operation "
+        "cpu_outer_product_scatter_add_with_weights_vjp "
         "contains elements up to 20; "
         "this would cause out-of-bounds accesses. With the provided "
         "parameters, it can only contain elements up to 19",

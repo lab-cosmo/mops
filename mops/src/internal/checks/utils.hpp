@@ -1,5 +1,5 @@
-#ifndef MOPS_CHECKS_HPP
-#define MOPS_CHECKS_HPP
+#ifndef MOPS_CHECKS_UTILS_HPP
+#define MOPS_CHECKS_UTILS_HPP
 
 #include "mops/tensor.hpp"
 #include <algorithm>

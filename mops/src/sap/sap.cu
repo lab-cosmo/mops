@@ -1,6 +1,6 @@
 #include "mops/sap.hpp"
 
-#include "internal/checks.hpp"
+#include "internal/checks/sap.hpp"
 #include "internal/cuda_utils.cuh"
 
 using namespace mops;
@@ -97,6 +97,9 @@ void mops::cuda::sparse_accumulation_of_products(
     Tensor<int32_t, 1> indices_B,
     Tensor<int32_t, 1> indices_output
 ) {
+    check_sap(
+        output, A, B, C, indices_A, indices_B, indices_output, "cuda_sparse_accumulation_of_products"
+    );
 
     dim3 block_dim(find_integer_divisor(A.shape[0], WARP_SIZE));
 
@@ -268,6 +271,7 @@ __global__ void sparse_accumulation_of_products_vjp_kernel(
         }
     }
 }
+
 template <typename scalar_t>
 void mops::cuda::sparse_accumulation_of_products_vjp(
     Tensor<scalar_t, 2> grad_A,
@@ -280,6 +284,19 @@ void mops::cuda::sparse_accumulation_of_products_vjp(
     Tensor<int32_t, 1> indices_B,
     Tensor<int32_t, 1> indices_output
 ) {
+    check_sap_vjp(
+        grad_A,
+        grad_B,
+        grad_output,
+        A,
+        B,
+        C,
+        indices_A,
+        indices_B,
+        indices_output,
+        "cuda_sparse_accumulation_of_products_vjp"
+    );
+
     dim3 block_dim(find_integer_divisor(grad_A.shape[0], WARP_SIZE));
 
     dim3 thread_block(WARP_SIZE * NWARPS_PER_BLOCK, 1, 1);
@@ -324,6 +341,365 @@ template void mops::cuda::sparse_accumulation_of_products_vjp<float>(
 template void mops::cuda::sparse_accumulation_of_products_vjp<double>(
     Tensor<double, 2> grad_A,
     Tensor<double, 2> grad_B,
+    Tensor<double, 2> grad_output,
+    Tensor<double, 2> A,
+    Tensor<double, 2> B,
+    Tensor<double, 1> C,
+    Tensor<int32_t, 1> indices_A,
+    Tensor<int32_t, 1> indices_B,
+    Tensor<int32_t, 1> indices_output
+);
+
+template <typename scalar_t>
+__global__ void sparse_accumulation_of_products_vjp_vjp_kernel(
+    Tensor<scalar_t, 2> grad_grad_output,
+    Tensor<scalar_t, 2> grad_A_2,
+    Tensor<scalar_t, 2> grad_B_2,
+    Tensor<scalar_t, 2> grad_grad_A,
+    Tensor<scalar_t, 2> grad_grad_B,
+    Tensor<scalar_t, 2> grad_output,
+    Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B,
+    Tensor<scalar_t, 1> C,
+    Tensor<int32_t, 1> indices_A,
+    Tensor<int32_t, 1> indices_B,
+    Tensor<int32_t, 1> indices_output
+) {
+    extern __shared__ char buffer[];
+
+    void* sptr = buffer;
+    size_t space = 0;
+
+    /* shared buffers */
+    scalar_t* buffer_grad_output;
+    scalar_t* buffer_grad_grad_output;
+    scalar_t* buffer_grad_grad_B;
+    scalar_t* buffer_grad_grad_A;
+    scalar_t* buffer_A;
+    scalar_t* buffer_B;
+    scalar_t* buffer_grad_A2;
+    scalar_t* buffer_grad_B2;
+
+    if (grad_grad_output.data != nullptr &&
+        (grad_grad_A.data != nullptr || grad_grad_B.data != nullptr)) {
+        buffer_grad_grad_output =
+            shared_array<scalar_t>(WARP_SIZE * grad_output.shape[1], sptr, &space);
+    }
+
+    if ((grad_grad_A.data != nullptr && grad_B_2.data != nullptr) ||
+        (grad_grad_B.data != nullptr && grad_A_2.data != nullptr)) {
+        buffer_grad_output = shared_array<scalar_t>(WARP_SIZE * grad_output.shape[1], sptr, &space);
+    }
+
+    if (grad_grad_A.data != nullptr) {
+        buffer_grad_grad_A = shared_array<scalar_t>(WARP_SIZE * grad_grad_A.shape[1], sptr, &space);
+
+        if (grad_grad_output.data != nullptr) {
+            buffer_B = shared_array<scalar_t>(WARP_SIZE * B.shape[1], sptr, &space);
+        }
+
+        if (grad_B_2.data != nullptr) {
+            buffer_grad_B2 = shared_array<scalar_t>(WARP_SIZE * grad_B_2.shape[1], sptr, &space);
+        }
+    }
+
+    if (grad_grad_B.data != nullptr) {
+        buffer_grad_grad_B = shared_array<scalar_t>(WARP_SIZE * grad_grad_B.shape[1], sptr, &space);
+
+        if (grad_grad_output.data != nullptr) {
+            buffer_A = shared_array<scalar_t>(WARP_SIZE * A.shape[1], sptr, &space);
+        }
+
+        if (grad_A_2.data != nullptr) {
+            buffer_grad_A2 = shared_array<scalar_t>(WARP_SIZE * grad_A_2.shape[1], sptr, &space);
+        }
+    }
+
+    int32_t* packed_indices = shared_array<int32_t>(indices_A.shape[0], sptr, &space);
+
+    int32_t laneID = threadIdx.x % WARP_SIZE;
+    int32_t rowID = threadIdx.x / WARP_SIZE;
+    int32_t nRows = find_integer_divisor(blockDim.x, WARP_SIZE);
+
+    int32_t idx_start = blockIdx.x * WARP_SIZE;
+
+    for (int32_t i = threadIdx.x; i < indices_A.shape[0]; i += blockDim.x) {
+        packed_indices[i] =
+            indices_A.data[i] << 16 | indices_B.data[i] << 8 | indices_output.data[i];
+    }
+
+    if (grad_grad_output.data != nullptr &&
+        (grad_grad_A.data != nullptr || grad_grad_B.data != nullptr)) {
+        for (int i = threadIdx.x; i < WARP_SIZE * grad_output.shape[1]; i += blockDim.x) {
+            buffer_grad_grad_output[i] = 0.0;
+        }
+    }
+
+    if ((grad_grad_A.data != nullptr && grad_B_2.data != nullptr) ||
+        (grad_grad_B.data != nullptr && grad_A_2.data != nullptr)) {
+        for (int i = rowID; i < grad_output.shape[1]; i += nRows) {
+            if ((idx_start + laneID) * grad_output.shape[1] + i <
+                grad_output.shape[0] * grad_output.shape[1]) {
+                buffer_grad_output[i * WARP_SIZE + laneID] =
+                    grad_output.data[(idx_start + laneID) * grad_output.shape[1] + i];
+            }
+        }
+    }
+
+    if (grad_grad_A.data != nullptr) {
+        for (int i = rowID; i < grad_grad_A.shape[1]; i += nRows) {
+            if ((idx_start + laneID) * grad_grad_A.shape[1] + i <
+                grad_grad_A.shape[0] * grad_grad_A.shape[1]) {
+                buffer_grad_grad_A[i * WARP_SIZE + laneID] =
+                    grad_grad_A.data[(idx_start + laneID) * grad_grad_A.shape[1] + i];
+            }
+        }
+        if (grad_grad_output.data != nullptr) {
+            for (int i = rowID; i < B.shape[1]; i += nRows) {
+
+                if ((idx_start + laneID) * B.shape[1] + i < B.shape[0] * B.shape[1]) {
+                    buffer_B[i * WARP_SIZE + laneID] = B.data[(idx_start + laneID) * B.shape[1] + i];
+                }
+            }
+        }
+
+        if (grad_B_2.data != nullptr) {
+            for (int i = threadIdx.x; i < WARP_SIZE * grad_B_2.shape[1]; i += blockDim.x) {
+                buffer_grad_B2[i] = 0.0;
+            }
+        }
+    }
+
+    if (grad_grad_B.data != nullptr) {
+        for (int i = rowID; i < grad_grad_B.shape[1]; i += nRows) {
+            if ((idx_start + laneID) * grad_grad_B.shape[1] + i <
+                grad_grad_B.shape[0] * grad_grad_B.shape[1]) {
+                buffer_grad_grad_B[i * WARP_SIZE + laneID] =
+                    grad_grad_B.data[(idx_start + laneID) * grad_grad_B.shape[1] + i];
+            }
+        }
+
+        if (grad_grad_output.data != nullptr) {
+            for (int i = rowID; i < A.shape[1]; i += nRows) {
+                if ((idx_start + laneID) * A.shape[1] + i < A.shape[0] * A.shape[1]) {
+                    buffer_A[i * WARP_SIZE + laneID] = A.data[(idx_start + laneID) * A.shape[1] + i];
+                }
+            }
+        }
+
+        if (grad_A_2.data != nullptr) {
+            for (int i = threadIdx.x; i < WARP_SIZE * grad_A_2.shape[1]; i += blockDim.x) {
+                buffer_grad_A2[i] = 0.0;
+            }
+        }
+    }
+
+    __syncthreads();
+
+    for (int k = rowID; k < C.shape[0]; k += nRows) {
+
+        scalar_t c = C.data[k];
+        int out_idx = packed_indices[k] & 0xFF;
+        int b_idx = (packed_indices[k] >> 8) & 0xFF;
+        int a_idx = (packed_indices[k] >> 16) & 0xFF;
+
+        if (grad_grad_A.data != nullptr) {
+            scalar_t grad_grad_A_k = buffer_grad_grad_A[a_idx * WARP_SIZE + laneID];
+
+            if (grad_grad_output.data != nullptr) {
+                atomicAdd(
+                    buffer_grad_grad_output + out_idx * WARP_SIZE + laneID,
+                    grad_grad_A_k * buffer_B[b_idx * WARP_SIZE + laneID] * c
+                );
+            }
+
+            if (grad_B_2.data != nullptr) {
+                atomicAdd(
+                    buffer_grad_B2 + b_idx * WARP_SIZE + laneID,
+                    grad_grad_A_k * buffer_grad_output[out_idx * WARP_SIZE + laneID] * c
+                );
+            }
+        }
+
+        if (grad_grad_B.data != nullptr) {
+            scalar_t grad_grad_B_k = buffer_grad_grad_B[b_idx * WARP_SIZE + laneID];
+
+            if (grad_grad_output.data != nullptr) {
+                atomicAdd(
+                    buffer_grad_grad_output + out_idx * WARP_SIZE + laneID,
+                    grad_grad_B_k * buffer_A[a_idx * WARP_SIZE + laneID] * c
+                );
+            }
+
+            if (grad_A_2.data != nullptr) {
+                atomicAdd(
+                    buffer_grad_A2 + a_idx * WARP_SIZE + laneID,
+                    grad_grad_B_k * buffer_grad_output[out_idx * WARP_SIZE + laneID] * c
+                );
+            }
+        }
+    }
+
+    __syncthreads();
+
+    if (grad_A_2.data != nullptr) {
+        for (int i = rowID; i < grad_A_2.shape[1]; i += nRows) {
+            if ((idx_start + laneID) * grad_A_2.shape[1] + i <
+                grad_A_2.shape[0] * grad_A_2.shape[1]) {
+                grad_A_2.data[(idx_start + laneID) * grad_A_2.shape[1] + i] =
+                    buffer_grad_A2[i * WARP_SIZE + laneID];
+            }
+        }
+    }
+
+    if (grad_B_2.data != nullptr) {
+        for (int i = rowID; i < grad_B_2.shape[1]; i += nRows) {
+            if ((idx_start + laneID) * grad_B_2.shape[1] + i <
+                grad_B_2.shape[0] * grad_B_2.shape[1]) {
+                grad_B_2.data[(idx_start + laneID) * grad_B_2.shape[1] + i] =
+                    buffer_grad_B2[i * WARP_SIZE + laneID];
+            }
+        }
+    }
+
+    if (grad_grad_output.data != nullptr) {
+        for (int i = rowID; i < grad_grad_output.shape[1]; i += nRows) {
+            if ((idx_start + laneID) * grad_grad_output.shape[1] + i <
+                grad_grad_output.shape[0] * grad_grad_output.shape[1]) {
+                grad_grad_output.data[(idx_start + laneID) * grad_grad_output.shape[1] + i] =
+                    buffer_grad_grad_output[i * WARP_SIZE + laneID];
+            }
+        }
+    }
+}
+
+template <typename scalar_t>
+void mops::cuda::sparse_accumulation_of_products_vjp_vjp(
+    Tensor<scalar_t, 2> grad_grad_output,
+    Tensor<scalar_t, 2> grad_A_2,
+    Tensor<scalar_t, 2> grad_B_2,
+    Tensor<scalar_t, 2> grad_grad_A,
+    Tensor<scalar_t, 2> grad_grad_B,
+    Tensor<scalar_t, 2> grad_output,
+    Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 2> B,
+    Tensor<scalar_t, 1> C,
+    Tensor<int32_t, 1> indices_A,
+    Tensor<int32_t, 1> indices_B,
+    Tensor<int32_t, 1> indices_output
+) {
+    check_sap_vjp_vjp(
+        grad_grad_output,
+        grad_A_2,
+        grad_B_2,
+        grad_grad_A,
+        grad_grad_B,
+        grad_output,
+        A,
+        B,
+        C,
+        indices_A,
+        indices_B,
+        indices_output,
+        "cuda_sparse_accumulation_of_products_vjp_vjp"
+    );
+
+    dim3 block_dim(find_integer_divisor(grad_A_2.shape[0], WARP_SIZE));
+
+    dim3 thread_block(WARP_SIZE * NWARPS_PER_BLOCK, 1, 1);
+
+    void* sptr = nullptr;
+    size_t space = 0;
+
+    /* unused but keeping here for clarity */
+    scalar_t* buffer_grad_output;
+    scalar_t* buffer_grad_grad_output;
+    scalar_t* buffer_grad_grad_B;
+    scalar_t* buffer_grad_grad_A;
+    scalar_t* buffer_A;
+    scalar_t* buffer_B;
+    scalar_t* buffer_grad_A2;
+    scalar_t* buffer_grad_B2;
+
+    if (grad_grad_output.data != nullptr &&
+        (grad_grad_A.data != nullptr || grad_grad_B.data != nullptr)) {
+        buffer_grad_grad_output =
+            shared_array<scalar_t>(WARP_SIZE * grad_output.shape[1], sptr, &space);
+    }
+
+    if ((grad_grad_A.data != nullptr && grad_B_2.data != nullptr) ||
+        (grad_grad_B.data != nullptr && grad_A_2.data != nullptr)) {
+        buffer_grad_output = shared_array<scalar_t>(WARP_SIZE * grad_output.shape[1], sptr, &space);
+    }
+
+    if (grad_grad_A.data != nullptr) {
+        buffer_grad_grad_A = shared_array<scalar_t>(WARP_SIZE * grad_grad_A.shape[1], sptr, &space);
+
+        if (grad_grad_output.data != nullptr) {
+            buffer_B = shared_array<scalar_t>(WARP_SIZE * B.shape[1], sptr, &space);
+        }
+
+        if (grad_B_2.data != nullptr) {
+            buffer_grad_B2 = shared_array<scalar_t>(WARP_SIZE * grad_B_2.shape[1], sptr, &space);
+        }
+    }
+
+    if (grad_grad_B.data != nullptr) {
+        buffer_grad_grad_B = shared_array<scalar_t>(WARP_SIZE * grad_grad_B.shape[1], sptr, &space);
+
+        if (grad_grad_output.data != nullptr) {
+            buffer_A = shared_array<scalar_t>(WARP_SIZE * A.shape[1], sptr, &space);
+        }
+
+        if (grad_A_2.data != nullptr) {
+            buffer_grad_A2 = shared_array<scalar_t>(WARP_SIZE * grad_A_2.shape[1], sptr, &space);
+        }
+    }
+
+    int32_t* packed_indices = shared_array<int32_t>(indices_A.shape[0], sptr, &space);
+
+    sparse_accumulation_of_products_vjp_vjp_kernel<scalar_t><<<block_dim, thread_block, space>>>(
+        grad_grad_output,
+        grad_A_2,
+        grad_B_2,
+        grad_grad_A,
+        grad_grad_B,
+        grad_output,
+        A,
+        B,
+        C,
+        indices_A,
+        indices_B,
+        indices_output
+    );
+
+    CUDA_CHECK_ERROR(cudaGetLastError());
+
+    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+}
+
+// explicit instanciations of CUDA templates
+template void mops::cuda::sparse_accumulation_of_products_vjp_vjp<float>(
+    Tensor<float, 2> grad_grad_output,
+    Tensor<float, 2> grad_A_2,
+    Tensor<float, 2> grad_B_2,
+    Tensor<float, 2> grad_grad_A,
+    Tensor<float, 2> grad_grad_B,
+    Tensor<float, 2> grad_output,
+    Tensor<float, 2> A,
+    Tensor<float, 2> B,
+    Tensor<float, 1> C,
+    Tensor<int32_t, 1> indices_A,
+    Tensor<int32_t, 1> indices_B,
+    Tensor<int32_t, 1> indices_output
+);
+
+template void mops::cuda::sparse_accumulation_of_products_vjp_vjp<double>(
+    Tensor<double, 2> grad_grad_output,
+    Tensor<double, 2> grad_A_2,
+    Tensor<double, 2> grad_B_2,
+    Tensor<double, 2> grad_grad_A,
+    Tensor<double, 2> grad_grad_B,
     Tensor<double, 2> grad_output,
     Tensor<double, 2> A,
     Tensor<double, 2> B,

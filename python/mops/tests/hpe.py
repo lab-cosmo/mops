@@ -19,7 +19,7 @@ except ImportError:
 
 @pytest.fixture
 def valid_arguments():
-    A = np.random.rand(100, 20)
+    A = np.random.rand(99, 20)
     C = np.random.rand(200)
     indices_A = np.random.randint(20, size=(200, 4))
     return A, C, indices_A
@@ -63,7 +63,8 @@ def test_hpe_size_mismatch(valid_arguments):
     with pytest.raises(
         mops.status.MopsError,
         match="Dimension mismatch: the sizes of C along "
-        "dimension 0 and indices_A along dimension 0 must match in hpe",
+        "dimension 0 and indices_A along dimension 0 must match in "
+        "cpu_homogeneous_polynomial_evaluation",
     ):
         hpe(A, C, indices_A)
 
@@ -74,7 +75,9 @@ def test_hpe_out_of_bounds(valid_arguments):
 
     with pytest.raises(
         mops.status.MopsError,
-        match="Index array indices_A in operation hpe contains elements up to 20; "
+        match="Index array indices_A in operation "
+        "cpu_homogeneous_polynomial_evaluation "
+        "contains elements up to 20; "
         "this would cause out-of-bounds accesses. With the provided "
         "parameters, it can only contain elements up to 19",
     ):

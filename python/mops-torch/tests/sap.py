@@ -20,8 +20,8 @@ def test_sap(dtype, device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
-    A = torch.rand(100, 20, device=device, dtype=dtype)
-    B = torch.rand(100, 6, device=device, dtype=dtype)
+    A = torch.rand(99, 20, device=device, dtype=dtype)
+    B = torch.rand(99, 6, device=device, dtype=dtype)
     C = torch.rand(30, device=device, dtype=dtype)
     indices_A = torch.randint(20, size=(30,), dtype=torch.int32, device=device)
     indices_B = torch.randint(6, size=(30,), dtype=torch.int32, device=device)
@@ -49,15 +49,14 @@ def test_sap(dtype, device):
     assert torch.allclose(reference, actual)
 
 
-@pytest.mark.parametrize("dtype", [torch.float32, torch.float64])
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
-def test_sap_grad(dtype, device):
+def test_sap_grads(device):
     if device == "cuda" and not HAS_CUDA:
         pytest.skip("CUDA not available")
 
-    A = torch.rand(100, 20, device=device, dtype=dtype, requires_grad=True)
-    B = torch.rand(100, 6, device=device, dtype=dtype, requires_grad=True)
-    C = torch.rand(30, device=device, dtype=dtype)
+    A = torch.rand(99, 20, device=device, dtype=torch.float64, requires_grad=True)
+    B = torch.rand(99, 6, device=device, dtype=torch.float64, requires_grad=True)
+    C = torch.rand(30, device=device, dtype=torch.float64)
     indices_A = torch.randint(20, size=(30,), dtype=torch.int32, device=device)
     indices_B = torch.randint(6, size=(30,), dtype=torch.int32, device=device)
     output_size = 35
@@ -68,15 +67,17 @@ def test_sap_grad(dtype, device):
     assert torch.autograd.gradcheck(
         mops.torch.sparse_accumulation_of_products,
         (A, B, C, indices_A, indices_B, indices_output, output_size),
-        fast_mode=True,
-        atol=1e-3,
-        nondet_tol=1e-5,
+    )
+
+    assert torch.autograd.gradgradcheck(
+        mops.torch.sparse_accumulation_of_products,
+        (A, B, C, indices_A, indices_B, indices_output, output_size),
     )
 
 
 def test_sap_ref():
-    A = torch.rand(100, 20)
-    B = torch.rand(100, 6)
+    A = torch.rand(99, 20)
+    B = torch.rand(99, 6)
     C = torch.rand(30)
     indices_A = torch.randint(20, size=(30,), dtype=torch.int32)
     indices_B = torch.randint(6, size=(30,), dtype=torch.int32)
