@@ -93,7 +93,7 @@ void mops::outer_product_scatter_add_vjp(
         scalar_t *grad_output_ptr = grad_output.data;
         scalar_t *a_ptr = A.data;
         scalar_t *b_ptr = B.data;
-        int32_t *indices_output_ptr = indices_output.data;
+        [[maybe_unused]] int32_t *indices_output_ptr = indices_output.data;
 
 #pragma omp parallel for
         for (size_t i = 0; i < size_ab; i++) {

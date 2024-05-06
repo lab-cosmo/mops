@@ -71,7 +71,7 @@ __global__ void sparse_accumulation_of_products_kernel(
         int a_idx = (packed_indices[k] >> 16) & 0xFF;
 
         atomicAdd(
-            buffer_out + out_idx * WARP_SIZE + laneID,
+            &buffer_out + out_idx * WARP_SIZE + laneID,
             C.data[k] * buffer_A[a_idx * WARP_SIZE + laneID] * buffer_B[b_idx * WARP_SIZE + laneID]
         );
     }
@@ -233,14 +233,14 @@ __global__ void sparse_accumulation_of_products_vjp_kernel(
 
         if (grad_A.data != nullptr) {
             atomicAdd(
-                buffer_gradA + a_idx * WARP_SIZE + laneID,
+                &buffer_gradA + a_idx * WARP_SIZE + laneID,
                 C.data[k] * buffer_B[b_idx * WARP_SIZE + laneID] *
                     buffer_gradout[out_idx * WARP_SIZE + laneID]
             );
         }
         if (grad_B.data != nullptr) {
             atomicAdd(
-                buffer_gradB + b_idx * WARP_SIZE + laneID,
+                &buffer_gradB + b_idx * WARP_SIZE + laneID,
                 C.data[k] * buffer_A[a_idx * WARP_SIZE + laneID] *
                     buffer_gradout[out_idx * WARP_SIZE + laneID]
             );
