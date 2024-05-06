@@ -508,14 +508,14 @@ __global__ void sparse_accumulation_of_products_vjp_vjp_kernel(
 
             if (grad_grad_output.data != nullptr) {
                 atomicAdd(
-                    buffer_grad_grad_output + out_idx * WARP_SIZE + laneID,
+                    &buffer_grad_grad_output + out_idx * WARP_SIZE + laneID,
                     grad_grad_A_k * buffer_B[b_idx * WARP_SIZE + laneID] * c
                 );
             }
 
             if (grad_B_2.data != nullptr) {
                 atomicAdd(
-                    buffer_grad_B2 + b_idx * WARP_SIZE + laneID,
+                    &buffer_grad_B2 + b_idx * WARP_SIZE + laneID,
                     grad_grad_A_k * buffer_grad_output[out_idx * WARP_SIZE + laneID] * c
                 );
             }
@@ -526,14 +526,14 @@ __global__ void sparse_accumulation_of_products_vjp_vjp_kernel(
 
             if (grad_grad_output.data != nullptr) {
                 atomicAdd(
-                    buffer_grad_grad_output + out_idx * WARP_SIZE + laneID,
+                    &buffer_grad_grad_output + out_idx * WARP_SIZE + laneID,
                     grad_grad_B_k * buffer_A[a_idx * WARP_SIZE + laneID] * c
                 );
             }
 
             if (grad_A_2.data != nullptr) {
                 atomicAdd(
-                    buffer_grad_A2 + a_idx * WARP_SIZE + laneID,
+                    &buffer_grad_A2 + a_idx * WARP_SIZE + laneID,
                     grad_grad_B_k * buffer_grad_output[out_idx * WARP_SIZE + laneID] * c
                 );
             }
