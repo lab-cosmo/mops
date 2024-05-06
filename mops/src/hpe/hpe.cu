@@ -313,10 +313,6 @@ void mops::cuda::homogeneous_polynomial_evaluation_vjp(
 
     if (polynomial_order <= 10) {
         switch (polynomial_order) {
-        case 0:
-            homogeneous_polynomial_evaluation_vjp_kernel<scalar_t, 0>
-                <<<block_dim, thread_block, space>>>(grad_A, grad_output, A, C, indices_A);
-            break;
         case 1:
             homogeneous_polynomial_evaluation_vjp_kernel<scalar_t, 1>
                 <<<block_dim, thread_block, space>>>(grad_A, grad_output, A, C, indices_A);
