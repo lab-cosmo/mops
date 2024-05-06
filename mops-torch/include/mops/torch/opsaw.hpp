@@ -29,6 +29,24 @@ class OuterProductScatterAddWithWeights
     );
 };
 
+class OuterProductScatterAddWithWeightsBackward
+    : public torch::autograd::Function<mops_torch::OuterProductScatterAddWithWeightsBackward> {
+  public:
+    static std::vector<torch::Tensor> forward(
+        torch::autograd::AutogradContext* ctx,
+        torch::Tensor grad_output,
+        torch::Tensor A,
+        torch::Tensor B,
+        torch::Tensor W,
+        torch::Tensor indices_W,
+        torch::Tensor indices_output
+    );
+
+    static std::vector<torch::Tensor> backward(
+        torch::autograd::AutogradContext* ctx, std::vector<torch::Tensor> grad_outputs
+    );
+};
+
 } // namespace mops_torch
 
 #endif

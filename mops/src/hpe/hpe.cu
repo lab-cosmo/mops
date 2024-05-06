@@ -1,6 +1,6 @@
 #include "mops/hpe.hpp"
 
-#include "internal/checks.hpp"
+#include "internal/checks/hpe.hpp"
 #include "internal/cuda_utils.cuh"
 
 using namespace mops;
@@ -110,6 +110,8 @@ template <typename scalar_t>
 void mops::cuda::homogeneous_polynomial_evaluation(
     Tensor<scalar_t, 1> output, Tensor<scalar_t, 2> A, Tensor<scalar_t, 1> C, Tensor<int32_t, 2> indices_A
 ) {
+
+    check_hpe(output, A, C, indices_A, "cuda_homogeneous_polynomial_evaluation");
 
     int32_t nbatch = output.shape[0];
     int32_t nnu1 = A.shape[1];
@@ -293,6 +295,7 @@ void mops::cuda::homogeneous_polynomial_evaluation_vjp(
     Tensor<scalar_t, 1> C,
     Tensor<int32_t, 2> indices_A
 ) {
+    check_hpe_vjp(grad_A, grad_output, A, C, indices_A, "cuda_homogeneous_polynomial_evaluation_vjp");
 
     int32_t nbatch = grad_output.shape[0];
     int32_t nnu1 = A.shape[1];
@@ -366,7 +369,7 @@ void mops::cuda::homogeneous_polynomial_evaluation_vjp(
 
 // explicit instanciations of CUDA templates
 template void mops::cuda::homogeneous_polynomial_evaluation_vjp<float>(
-    Tensor<float, 2> gradA,
+    Tensor<float, 2> grad_A,
     Tensor<float, 1> grad_output,
     Tensor<float, 2> A,
     Tensor<float, 1> C,
@@ -374,7 +377,41 @@ template void mops::cuda::homogeneous_polynomial_evaluation_vjp<float>(
 );
 
 template void mops::cuda::homogeneous_polynomial_evaluation_vjp<double>(
-    Tensor<double, 2> gradA,
+    Tensor<double, 2> grad_A,
+    Tensor<double, 1> grad_output,
+    Tensor<double, 2> A,
+    Tensor<double, 1> C,
+    Tensor<int32_t, 2> indices_A
+);
+
+template <typename scalar_t>
+void mops::cuda::homogeneous_polynomial_evaluation_vjp_vjp(
+    Tensor<scalar_t, 1> grad_grad_output,
+    Tensor<scalar_t, 2> grad_A_2,
+    Tensor<scalar_t, 2> grad_grad_A,
+    Tensor<scalar_t, 1> grad_output,
+    Tensor<scalar_t, 2> A,
+    Tensor<scalar_t, 1> C,
+    Tensor<int32_t, 2> indices_A
+) {
+    throw std::runtime_error("Not implemented");
+}
+
+// explicit instanciations of CUDA templates
+template void mops::cuda::homogeneous_polynomial_evaluation_vjp_vjp<float>(
+    Tensor<float, 1> grad_grad_output,
+    Tensor<float, 2> grad_A_2,
+    Tensor<float, 2> grad_grad_A,
+    Tensor<float, 1> grad_output,
+    Tensor<float, 2> A,
+    Tensor<float, 1> C,
+    Tensor<int32_t, 2> indices_A
+);
+
+template void mops::cuda::homogeneous_polynomial_evaluation_vjp_vjp<double>(
+    Tensor<double, 1> grad_grad_output,
+    Tensor<double, 2> grad_A_2,
+    Tensor<double, 2> grad_grad_A,
     Tensor<double, 1> grad_output,
     Tensor<double, 2> A,
     Tensor<double, 1> C,

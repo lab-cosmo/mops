@@ -1,6 +1,6 @@
 #include "mops/opsa.hpp"
 
-#include "internal/checks.hpp"
+#include "internal/checks/opsa.hpp"
 #include "internal/cuda_first_occurences.cuh"
 #include "internal/cuda_utils.cuh"
 
@@ -68,11 +68,7 @@ void mops::cuda::outer_product_scatter_add(
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> indices_output
 ) {
-
-    check_sizes(A, "A", 0, B, "B", 0, "opsa");
-    check_sizes(A, "A", 1, output, "output", 1, "opsa");
-    check_sizes(B, "B", 1, output, "output", 2, "opsa");
-    check_sizes(A, "A", 0, indices_output, "indices_output", 0, "opsa");
+    check_opsa(output, A, B, indices_output, "cuda_outer_product_scatter_add");
 
     int32_t* first_occurences = calculate_first_occurences_cuda(
         indices_output.data, indices_output.shape[0], output.shape[0]
@@ -246,11 +242,9 @@ void mops::cuda::outer_product_scatter_add_vjp(
     Tensor<scalar_t, 2> B,
     Tensor<int32_t, 1> indices_output
 ) {
-
-    check_sizes(A, "A", 0, B, "B", 0, "cuda_opsa_vjp");
-    check_sizes(A, "A", 1, grad_output, "grad_output", 1, "cuda_opsa_vjp");
-    check_sizes(B, "B", 1, grad_output, "grad_output", 2, "cuda_opsa_vjp");
-    check_sizes(A, "A", 0, indices_output, "indices_output", 0, "cuda_opsa_vjp");
+    check_opsa_vjp(
+        grad_A, grad_B, grad_output, A, B, indices_output, "cuda_outer_product_scatter_add_vjp"
+    );
 
     int32_t* first_occurences = calculate_first_occurences_cuda(
         indices_output.data, indices_output.shape[0], grad_output.shape[0]
@@ -268,11 +262,9 @@ void mops::cuda::outer_product_scatter_add_vjp(
     shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
 
     if (grad_A.data != nullptr) {
-        check_same_shape(grad_A, "grad_A", A, "A", "cuda_opsa_vjp");
         shared_array<scalar_t>(NWARPS_PER_BLOCK * A.shape[1], sptr, &space);
     }
     if (grad_B.data != nullptr) {
-        check_same_shape(grad_B, "grad_B", B, "B", "cuda_opsa_vjp");
         shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
     }
 
@@ -304,6 +296,46 @@ template void mops::cuda::outer_product_scatter_add_vjp<float>(
 template void mops::cuda::outer_product_scatter_add_vjp<double>(
     Tensor<double, 2> grad_A,
     Tensor<double, 2> grad_B,
+    Tensor<double, 3> grad_output,
+    Tensor<double, 2> A,
+    Tensor<double, 2> B,
+    Tensor<int32_t, 1> indices_output
+);
+
+template <typename scalar_t>
+void mops::cuda::outer_product_scatter_add_vjp_vjp(
+    Tensor<scalar_t, 3> /*grad_grad_output*/,
+    Tensor<scalar_t, 2> /*grad_A_2*/,
+    Tensor<scalar_t, 2> /*grad_B_2*/,
+    Tensor<scalar_t, 2> /*grad_grad_A*/,
+    Tensor<scalar_t, 2> /*grad_grad_B*/,
+    Tensor<scalar_t, 3> /*grad_output*/,
+    Tensor<scalar_t, 2> /*A*/,
+    Tensor<scalar_t, 2> /*B*/,
+    Tensor<int32_t, 1> /*indices_output*/
+) {
+    throw std::runtime_error("Not implemented");
+}
+
+// explicit instantiations of CUDA templates
+template void mops::cuda::outer_product_scatter_add_vjp_vjp<float>(
+    Tensor<float, 3> grad_grad_output,
+    Tensor<float, 2> grad_A_2,
+    Tensor<float, 2> grad_B_2,
+    Tensor<float, 2> grad_grad_A,
+    Tensor<float, 2> grad_grad_B,
+    Tensor<float, 3> grad_output,
+    Tensor<float, 2> A,
+    Tensor<float, 2> B,
+    Tensor<int32_t, 1> indices_output
+);
+
+template void mops::cuda::outer_product_scatter_add_vjp_vjp<double>(
+    Tensor<double, 3> grad_grad_output,
+    Tensor<double, 2> grad_A_2,
+    Tensor<double, 2> grad_B_2,
+    Tensor<double, 2> grad_grad_A,
+    Tensor<double, 2> grad_grad_B,
     Tensor<double, 3> grad_output,
     Tensor<double, 2> A,
     Tensor<double, 2> B,

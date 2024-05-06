@@ -211,3 +211,145 @@ def _check_sasaw_vjp(
         indices_output_2,
         output_size,
     )
+
+
+def _check_hpe_vjp_vjp(
+    grad_grad_A,
+    grad_output,
+    A,
+    C,
+    indices_A,
+):
+    function = "homogeneous_polynomial_evaluation_vjp_vjp"
+
+    if grad_grad_A is not None:
+        _check_number_of_dimensions(grad_grad_A, 2, function, "grad_grad_A")
+
+    if grad_grad_A is not None:
+        _check_array_dtype(grad_grad_A, np.floating, function, "grad_grad_A")
+
+    _check_hpe_vjp(grad_output, A, C, indices_A)
+
+
+def _check_sap_vjp_vjp(
+    grad_grad_A,
+    grad_grad_B,
+    grad_output,
+    A,
+    B,
+    C,
+    indices_A,
+    indices_B,
+    indices_output,
+    output_size,
+):
+    function = "sparse_accumulation_of_products_vjp_vjp"
+
+    if grad_grad_A is not None:
+        _check_number_of_dimensions(grad_grad_A, 2, function, "grad_grad_A")
+    if grad_grad_B is not None:
+        _check_number_of_dimensions(grad_grad_B, 2, function, "grad_grad_B")
+
+    if grad_grad_A is not None:
+        _check_array_dtype(grad_grad_A, np.floating, function, "grad_grad_A")
+    if grad_grad_B is not None:
+        _check_array_dtype(grad_grad_B, np.floating, function, "grad_grad_B")
+
+    _check_sap_vjp(
+        grad_output, A, B, C, indices_A, indices_B, indices_output, output_size
+    )
+
+
+def _check_opsa_vjp_vjp(
+    grad_grad_A, grad_grad_B, grad_output, A, B, indices_output, output_size
+):
+    function = "outer_product_scatter_add_vjp_vjp"
+
+    if grad_grad_A is not None:
+        _check_number_of_dimensions(grad_grad_A, 2, function, "grad_grad_A")
+    if grad_grad_B is not None:
+        _check_number_of_dimensions(grad_grad_B, 2, function, "grad_grad_B")
+
+    if grad_grad_A is not None:
+        _check_array_dtype(grad_grad_A, np.floating, function, "grad_grad_A")
+    if grad_grad_B is not None:
+        _check_array_dtype(grad_grad_B, np.floating, function, "grad_grad_B")
+
+    _check_opsa_vjp(grad_output, A, B, indices_output, output_size)
+
+
+def _check_opsaw_vjp_vjp(
+    grad_grad_A,
+    grad_grad_B,
+    grad_grad_W,
+    grad_output,
+    A,
+    B,
+    W,
+    indices_W,
+    indices_output,
+):
+    function = "outer_product_scatter_add_with_weights_vjp_vjp"
+
+    if grad_grad_A is not None:
+        _check_number_of_dimensions(grad_grad_A, 2, function, "grad_grad_A")
+    if grad_grad_B is not None:
+        _check_number_of_dimensions(grad_grad_B, 2, function, "grad_grad_B")
+    if grad_grad_W is not None:
+        _check_number_of_dimensions(grad_grad_W, 2, function, "grad_grad_W")
+
+    if grad_grad_A is not None:
+        _check_array_dtype(grad_grad_A, np.floating, function, "grad_grad_A")
+    if grad_grad_B is not None:
+        _check_array_dtype(grad_grad_B, np.floating, function, "grad_grad_B")
+    if grad_grad_W is not None:
+        _check_array_dtype(grad_grad_W, np.floating, function, "grad_grad_W")
+
+    _check_opsaw_vjp(A, B, W, indices_W, indices_output, grad_output)
+
+
+def _check_sasaw_vjp_vjp(
+    grad_grad_A,
+    grad_grad_B,
+    grad_grad_W,
+    grad_output,
+    A,
+    B,
+    C,
+    W,
+    indices_A,
+    indices_W_1,
+    indices_W_2,
+    indices_output_1,
+    indices_output_2,
+    output_size,
+):
+    function = "sparse_accumulation_scatter_add_with_weights_vjp_vjp"
+
+    if grad_grad_A is not None:
+        _check_number_of_dimensions(grad_grad_A, 2, function, "grad_grad_A")
+    if grad_grad_B is not None:
+        _check_number_of_dimensions(grad_grad_B, 2, function, "grad_grad_B")
+    if grad_grad_W is not None:
+        _check_number_of_dimensions(grad_grad_W, 3, function, "grad_grad_W")
+
+    if grad_grad_A is not None:
+        _check_array_dtype(grad_grad_A, np.floating, function, "grad_grad_A")
+    if grad_grad_B is not None:
+        _check_array_dtype(grad_grad_B, np.floating, function, "grad_grad_B")
+    if grad_grad_W is not None:
+        _check_array_dtype(grad_grad_W, np.floating, function, "grad_grad_W")
+
+    _check_sasaw_vjp(
+        A,
+        B,
+        C,
+        W,
+        indices_A,
+        indices_W_1,
+        indices_W_2,
+        indices_output_1,
+        indices_output_2,
+        grad_output,
+        output_size,
+    )
