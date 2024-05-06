@@ -71,7 +71,7 @@ __global__ void sparse_accumulation_of_products_kernel(
         int a_idx = (packed_indices[k] >> 16) & 0xFF;
 
         atomicAdd(
-            &buffer_out + out_idx * WARP_SIZE + laneID,
+            &buffer_out[out_idx * WARP_SIZE + laneID],
             C.data[k] * buffer_A[a_idx * WARP_SIZE + laneID] * buffer_B[b_idx * WARP_SIZE + laneID]
         );
     }
@@ -236,14 +236,14 @@ __global__ void sparse_accumulation_of_products_vjp_kernel(
 
         if (grad_A.data != nullptr) {
             atomicAdd(
-                &buffer_gradA + a_idx * WARP_SIZE + laneID,
+                &buffer_gradA[a_idx * WARP_SIZE + laneID],
                 C.data[k] * buffer_B[b_idx * WARP_SIZE + laneID] *
                     buffer_gradout[out_idx * WARP_SIZE + laneID]
             );
         }
         if (grad_B.data != nullptr) {
             atomicAdd(
-                &buffer_gradB + b_idx * WARP_SIZE + laneID,
+                &buffer_gradB[b_idx * WARP_SIZE + laneID],
                 C.data[k] * buffer_A[a_idx * WARP_SIZE + laneID] *
                     buffer_gradout[out_idx * WARP_SIZE + laneID]
             );
@@ -508,14 +508,14 @@ __global__ void sparse_accumulation_of_products_vjp_vjp_kernel(
 
             if (grad_grad_output.data != nullptr) {
                 atomicAdd(
-                    &buffer_grad_grad_output + out_idx * WARP_SIZE + laneID,
+                    &buffer_grad_grad_output[out_idx * WARP_SIZE + laneID],
                     grad_grad_A_k * buffer_B[b_idx * WARP_SIZE + laneID] * c
                 );
             }
 
             if (grad_B_2.data != nullptr) {
                 atomicAdd(
-                    &buffer_grad_B2 + b_idx * WARP_SIZE + laneID,
+                    &buffer_grad_B2[b_idx * WARP_SIZE + laneID],
                     grad_grad_A_k * buffer_grad_output[out_idx * WARP_SIZE + laneID] * c
                 );
             }
@@ -526,14 +526,14 @@ __global__ void sparse_accumulation_of_products_vjp_vjp_kernel(
 
             if (grad_grad_output.data != nullptr) {
                 atomicAdd(
-                    &buffer_grad_grad_output + out_idx * WARP_SIZE + laneID,
+                    &buffer_grad_grad_output[out_idx * WARP_SIZE + laneID],
                     grad_grad_B_k * buffer_A[a_idx * WARP_SIZE + laneID] * c
                 );
             }
 
             if (grad_A_2.data != nullptr) {
                 atomicAdd(
-                    &buffer_grad_A2 + a_idx * WARP_SIZE + laneID,
+                    &buffer_grad_A2[a_idx * WARP_SIZE + laneID],
                     grad_grad_B_k * buffer_grad_output[out_idx * WARP_SIZE + laneID] * c
                 );
             }

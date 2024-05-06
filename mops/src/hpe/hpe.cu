@@ -311,7 +311,7 @@ void mops::cuda::homogeneous_polynomial_evaluation_vjp(
     shared_array<scalar_t>(2 * nnu1, sptr, &space);
     shared_array<int32_t>(NWARPS_PER_BLOCK * WARP_SIZE * polynomial_order, sptr, &space);
 
-    if (polynomial_order <= 10) {
+    if (polynomial_order > 0 && polynomial_order <= 10) {
         switch (polynomial_order) {
         case 1:
             homogeneous_polynomial_evaluation_vjp_kernel<scalar_t, 1>
