@@ -106,6 +106,13 @@ __global__ void homogeneous_polynomial_evaluation_kernel(
     }
 }
 
+template <typename scalar_t, 0>
+__global__ void homogeneous_polynomial_evaluation_kernel(
+    Tensor<scalar_t, 1> output, Tensor<scalar_t, 2> A, Tensor<scalar_t, 1> C, Tensor<int32_t, 2> indices_A
+) {
+	// dummy implementation for polynomial order zero
+}
+
 template <typename scalar_t>
 void mops::cuda::homogeneous_polynomial_evaluation(
     Tensor<scalar_t, 1> output, Tensor<scalar_t, 2> A, Tensor<scalar_t, 1> C, Tensor<int32_t, 2> indices_A
@@ -128,12 +135,8 @@ void mops::cuda::homogeneous_polynomial_evaluation(
     shared_array<scalar_t>(NWARPS_PER_BLOCK, sptr, &space);
     shared_array<int32_t>(WARP_SIZE * NWARPS_PER_BLOCK * polynomial_order, sptr, &space);
 
-    if (polynomial_order <= 10) {
+    if (polynomial_order > 0 && polynomial_order <= 10) {
         switch (polynomial_order) {
-        case 0:
-            homogeneous_polynomial_evaluation_kernel<scalar_t, 0>
-                <<<block_dim, thread_block, space>>>(output, A, C, indices_A);
-            break;
         case 1:
             homogeneous_polynomial_evaluation_kernel<scalar_t, 1>
                 <<<block_dim, thread_block, space>>>(output, A, C, indices_A);
