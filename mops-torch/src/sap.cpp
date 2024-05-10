@@ -346,7 +346,8 @@ std::vector<torch::Tensor> SparseAccumulationOfProductsBackward::backward(
                 details::torch_to_mops_1d<scalar_t>(C),
                 details::torch_to_mops_1d<int32_t>(indices_A),
                 details::torch_to_mops_1d<int32_t>(indices_B),
-                details::torch_to_mops_1d<int32_t>(indices_output)
+                details::torch_to_mops_1d<int32_t>(indices_output),
+                stream
             );
         });
 #endif
