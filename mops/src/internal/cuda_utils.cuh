@@ -23,6 +23,12 @@ using namespace std;
         }                                                                                          \
     } while (0)
 
+#if __CUDA_ARCH__ < 600
+#define ATOMIC_ADD(address, val) atomicAdd_presm60(address, val)
+#else
+#define ATOMIC_ADD(address, val) atomicAdd(address, val)
+#endif
+
 __device__ double atomicAdd_presm60(double* address, double val);
 
 __host__ __device__ int32_t find_integer_divisor(int32_t x, int32_t bdim);

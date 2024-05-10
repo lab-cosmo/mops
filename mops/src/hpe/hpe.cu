@@ -284,11 +284,8 @@ __global__ void homogeneous_polynomial_evaluation_vjp_kernel(
                     }
 
                     int32_t idx_i = buffer_indices_A[i_monomial * blockDim.x + threadIdx.x];
-#if __CUDA_ARCH__ < 600
-                    atomicAdd_presm60(&buffer_gradA[idx_i], tmp_i);
-#else
-                    atomicAdd(&buffer_gradA[idx_i], tmp_i);
-#endif
+
+                    ATOMIC_ADD(&buffer_gradA[idx_i], tmp_i);
                 }
             }
         }
