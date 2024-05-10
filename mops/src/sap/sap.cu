@@ -70,8 +70,8 @@ __global__ void sparse_accumulation_of_products_kernel(
         int b_idx = (packed_indices[k] >> 8) & 0xFF;
         int a_idx = (packed_indices[k] >> 16) & 0xFF;
 
-        atomicAdd(
-            buffer_out + out_idx * WARP_SIZE + laneID,
+        ATOMIC_ADD(
+            &buffer_out[out_idx * WARP_SIZE + laneID],
             C.data[k] * buffer_A[a_idx * WARP_SIZE + laneID] * buffer_B[b_idx * WARP_SIZE + laneID]
         );
     }
@@ -124,8 +124,9 @@ void mops::cuda::sparse_accumulation_of_products(
     shared_array<scalar_t>(WARP_SIZE * B.shape[1], sptr, &space);
     shared_array<int32_t>(indices_A.shape[0], sptr, &space);
 
-    sparse_accumulation_of_products_kernel<scalar_t>
-        <<<block_dim, thread_block, space>>>(output, A, B, C, indices_A, indices_B, indices_output);
+    sparse_accumulation_of_products_kernel<scalar_t><<<block_dim, thread_block, space, cstream>>>(
+        output, A, B, C, indices_A, indices_B, indices_output
+    );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
     CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
@@ -251,15 +252,15 @@ __global__ void sparse_accumulation_of_products_vjp_kernel(
         int a_idx = (packed_indices[k] >> 16) & 0xFF;
 
         if (grad_A.data != nullptr) {
-            atomicAdd(
-                buffer_gradA + a_idx * WARP_SIZE + laneID,
+            ATOMIC_ADD(
+                &buffer_gradA[a_idx * WARP_SIZE + laneID],
                 C.data[k] * buffer_B[b_idx * WARP_SIZE + laneID] *
                     buffer_gradout[out_idx * WARP_SIZE + laneID]
             );
         }
         if (grad_B.data != nullptr) {
-            atomicAdd(
-                buffer_gradB + b_idx * WARP_SIZE + laneID,
+            ATOMIC_ADD(
+                &buffer_gradB[b_idx * WARP_SIZE + laneID],
                 C.data[k] * buffer_A[a_idx * WARP_SIZE + laneID] *
                     buffer_gradout[out_idx * WARP_SIZE + laneID]
             );
@@ -344,9 +345,10 @@ void mops::cuda::sparse_accumulation_of_products_vjp(
         shared_array<scalar_t>(WARP_SIZE * grad_A.shape[1], sptr, &space);
     }
 
-    sparse_accumulation_of_products_vjp_kernel<scalar_t><<<block_dim, thread_block, space>>>(
-        grad_A, grad_B, grad_output, A, B, C, indices_A, indices_B, indices_output
-    );
+    sparse_accumulation_of_products_vjp_kernel<scalar_t>
+        <<<block_dim, thread_block, space, cstream>>>(
+            grad_A, grad_B, grad_output, A, B, C, indices_A, indices_B, indices_output
+        );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
     CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
@@ -539,15 +541,15 @@ __global__ void sparse_accumulation_of_products_vjp_vjp_kernel(
             scalar_t grad_grad_A_k = buffer_grad_grad_A[a_idx * WARP_SIZE + laneID];
 
             if (grad_grad_output.data != nullptr) {
-                atomicAdd(
-                    buffer_grad_grad_output + out_idx * WARP_SIZE + laneID,
+                ATOMIC_ADD(
+                    &buffer_grad_grad_output[out_idx * WARP_SIZE + laneID],
                     grad_grad_A_k * buffer_B[b_idx * WARP_SIZE + laneID] * c
                 );
             }
 
             if (grad_B_2.data != nullptr) {
-                atomicAdd(
-                    buffer_grad_B2 + b_idx * WARP_SIZE + laneID,
+                ATOMIC_ADD(
+                    &buffer_grad_B2[b_idx * WARP_SIZE + laneID],
                     grad_grad_A_k * buffer_grad_output[out_idx * WARP_SIZE + laneID] * c
                 );
             }
@@ -557,15 +559,15 @@ __global__ void sparse_accumulation_of_products_vjp_vjp_kernel(
             scalar_t grad_grad_B_k = buffer_grad_grad_B[b_idx * WARP_SIZE + laneID];
 
             if (grad_grad_output.data != nullptr) {
-                atomicAdd(
-                    buffer_grad_grad_output + out_idx * WARP_SIZE + laneID,
+                ATOMIC_ADD(
+                    &buffer_grad_grad_output[out_idx * WARP_SIZE + laneID],
                     grad_grad_B_k * buffer_A[a_idx * WARP_SIZE + laneID] * c
                 );
             }
 
             if (grad_A_2.data != nullptr) {
-                atomicAdd(
-                    buffer_grad_A2 + a_idx * WARP_SIZE + laneID,
+                ATOMIC_ADD(
+                    &buffer_grad_A2[a_idx * WARP_SIZE + laneID],
                     grad_grad_B_k * buffer_grad_output[out_idx * WARP_SIZE + laneID] * c
                 );
             }
@@ -701,20 +703,21 @@ void mops::cuda::sparse_accumulation_of_products_vjp_vjp(
 
     int32_t* packed_indices = shared_array<int32_t>(indices_A.shape[0], sptr, &space);
 
-    sparse_accumulation_of_products_vjp_vjp_kernel<scalar_t><<<block_dim, thread_block, space>>>(
-        grad_grad_output,
-        grad_A_2,
-        grad_B_2,
-        grad_grad_A,
-        grad_grad_B,
-        grad_output,
-        A,
-        B,
-        C,
-        indices_A,
-        indices_B,
-        indices_output
-    );
+    sparse_accumulation_of_products_vjp_vjp_kernel<scalar_t>
+        <<<block_dim, thread_block, space, cstream>>>(
+            grad_grad_output,
+            grad_A_2,
+            grad_B_2,
+            grad_grad_A,
+            grad_grad_B,
+            grad_output,
+            A,
+            B,
+            C,
+            indices_A,
+            indices_B,
+            indices_output
+        );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
     CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
