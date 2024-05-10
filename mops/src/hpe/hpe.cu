@@ -1,3 +1,5 @@
+#include <cuda.h>
+
 #include "mops/hpe.hpp"
 
 #include "internal/checks/hpe.hpp"
