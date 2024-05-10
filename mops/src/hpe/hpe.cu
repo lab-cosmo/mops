@@ -106,13 +106,6 @@ __global__ void homogeneous_polynomial_evaluation_kernel(
     }
 }
 
-template <typename scalar_t, 0>
-__global__ void homogeneous_polynomial_evaluation_kernel(
-    Tensor<scalar_t, 1> output, Tensor<scalar_t, 2> A, Tensor<scalar_t, 1> C, Tensor<int32_t, 2> indices_A
-) {
-	// dummy implementation for polynomial order zero
-}
-
 template <typename scalar_t>
 void mops::cuda::homogeneous_polynomial_evaluation(
     Tensor<scalar_t, 1> output, Tensor<scalar_t, 2> A, Tensor<scalar_t, 1> C, Tensor<int32_t, 2> indices_A
