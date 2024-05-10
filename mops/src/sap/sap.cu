@@ -124,8 +124,9 @@ void mops::cuda::sparse_accumulation_of_products(
     shared_array<scalar_t>(WARP_SIZE * B.shape[1], sptr, &space);
     shared_array<int32_t>(indices_A.shape[0], sptr, &space);
 
-    sparse_accumulation_of_products_kernel<scalar_t>
-        <<<block_dim, thread_block, space, cstream>>>(output, A, B, C, indices_A, indices_B, indices_output);
+    sparse_accumulation_of_products_kernel<scalar_t><<<block_dim, thread_block, space, cstream>>>(
+        output, A, B, C, indices_A, indices_B, indices_output
+    );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
     CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
@@ -344,9 +345,10 @@ void mops::cuda::sparse_accumulation_of_products_vjp(
         shared_array<scalar_t>(WARP_SIZE * grad_A.shape[1], sptr, &space);
     }
 
-    sparse_accumulation_of_products_vjp_kernel<scalar_t><<<block_dim, thread_block, space, cstream>>>(
-        grad_A, grad_B, grad_output, A, B, C, indices_A, indices_B, indices_output
-    );
+    sparse_accumulation_of_products_vjp_kernel<scalar_t>
+        <<<block_dim, thread_block, space, cstream>>>(
+            grad_A, grad_B, grad_output, A, B, C, indices_A, indices_B, indices_output
+        );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
     CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
@@ -701,20 +703,21 @@ void mops::cuda::sparse_accumulation_of_products_vjp_vjp(
 
     int32_t* packed_indices = shared_array<int32_t>(indices_A.shape[0], sptr, &space);
 
-    sparse_accumulation_of_products_vjp_vjp_kernel<scalar_t><<<block_dim, thread_block, space, cstream>>>(
-        grad_grad_output,
-        grad_A_2,
-        grad_B_2,
-        grad_grad_A,
-        grad_grad_B,
-        grad_output,
-        A,
-        B,
-        C,
-        indices_A,
-        indices_B,
-        indices_output
-    );
+    sparse_accumulation_of_products_vjp_vjp_kernel<scalar_t>
+        <<<block_dim, thread_block, space, cstream>>>(
+            grad_grad_output,
+            grad_A_2,
+            grad_B_2,
+            grad_grad_A,
+            grad_grad_B,
+            grad_output,
+            A,
+            B,
+            C,
+            indices_A,
+            indices_B,
+            indices_output
+        );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
     CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
