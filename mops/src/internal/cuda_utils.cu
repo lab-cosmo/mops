@@ -39,8 +39,8 @@ template <typename scalar_t> __device__ scalar_t ATOMIC_ADD(scalar_t* address, s
 #endif
 }
 
-template float ATOMIC_ADD<float>(float* address, float val);
-template double ATOMIC_ADD<double>(double* address, double val);
+template __device__ float ATOMIC_ADD<float>(float* address, float val);
+template __device__ double ATOMIC_ADD<double>(double* address, double val);
 
 template <typename T>
 __host__ __device__ T* shared_array(std::size_t n_elements, void*& ptr, std::size_t* space) noexcept {
