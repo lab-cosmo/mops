@@ -23,6 +23,8 @@ using namespace std;
         }                                                                                          \
     } while (0)
 
+__device__ double atomicAdd_presm60(double* address, double val);
+
 __host__ __device__ int32_t find_integer_divisor(int32_t x, int32_t bdim);
 
 /*
