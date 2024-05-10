@@ -99,18 +99,16 @@ template void mops::sparse_accumulation_scatter_add_with_weights_vjp_vjp<double>
     Tensor<int32_t, 1> indices_output_2
 );
 
-#ifdef MOPS_CUDA_ENABLED
-#include "cuda.tpp"
-#else
+#ifndef MOPS_CUDA_ENABLED
 template <typename scalar_t>
 void mops::cuda::
-    sparse_accumulation_scatter_add_with_weights(Tensor<scalar_t, 3>, Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 1>, Tensor<scalar_t, 3>, Tensor<int32_t, 1>, Tensor<int32_t, 1>, Tensor<int32_t, 1>, Tensor<int32_t, 1>, Tensor<int32_t, 1>) {
+    sparse_accumulation_scatter_add_with_weights(Tensor<scalar_t, 3>, Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 1>, Tensor<scalar_t, 3>, Tensor<int32_t, 1>, Tensor<int32_t, 1>, Tensor<int32_t, 1>, Tensor<int32_t, 1>, Tensor<int32_t, 1>, void*) {
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
 
 template <typename scalar_t>
 void mops::cuda::
-    sparse_accumulation_scatter_add_with_weights_vjp(Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 3>, Tensor<scalar_t, 3>, Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 1>, Tensor<scalar_t, 3>, Tensor<int, 1>, Tensor<int, 1>, Tensor<int, 1>, Tensor<int, 1>, Tensor<int, 1>) {
+    sparse_accumulation_scatter_add_with_weights_vjp(Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 3>, Tensor<scalar_t, 3>, Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 1>, Tensor<scalar_t, 3>, Tensor<int, 1>, Tensor<int, 1>, Tensor<int, 1>, Tensor<int, 1>, Tensor<int, 1>, void*) {
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
 
@@ -132,12 +130,11 @@ void mops::cuda::sparse_accumulation_scatter_add_with_weights_vjp_vjp(
     Tensor<int32_t, 1> /*indices_W_1*/,
     Tensor<int32_t, 1> /*indices_W_2*/,
     Tensor<int32_t, 1> /*indices_output_1*/,
-    Tensor<int32_t, 1> /*indices_output_2*/
+    Tensor<int32_t, 1> /*indices_output_2*/,
+    void* /*cuda_stream*/
 ) {
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
-
-#endif
 
 // explicit instantiations of CUDA templates
 template void mops::cuda::sparse_accumulation_scatter_add_with_weights<float>(
@@ -150,7 +147,8 @@ template void mops::cuda::sparse_accumulation_scatter_add_with_weights<float>(
     Tensor<int32_t, 1> indices_W_1,
     Tensor<int32_t, 1> indices_W_2,
     Tensor<int32_t, 1> indices_output_1,
-    Tensor<int32_t, 1> indices_output_2
+    Tensor<int32_t, 1> indices_output_2,
+    void* cuda_stream
 );
 
 template void mops::cuda::sparse_accumulation_scatter_add_with_weights<double>(
@@ -163,7 +161,8 @@ template void mops::cuda::sparse_accumulation_scatter_add_with_weights<double>(
     Tensor<int32_t, 1> indices_W_1,
     Tensor<int32_t, 1> indices_W_2,
     Tensor<int32_t, 1> indices_output_1,
-    Tensor<int32_t, 1> indices_output_2
+    Tensor<int32_t, 1> indices_output_2,
+    void* cuda_stream
 );
 
 template void mops::cuda::sparse_accumulation_scatter_add_with_weights_vjp<float>(
@@ -179,7 +178,8 @@ template void mops::cuda::sparse_accumulation_scatter_add_with_weights_vjp<float
     Tensor<int32_t, 1> indices_W_1,
     Tensor<int32_t, 1> indices_W_2,
     Tensor<int32_t, 1> indices_output_1,
-    Tensor<int32_t, 1> indices_output_2
+    Tensor<int32_t, 1> indices_output_2,
+    void* cuda_stream
 );
 
 template void mops::cuda::sparse_accumulation_scatter_add_with_weights_vjp<double>(
@@ -195,7 +195,8 @@ template void mops::cuda::sparse_accumulation_scatter_add_with_weights_vjp<doubl
     Tensor<int32_t, 1> indices_W_1,
     Tensor<int32_t, 1> indices_W_2,
     Tensor<int32_t, 1> indices_output_1,
-    Tensor<int32_t, 1> indices_output_2
+    Tensor<int32_t, 1> indices_output_2,
+    void* cuda_stream
 );
 
 template void mops::cuda::sparse_accumulation_scatter_add_with_weights_vjp_vjp<float>(
@@ -215,7 +216,8 @@ template void mops::cuda::sparse_accumulation_scatter_add_with_weights_vjp_vjp<f
     Tensor<int32_t, 1> indices_W_1,
     Tensor<int32_t, 1> indices_W_2,
     Tensor<int32_t, 1> indices_output_1,
-    Tensor<int32_t, 1> indices_output_2
+    Tensor<int32_t, 1> indices_output_2,
+    void* cuda_stream
 );
 
 template void mops::cuda::sparse_accumulation_scatter_add_with_weights_vjp_vjp<double>(
@@ -235,5 +237,8 @@ template void mops::cuda::sparse_accumulation_scatter_add_with_weights_vjp_vjp<d
     Tensor<int32_t, 1> indices_W_1,
     Tensor<int32_t, 1> indices_W_2,
     Tensor<int32_t, 1> indices_output_1,
-    Tensor<int32_t, 1> indices_output_2
+    Tensor<int32_t, 1> indices_output_2,
+    void* cuda_stream
 );
+
+#endif

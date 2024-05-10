@@ -66,9 +66,20 @@ void mops::cuda::outer_product_scatter_add(
     Tensor<scalar_t, 3> output,
     Tensor<scalar_t, 2> A,
     Tensor<scalar_t, 2> B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 ) {
     check_opsa(output, A, B, indices_output, "cuda_outer_product_scatter_add");
+
+    cudaPointerAttributes attributes;
+    CUDA_CHECK_ERROR(cudaPointerGetAttributes(&attributes, A.data));
+    int current_device;
+    CUDA_CHECK_ERROR(cudaGetDevice(&current_device));
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(attributes.device));
+    }
+
+    cudaStream_t cstream = reinterpret_cast<cudaStream_t>(cuda_stream);
 
     int32_t* first_occurences = calculate_first_occurences_cuda(
         indices_output.data, indices_output.shape[0], output.shape[0]
@@ -78,22 +89,33 @@ void mops::cuda::outer_product_scatter_add(
 
     dim3 blockDim(WARP_SIZE * NWARPS_PER_BLOCK, 1, 1);
 
-    outer_product_scatter_add_kernel<scalar_t><<<gridDim, blockDim, 0>>>(
+    outer_product_scatter_add_kernel<scalar_t><<<gridDim, blockDim, 0, cstream>>>(
         A, B, mops::Tensor<int32_t, 1>{first_occurences, {output.shape[0] * 2}}, indices_output, output
     );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
+    CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
 
-    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(current_device));
+    }
 }
 
 // explicit instantiations of CUDA templates
 template void mops::cuda::outer_product_scatter_add<float>(
-    Tensor<float, 3> output, Tensor<float, 2> A, Tensor<float, 2> B, Tensor<int32_t, 1> indices_output
+    Tensor<float, 3> output,
+    Tensor<float, 2> A,
+    Tensor<float, 2> B,
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template void mops::cuda::outer_product_scatter_add<double>(
-    Tensor<double, 3> output, Tensor<double, 2> A, Tensor<double, 2> B, Tensor<int32_t, 1> indices_output
+    Tensor<double, 3> output,
+    Tensor<double, 2> A,
+    Tensor<double, 2> B,
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template <typename scalar_t>
@@ -240,11 +262,22 @@ void mops::cuda::outer_product_scatter_add_vjp(
     Tensor<scalar_t, 3> grad_output,
     Tensor<scalar_t, 2> A,
     Tensor<scalar_t, 2> B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 ) {
     check_opsa_vjp(
         grad_A, grad_B, grad_output, A, B, indices_output, "cuda_outer_product_scatter_add_vjp"
     );
+
+    cudaPointerAttributes attributes;
+    CUDA_CHECK_ERROR(cudaPointerGetAttributes(&attributes, A.data));
+    int current_device;
+    CUDA_CHECK_ERROR(cudaGetDevice(&current_device));
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(attributes.device));
+    }
+
+    cudaStream_t cstream = reinterpret_cast<cudaStream_t>(cuda_stream);
 
     int32_t* first_occurences = calculate_first_occurences_cuda(
         indices_output.data, indices_output.shape[0], grad_output.shape[0]
@@ -268,7 +301,7 @@ void mops::cuda::outer_product_scatter_add_vjp(
         shared_array<scalar_t>(NWARPS_PER_BLOCK * B.shape[1], sptr, &space);
     }
 
-    outer_product_scatter_add_vjp_kernel<scalar_t><<<gridDim, blockDim, space>>>(
+    outer_product_scatter_add_vjp_kernel<scalar_t><<<gridDim, blockDim, space, cstream>>>(
         A,
         B,
         mops::Tensor<int32_t, 1>{first_occurences, {grad_output.shape[0]}},
@@ -279,8 +312,11 @@ void mops::cuda::outer_product_scatter_add_vjp(
     );
 
     CUDA_CHECK_ERROR(cudaGetLastError());
+    CUDA_CHECK_ERROR(cudaStreamSynchronize(cstream));
 
-    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+    if (current_device != attributes.device) {
+        CUDA_CHECK_ERROR(cudaSetDevice(current_device));
+    }
 }
 
 // these templates will be precompiled and provided in the mops library
@@ -290,7 +326,8 @@ template void mops::cuda::outer_product_scatter_add_vjp<float>(
     Tensor<float, 3> grad_output,
     Tensor<float, 2> A,
     Tensor<float, 2> B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template void mops::cuda::outer_product_scatter_add_vjp<double>(
@@ -299,7 +336,8 @@ template void mops::cuda::outer_product_scatter_add_vjp<double>(
     Tensor<double, 3> grad_output,
     Tensor<double, 2> A,
     Tensor<double, 2> B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template <typename scalar_t>
@@ -312,7 +350,8 @@ void mops::cuda::outer_product_scatter_add_vjp_vjp(
     Tensor<scalar_t, 3> /*grad_output*/,
     Tensor<scalar_t, 2> /*A*/,
     Tensor<scalar_t, 2> /*B*/,
-    Tensor<int32_t, 1> /*indices_output*/
+    Tensor<int32_t, 1> /*indices_output*/,
+    void* /*cudaStream_t*/
 ) {
     throw std::runtime_error("Not implemented");
 }
@@ -327,7 +366,8 @@ template void mops::cuda::outer_product_scatter_add_vjp_vjp<float>(
     Tensor<float, 3> grad_output,
     Tensor<float, 2> A,
     Tensor<float, 2> B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template void mops::cuda::outer_product_scatter_add_vjp_vjp<double>(
@@ -339,5 +379,6 @@ template void mops::cuda::outer_product_scatter_add_vjp_vjp<double>(
     Tensor<double, 3> grad_output,
     Tensor<double, 2> A,
     Tensor<double, 2> B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );

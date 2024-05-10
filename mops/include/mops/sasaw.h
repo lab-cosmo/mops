@@ -127,7 +127,8 @@ int MOPS_EXPORT mops_cuda_sparse_accumulation_scatter_add_with_weights_f32(
     mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2,
     mops_tensor_1d_i32_t indices_output_1,
-    mops_tensor_1d_i32_t indices_output_2
+    mops_tensor_1d_i32_t indices_output_2,
+    void* cuda_stream
 );
 
 /// CUDA version of mops::sparse_accumulation_scatter_add_with for 64-bit floats
@@ -141,7 +142,8 @@ int MOPS_EXPORT mops_cuda_sparse_accumulation_scatter_add_with_weights_f64(
     mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2,
     mops_tensor_1d_i32_t indices_output_1,
-    mops_tensor_1d_i32_t indices_output_2
+    mops_tensor_1d_i32_t indices_output_2,
+    void* cuda_stream
 );
 
 /// CUDA version of mops::sparse_accumulation_scatter_add_with_weights_vjp for
@@ -159,7 +161,8 @@ int MOPS_EXPORT mops_cuda_sparse_accumulation_scatter_add_with_weights_vjp_f32(
     mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2,
     mops_tensor_1d_i32_t indices_output_1,
-    mops_tensor_1d_i32_t indices_output_2
+    mops_tensor_1d_i32_t indices_output_2,
+    void* cuda_stream
 );
 
 /// CUDA version of mops::sparse_accumulation_scatter_add_with_weights_vjp for
@@ -177,7 +180,8 @@ int MOPS_EXPORT mops_cuda_sparse_accumulation_scatter_add_with_weights_vjp_f64(
     mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2,
     mops_tensor_1d_i32_t indices_output_1,
-    mops_tensor_1d_i32_t indices_output_2
+    mops_tensor_1d_i32_t indices_output_2,
+    void* cuda_stream
 );
 
 /// CUDA version of mops::sparse_accumulation_scatter_add_with_weights_vjp_vjp for
@@ -199,7 +203,8 @@ int MOPS_EXPORT mops_cuda_sparse_accumulation_scatter_add_with_weights_vjp_vjp_f
     mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2,
     mops_tensor_1d_i32_t indices_output_1,
-    mops_tensor_1d_i32_t indices_output_2
+    mops_tensor_1d_i32_t indices_output_2,
+    void* cuda_stream
 );
 
 /// CUDA version of mops::sparse_accumulation_scatter_add_with_weights_vjp_vjp for
@@ -221,7 +226,8 @@ int MOPS_EXPORT mops_cuda_sparse_accumulation_scatter_add_with_weights_vjp_vjp_f
     mops_tensor_1d_i32_t indices_W_1,
     mops_tensor_1d_i32_t indices_W_2,
     mops_tensor_1d_i32_t indices_output_1,
-    mops_tensor_1d_i32_t indices_output_2
+    mops_tensor_1d_i32_t indices_output_2,
+    void* cuda_stream
 );
 
 #ifdef __cplusplus
