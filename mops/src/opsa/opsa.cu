@@ -484,7 +484,7 @@ __global__ void outer_product_scatter_add_vjp_vjp_kernel(
                 }
 
                 if (compute_grad_grad_output && grad_grad_B.data != nullptr) {
-                    atomicAdd(
+                    ATOMIC_ADD(
                         &buffer_grad_grad_out[i * B.shape[1] + j],
                         buffer_A[threadRow * A.shape[1] + i] *
                             buffer_grad_grad_B[threadRow * B.shape[1] + j]
@@ -492,7 +492,7 @@ __global__ void outer_product_scatter_add_vjp_vjp_kernel(
                 }
 
                 if (compute_grad_grad_output && grad_grad_A.data != nullptr) {
-                    atomicAdd(
+                    ATOMIC_ADD(
                         &buffer_grad_grad_out[i * B.shape[1] + j],
                         buffer_B[threadRow * B.shape[1] + j] *
                             buffer_grad_grad_A[threadRow * A.shape[1] + i]
