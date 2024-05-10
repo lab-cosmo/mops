@@ -64,6 +64,14 @@ torch::Tensor SparseAccumulationOfProducts::forward(
             );
         });
     } else if (A.device().is_cuda()) {
+
+#ifndef MOPS_CUDA_ENABLED
+        C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " + A.device().str());
+#else
+        c10::cuda::CUDAGuard deviceGuard{A.device()};
+        cudaStream_t currstream = c10::cuda::getCurrentCUDAStream();
+        void* stream = reinterpret_cast<void*>(currstream);
+
         output = torch::empty(
             {A.size(0), output_size},
             torch::TensorOptions().dtype(A.scalar_type()).device(A.device())
@@ -77,9 +85,11 @@ torch::Tensor SparseAccumulationOfProducts::forward(
                 details::torch_to_mops_1d<scalar_t>(C),
                 details::torch_to_mops_1d<int32_t>(indices_A),
                 details::torch_to_mops_1d<int32_t>(indices_B),
-                details::torch_to_mops_1d<int32_t>(indices_output)
+                details::torch_to_mops_1d<int32_t>(indices_output),
+                stream
             );
         });
+#endif
     } else {
         C10_THROW_ERROR(
             ValueError,
@@ -175,6 +185,14 @@ std::vector<torch::Tensor> SparseAccumulationOfProductsBackward::forward(
             );
         });
     } else if (A.device().is_cuda()) {
+
+#ifndef MOPS_CUDA_ENABLED
+        C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " + A.device().str());
+#else
+        c10::cuda::CUDAGuard deviceGuard{A.device()};
+        cudaStream_t currstream = c10::cuda::getCurrentCUDAStream();
+        void* stream = reinterpret_cast<void*>(currstream);
+
         AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "sparse_accumulation_of_products_vjp", [&]() {
             auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
             if (A.requires_grad()) {
@@ -197,9 +215,11 @@ std::vector<torch::Tensor> SparseAccumulationOfProductsBackward::forward(
                 details::torch_to_mops_1d<scalar_t>(C),
                 details::torch_to_mops_1d<int32_t>(indices_A),
                 details::torch_to_mops_1d<int32_t>(indices_B),
-                details::torch_to_mops_1d<int32_t>(indices_output)
+                details::torch_to_mops_1d<int32_t>(indices_output),
+                stream
             );
         });
+#endif
     } else {
         C10_THROW_ERROR(
             ValueError,
@@ -281,6 +301,10 @@ std::vector<torch::Tensor> SparseAccumulationOfProductsBackward::backward(
 #ifndef MOPS_CUDA_ENABLED
         C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " + A.device().str());
 #else
+        c10::cuda::CUDAGuard deviceGuard{A.device()};
+        cudaStream_t currstream = c10::cuda::getCurrentCUDAStream();
+        void* stream = reinterpret_cast<void*>(currstream);
+
         AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "sparse_accumulation_of_products_vjp_vjp", [&]() {
             auto mops_grad_grad_output = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
             if (grad_output.requires_grad()) {
