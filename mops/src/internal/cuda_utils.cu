@@ -27,6 +27,21 @@ __device__ double atomicAdd_presm60(double* address, double val) {
     return __longlong_as_double(old);
 }
 
+template <typename scalar_t> __device__ scalar_t ATOMIC_ADD(scalar_t* address, scalar_t val) {
+#if __CUDA_ARCH__ < 600
+    if constexpr (sizeof(scalar_t) == 4) {
+        return atomicAdd(address, val);
+    } else if constexpr (sizeof(scalar_t) == 8) {
+        return atomicAdd_presm60(address, val);
+    }
+#else
+    return atomicAdd(address, val);
+#endif
+}
+
+template float ATOMIC_ADD<float>(float* address, float val);
+template double ATOMIC_ADD<double>(double* address, double val);
+
 template <typename T>
 __host__ __device__ T* shared_array(std::size_t n_elements, void*& ptr, std::size_t* space) noexcept {
     const std::uintptr_t inptr = reinterpret_cast<uintptr_t>(ptr);
