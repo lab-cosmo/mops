@@ -701,7 +701,7 @@ void mops::cuda::sparse_accumulation_of_products_vjp_vjp(
 
     int32_t* packed_indices = shared_array<int32_t>(indices_A.shape[0], sptr, &space);
 
-    sparse_accumulation_of_products_vjp_vjp_kernel<scalar_t><<<block_dim, thread_block, space>>>(
+    sparse_accumulation_of_products_vjp_vjp_kernel<scalar_t><<<block_dim, thread_block, space, cstream>>>(
         grad_grad_output,
         grad_A_2,
         grad_B_2,
