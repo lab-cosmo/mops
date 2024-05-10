@@ -1,5 +1,3 @@
-#include <cuda.h>
-
 #include "mops/hpe.hpp"
 
 #include "internal/checks/hpe.hpp"
@@ -55,14 +53,20 @@ __global__ void homogeneous_polynomial_evaluation_kernel(
 
         __syncthreads();
 
-        int32_t i_monomial = threadIdx.x % polynomial_order;
-        int32_t x = threadIdx.x / polynomial_order;
-        int32_t nx = blockDim.x / polynomial_order;
+        int32_t i_monomial;
+        int32_t x;
+        int32_t nx;
 
-        for (int lbasis = x; lbasis < blockDim.x; lbasis += nx) {
-            if (i_monomial * blockDim.x + lbasis < polynomial_order * blockDim.x) {
-                buffer_indices_A[i_monomial * blockDim.x + lbasis] =
-                    indices_A.data[(i + lbasis) * polynomial_order + i_monomial];
+        if (polynomial_order > 0) {
+            i_monomial = threadIdx.x % polynomial_order;
+            x = threadIdx.x / polynomial_order;
+            nx = blockDim.x / polynomial_order;
+
+            for (int lbasis = x; lbasis < blockDim.x; lbasis += nx) {
+                if (i_monomial * blockDim.x + lbasis < polynomial_order * blockDim.x) {
+                    buffer_indices_A[i_monomial * blockDim.x + lbasis] =
+                        indices_A.data[(i + lbasis) * polynomial_order + i_monomial];
+                }
             }
         }
 
@@ -130,8 +134,12 @@ void mops::cuda::homogeneous_polynomial_evaluation(
     shared_array<scalar_t>(NWARPS_PER_BLOCK, sptr, &space);
     shared_array<int32_t>(WARP_SIZE * NWARPS_PER_BLOCK * polynomial_order, sptr, &space);
 
-    if (polynomial_order > 0 && polynomial_order <= 10) {
+    if (polynomial_order <= 10) {
         switch (polynomial_order) {
+        case 0:
+            homogeneous_polynomial_evaluation_kernel<scalar_t, 0>
+                <<<block_dim, thread_block, space>>>(output, A, C, indices_A);
+            break;
         case 1:
             homogeneous_polynomial_evaluation_kernel<scalar_t, 1>
                 <<<block_dim, thread_block, space>>>(output, A, C, indices_A);
@@ -229,51 +237,56 @@ __global__ void homogeneous_polynomial_evaluation_vjp_kernel(
     __syncthreads();
 
     scalar_t gout = grad_output.data[batch_id];
+    if (polynomial_order > 0) {
+        // indices_A : nbasis, polynomial_order
+        for (int32_t i = 0; i < nbasis; i += blockDim.x) {
 
-    // indices_A : nbasis, polynomial_order
-    for (int32_t i = 0; i < nbasis; i += blockDim.x) {
+            __syncthreads();
 
-        __syncthreads();
+            int32_t basis = i + threadIdx.x;
 
-        int32_t i_monomial = threadIdx.x % polynomial_order;
-        int32_t x = threadIdx.x / polynomial_order;
-        int32_t nx = blockDim.x / polynomial_order;
+            int32_t i_monomial;
+            int32_t x;
+            int32_t nx;
 
-        for (int lbasis = x; lbasis < blockDim.x; lbasis += nx) {
-            if (i_monomial * blockDim.x + lbasis < polynomial_order * blockDim.x) {
-                buffer_indices_A[i_monomial * blockDim.x + lbasis] =
-                    indices_A.data[(i + lbasis) * polynomial_order + i_monomial];
+            i_monomial = threadIdx.x % polynomial_order;
+            x = threadIdx.x / polynomial_order;
+            nx = blockDim.x / polynomial_order;
+
+            for (int lbasis = x; lbasis < blockDim.x; lbasis += nx) {
+                if (i_monomial * blockDim.x + lbasis < polynomial_order * blockDim.x) {
+                    buffer_indices_A[i_monomial * blockDim.x + lbasis] =
+                        indices_A.data[(i + lbasis) * polynomial_order + i_monomial];
+                }
             }
-        }
 
-        __syncthreads();
+            __syncthreads();
 
-        int32_t basis = i + threadIdx.x;
+            if (basis < nbasis) {
 
-        if (basis < nbasis) {
+                scalar_t c = C.data[basis] * gout;
 
-            scalar_t c = C.data[basis] * gout;
+                for (int32_t i_monomial = 0; i_monomial < polynomial_order; i_monomial++) {
 
-            for (int32_t i_monomial = 0; i_monomial < polynomial_order; i_monomial++) {
+                    scalar_t tmp_i = c;
 
-                scalar_t tmp_i = c;
+                    for (int32_t j_monomial = 0; j_monomial < polynomial_order; j_monomial++) {
 
-                for (int32_t j_monomial = 0; j_monomial < polynomial_order; j_monomial++) {
+                        if (i_monomial == j_monomial) {
+                            continue;
+                        }
 
-                    if (i_monomial == j_monomial) {
-                        continue;
+                        int32_t idx_j = buffer_indices_A
+                            [j_monomial * blockDim.x + threadIdx.x]; // indices_A.data[j_monomial
+                                                                     // * indices_A.shape[0] + basis];
+
+                        tmp_i *= buffer_nu1[idx_j];
                     }
 
-                    int32_t idx_j =
-                        buffer_indices_A[j_monomial * blockDim.x + threadIdx.x]; // indices_A.data[j_monomial
-                                                                                 // * indices_A.shape[0] + basis];
+                    int32_t idx_i = buffer_indices_A[i_monomial * blockDim.x + threadIdx.x];
 
-                    tmp_i *= buffer_nu1[idx_j];
+                    atomicAdd(&buffer_gradA[idx_i], tmp_i);
                 }
-
-                int32_t idx_i = buffer_indices_A[i_monomial * blockDim.x + threadIdx.x];
-
-                atomicAdd(&buffer_gradA[idx_i], tmp_i);
             }
         }
     }
@@ -281,7 +294,11 @@ __global__ void homogeneous_polynomial_evaluation_vjp_kernel(
     __syncthreads();
 
     for (int32_t i = threadIdx.x; i < nnu1; i += blockDim.x) {
-        grad_A.data[batch_id * nnu1 + i] = buffer_gradA[i];
+        if (polynomial_order > 0) {
+            grad_A.data[batch_id * nnu1 + i] = buffer_gradA[i];
+        } else {
+            grad_A.data[batch_id * nnu1 + i] = 0.0;
+        }
     }
 }
 
@@ -309,8 +326,12 @@ void mops::cuda::homogeneous_polynomial_evaluation_vjp(
     shared_array<scalar_t>(2 * nnu1, sptr, &space);
     shared_array<int32_t>(NWARPS_PER_BLOCK * WARP_SIZE * polynomial_order, sptr, &space);
 
-    if (polynomial_order > 0 && polynomial_order <= 10) {
+    if (polynomial_order <= 10) {
         switch (polynomial_order) {
+        case 0:
+            homogeneous_polynomial_evaluation_vjp_kernel<scalar_t, 0>
+                <<<block_dim, thread_block, space>>>(grad_A, grad_output, A, C, indices_A);
+            break;
         case 1:
             homogeneous_polynomial_evaluation_vjp_kernel<scalar_t, 1>
                 <<<block_dim, thread_block, space>>>(grad_A, grad_output, A, C, indices_A);
