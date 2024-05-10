@@ -1,0 +1,36 @@
+include:
+  - remote: 'https://gitlab.com/cscs-ci/recipes/-/raw/master/templates/v2/.ci-ext.yml'
+
+stages:
+  - build
+  - test
+
+build_base_image_job:
+  stage: build
+  extends: .container-builder-dynamic-name
+  timeout: 2h
+  variables:
+    DOCKERFILE: ci/docker/Dockerfile.base
+    WATCH_FILECHANGES: $DOCKERFILE
+    PERSIST_IMAGE_NAME: $CSCS_REGISTRY_PATH/base/public/mops
+
+test_job:
+  stage: test
+  extends: .container-runner-daint-gpu
+  image: $BASE_IMAGE
+  timeout: 2h
+  script:
+    - export CUDA_HOME="/usr/local/cuda"
+    - python3 -m pip install --upgrade pip
+    - echo "Install Tox"
+    - python3 -m pip install tox
+    - echo "Run the Tox Script"
+    - tox
+    - echo "Tox script completed"
+
+  variables:
+    SLURM_JOB_NUM_NODES: 1
+    SLURM_PARTITION: normal
+    SLURM_NTASKS: 1
+    SLURM_TIMELIMIT: '00:40:00'
+    GIT_STRATEGY: fetch
