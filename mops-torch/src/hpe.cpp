@@ -1,3 +1,8 @@
+#ifdef MOPS_CUDA_ENABLED
+#include <c10/cuda/CUDAGuard.h>
+#include <c10/cuda/CUDAStream.h>
+#endif
+
 #include "mops/torch/hpe.hpp"
 #include "mops/torch/utils.hpp"
 
@@ -38,14 +43,24 @@ torch::Tensor HomogeneousPolynomialEvaluation::forward(
         });
     } else if (A.device().is_cuda()) {
 
+#ifndef MOPS_CUDA_ENABLED
+        C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " + A.device().str());
+#else
+        c10::cuda::CUDAGuard deviceGuard{A.device()};
+        cudaStream_t currstream = c10::cuda::getCurrentCUDAStream();
+        void* stream = reinterpret_cast<void*>(currstream);
+
         AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "homogeneous_polynomial_evaluation", [&]() {
             mops::cuda::homogeneous_polynomial_evaluation<scalar_t>(
                 details::torch_to_mops_1d<scalar_t>(output),
                 details::torch_to_mops_2d<scalar_t>(A),
                 details::torch_to_mops_1d<scalar_t>(C),
-                details::torch_to_mops_2d<int32_t>(indices_A)
+                details::torch_to_mops_2d<int32_t>(indices_A),
+                stream
             );
         });
+
+#endif
 
     } else {
         C10_THROW_ERROR(
@@ -108,6 +123,12 @@ torch::Tensor HomogeneousPolynomialEvaluationBackward::forward(
             );
         });
     } else if (A.device().is_cuda()) {
+#ifndef MOPS_CUDA_ENABLED
+        C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " + A.device().str());
+#else
+        c10::cuda::CUDAGuard deviceGuard{A.device()};
+        cudaStream_t currstream = c10::cuda::getCurrentCUDAStream();
+        void* stream = reinterpret_cast<void*>(currstream);
 
         AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "homogeneous_polynomial_evaluation_vjp", [&]() {
             auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
@@ -121,9 +142,11 @@ torch::Tensor HomogeneousPolynomialEvaluationBackward::forward(
                 details::torch_to_mops_1d<scalar_t>(grad_output),
                 details::torch_to_mops_2d<scalar_t>(A),
                 details::torch_to_mops_1d<scalar_t>(C),
-                details::torch_to_mops_2d<int32_t>(indices_A)
+                details::torch_to_mops_2d<int32_t>(indices_A),
+                stream
             );
         });
+#endif
     } else {
         C10_THROW_ERROR(
             ValueError,

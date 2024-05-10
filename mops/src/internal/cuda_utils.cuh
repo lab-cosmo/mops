@@ -23,6 +23,17 @@ using namespace std;
         }                                                                                          \
     } while (0)
 
+/*
+ * Pre SM60 cards do not support atomicAdd(double *, double). This function implements and atomicCAS
+ * to lock update the address.
+ */
+__device__ double atomicAdd_presm60(double* address, double val);
+
+/*
+ * function to select the right version of atomicAdd for the archcode being compiled.
+ */
+template <typename scalar_t> __device__ scalar_t ATOMIC_ADD(scalar_t* address, scalar_t val);
+
 __host__ __device__ int32_t find_integer_divisor(int32_t x, int32_t bdim);
 
 /*

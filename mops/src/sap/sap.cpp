@@ -78,13 +78,13 @@ template void mops::sparse_accumulation_of_products_vjp_vjp<double>(
 #ifndef MOPS_CUDA_ENABLED
 template <typename scalar_t>
 void mops::cuda::
-    sparse_accumulation_of_products(Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 1>, Tensor<int32_t, 1>, Tensor<int32_t, 1>, Tensor<int32_t, 1>) {
+    sparse_accumulation_of_products(Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 1>, Tensor<int32_t, 1>, Tensor<int32_t, 1>, Tensor<int32_t, 1>, void*) {
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
 
 template <typename scalar_t>
 void mops::cuda::
-    sparse_accumulation_of_products_vjp(Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 1>, Tensor<int32_t, 1>, Tensor<int32_t, 1>, Tensor<int32_t, 1>) {
+    sparse_accumulation_of_products_vjp(Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 2>, Tensor<scalar_t, 1>, Tensor<int32_t, 1>, Tensor<int32_t, 1>, Tensor<int32_t, 1>, void*) {
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
 
@@ -101,7 +101,8 @@ void mops::cuda::sparse_accumulation_of_products_vjp_vjp(
     Tensor<scalar_t, 1> /*C*/,
     Tensor<int32_t, 1> /*indices_A*/,
     Tensor<int32_t, 1> /*indices_B*/,
-    Tensor<int32_t, 1> /*indices_output*/
+    Tensor<int32_t, 1> /*indices_output*/,
+    void* /*cuda_stream*/
 ) {
     throw std::runtime_error("MOPS was not compiled with CUDA support");
 }
@@ -114,7 +115,8 @@ template void mops::cuda::sparse_accumulation_of_products<float>(
     Tensor<float, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template void mops::cuda::sparse_accumulation_of_products<double>(
@@ -124,7 +126,8 @@ template void mops::cuda::sparse_accumulation_of_products<double>(
     Tensor<double, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template void mops::cuda::sparse_accumulation_of_products_vjp<float>(
@@ -136,7 +139,8 @@ template void mops::cuda::sparse_accumulation_of_products_vjp<float>(
     Tensor<float, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template void mops::cuda::sparse_accumulation_of_products_vjp<double>(
@@ -148,7 +152,8 @@ template void mops::cuda::sparse_accumulation_of_products_vjp<double>(
     Tensor<double, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template void mops::cuda::sparse_accumulation_of_products_vjp_vjp<float>(
@@ -163,7 +168,8 @@ template void mops::cuda::sparse_accumulation_of_products_vjp_vjp<float>(
     Tensor<float, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 template void mops::cuda::sparse_accumulation_of_products_vjp_vjp<double>(
@@ -178,7 +184,8 @@ template void mops::cuda::sparse_accumulation_of_products_vjp_vjp<double>(
     Tensor<double, 1> C,
     Tensor<int32_t, 1> indices_A,
     Tensor<int32_t, 1> indices_B,
-    Tensor<int32_t, 1> indices_output
+    Tensor<int32_t, 1> indices_output,
+    void* cuda_stream
 );
 
 #endif

@@ -1,3 +1,8 @@
+#ifdef MOPS_CUDA_ENABLED
+#include <c10/cuda/CUDAGuard.h>
+#include <c10/cuda/CUDAStream.h>
+#endif
+
 #include "mops/torch/sasaw.hpp"
 #include "mops/torch/utils.hpp"
 

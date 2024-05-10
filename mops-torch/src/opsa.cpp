@@ -1,3 +1,8 @@
+#ifdef MOPS_CUDA_ENABLED
+#include <c10/cuda/CUDAGuard.h>
+#include <c10/cuda/CUDAStream.h>
+#endif
+
 #include "mops/torch/opsa.hpp"
 #include "mops/torch/utils.hpp"
 
@@ -48,6 +53,10 @@ torch::Tensor OuterProductScatterAdd::forward(
 #ifndef MOPS_CUDA_ENABLED
         C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " + A.device().str());
 #else
+        c10::cuda::CUDAGuard deviceGuard{A.device()};
+        cudaStream_t currstream = c10::cuda::getCurrentCUDAStream();
+        void* stream = reinterpret_cast<void*>(currstream);
+
         output = torch::empty(
             {output_size, A.size(1), B.size(1)},
             torch::TensorOptions().dtype(A.scalar_type()).device(A.device())
@@ -58,7 +67,8 @@ torch::Tensor OuterProductScatterAdd::forward(
                 details::torch_to_mops_3d<scalar_t>(output),
                 details::torch_to_mops_2d<scalar_t>(A),
                 details::torch_to_mops_2d<scalar_t>(B),
-                details::torch_to_mops_1d<int32_t>(indices_output)
+                details::torch_to_mops_1d<int32_t>(indices_output),
+                stream
             );
         });
 
@@ -130,6 +140,10 @@ std::vector<torch::Tensor> OuterProductScatterAddBackward::forward(
 #ifndef MOPS_CUDA_ENABLED
         C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " + A.device().str());
 #else
+        c10::cuda::CUDAGuard deviceGuard{A.device()};
+        cudaStream_t currstream = c10::cuda::getCurrentCUDAStream();
+        void* stream = reinterpret_cast<void*>(currstream);
+
         AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "outer_product_scatter_add_vjp", [&]() {
             auto mops_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
 
@@ -150,7 +164,8 @@ std::vector<torch::Tensor> OuterProductScatterAddBackward::forward(
                 details::torch_to_mops_3d<scalar_t>(grad_output),
                 details::torch_to_mops_2d<scalar_t>(A),
                 details::torch_to_mops_2d<scalar_t>(B),
-                details::torch_to_mops_1d<int32_t>(indices_output)
+                details::torch_to_mops_1d<int32_t>(indices_output),
+                stream
             );
         });
 #endif
@@ -228,9 +243,52 @@ std::vector<torch::Tensor> OuterProductScatterAddBackward::backward(
 #ifndef MOPS_CUDA_ENABLED
         C10_THROW_ERROR(ValueError, "MOPS was not compiled with CUDA support " + A.device().str());
 #else
-        C10_THROW_ERROR(
-            ValueError, "outer_product_scatter_add_vjp_vjp is not implemented for CUDA yet"
-        );
+        c10::cuda::CUDAGuard deviceGuard{A.device()};
+        cudaStream_t currstream = c10::cuda::getCurrentCUDAStream();
+        void* stream = reinterpret_cast<void*>(currstream);
+
+        AT_DISPATCH_FLOATING_TYPES(A.scalar_type(), "outer_product_scatter_add_vjp", [&]() {
+            auto mops_grad_grad_output = mops::Tensor<scalar_t, 3>{nullptr, {0, 0, 0}};
+            if (grad_output.requires_grad()) {
+                grad_grad_output = torch::empty_like(grad_output);
+                mops_grad_grad_output = details::torch_to_mops_3d<scalar_t>(grad_grad_output);
+            }
+
+            auto mops_grad_A_2 = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (A.requires_grad()) {
+                grad_A_2 = torch::empty_like(A);
+                mops_grad_A_2 = details::torch_to_mops_2d<scalar_t>(grad_A_2);
+            }
+
+            auto mops_grad_B_2 = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (B.requires_grad()) {
+                grad_B_2 = torch::empty_like(B);
+                mops_grad_B_2 = details::torch_to_mops_2d<scalar_t>(grad_B_2);
+            }
+
+            auto mops_grad_grad_A = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (grad_grad_A.defined()) {
+                mops_grad_grad_A = details::torch_to_mops_2d<scalar_t>(grad_grad_A);
+            }
+
+            auto mops_grad_grad_B = mops::Tensor<scalar_t, 2>{nullptr, {0, 0}};
+            if (grad_grad_B.defined()) {
+                mops_grad_grad_B = details::torch_to_mops_2d<scalar_t>(grad_grad_B);
+            }
+
+            mops::cuda::outer_product_scatter_add_vjp_vjp<scalar_t>(
+                mops_grad_grad_output,
+                mops_grad_A_2,
+                mops_grad_B_2,
+                mops_grad_grad_A,
+                mops_grad_grad_B,
+                details::torch_to_mops_3d<scalar_t>(grad_output),
+                details::torch_to_mops_2d<scalar_t>(A),
+                details::torch_to_mops_2d<scalar_t>(B),
+                details::torch_to_mops_1d<int32_t>(indices_output),
+                stream
+            );
+        });
 #endif
     } else {
         C10_THROW_ERROR(
